@@ -1,22 +1,27 @@
-package com.scriptopia.demo.dto;
+package com.scriptopia.demo.domain;
+
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
-public class UserPiaItem {
-
-    @Id @GeneratedValue
+public class SharedGameScore {
+    @Id
+    @GeneratedValue
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private PiaItem piaItem;
+    private SharedGame sharedGame;
 
-    private Long quantity;
+
+    private Long score;
+    private LocalDateTime createdAt;
 }

@@ -1,27 +1,22 @@
-package com.scriptopia.demo.dto;
+package com.scriptopia.demo.domain;
 
-import com.scriptopia.demo.domain.ItemDef;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-
 @Entity
 @Getter
 @Setter
-public class UserItem {
+public class UserPiaItem {
 
-    @Id
-    @GeneratedValue
+    @Id @GeneratedValue
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
-    private ItemDef itemDef;
+    private PiaItem piaItem;
 
-    private int remainingUses;
-    private TradeStatus tradeStatus;
+    private Long quantity;
 }

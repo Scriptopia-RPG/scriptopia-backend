@@ -1,6 +1,5 @@
-package com.scriptopia.demo.dto;
+package com.scriptopia.demo.domain;
 
-import com.scriptopia.demo.domain.ItemDef;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

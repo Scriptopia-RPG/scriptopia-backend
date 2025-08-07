@@ -1,4 +1,4 @@
-package com.scriptopia.demo.dto;
+package com.scriptopia.demo.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

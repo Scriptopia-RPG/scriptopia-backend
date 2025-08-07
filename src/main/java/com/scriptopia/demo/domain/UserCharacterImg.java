@@ -1,4 +1,4 @@
-package com.scriptopia.demo.dto;
+package com.scriptopia.demo.domain;
 
 
 import jakarta.persistence.*;
@@ -8,13 +8,15 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class SharedGameFavorite {
-    @Id @GeneratedValue
+public class UserCharacterImg {
+
+    @Id
+    @GeneratedValue
     private Long id;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private SharedGame sharedGame;
+    private String imgUrl;
 }

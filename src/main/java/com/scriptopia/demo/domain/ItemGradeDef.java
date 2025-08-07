@@ -1,4 +1,4 @@
-package com.scriptopia.demo.dto;
+package com.scriptopia.demo.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,16 +7,14 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class EffectGradeDef {
+public class ItemGradeDef {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-    private Long price;
-    private Double weight;
+    private double weight;
 
     @Enumerated(EnumType.STRING)
-    private Grade grade;
+    private Grade grade;  // enum 필드 추가
 }
