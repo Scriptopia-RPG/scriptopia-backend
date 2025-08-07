@@ -7,14 +7,16 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class ItemGradeDef {
+public class EffectGradeDef {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    private double weight;
+    private Long price;
+
+    private Double weight;
 
     @Enumerated(EnumType.STRING)
-    private Grade grade;  // enum 필드 추가
+    private Grade grade;
 }
