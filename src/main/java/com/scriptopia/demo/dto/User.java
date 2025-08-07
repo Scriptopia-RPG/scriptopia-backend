@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 @Setter
 public class User {
     @Id @GeneratedValue
-    private long id;
+    private Long id;
 
     private String nickname;
-    private long pia;
+    private Long pia;
     private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
 

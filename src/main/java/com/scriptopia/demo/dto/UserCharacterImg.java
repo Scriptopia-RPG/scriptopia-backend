@@ -12,7 +12,7 @@ public class UserCharacterImg {
 
     @Id
     @GeneratedValue
-    private long id;
+    private Long id;
 
 
     @ManyToOne(fetch = FetchType.LAZY)

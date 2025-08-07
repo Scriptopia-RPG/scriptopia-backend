@@ -1,18 +1,16 @@
 package com.scriptopia.demo.dto;
 
 
-import com.scriptopia.demo.domain.ItemDef;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-
 @Entity
-@Setter
 @Getter
-public class Settlement {
+@Setter
+public class SharedGameScore {
     @Id
     @GeneratedValue
     private Long id;
@@ -20,16 +18,10 @@ public class Settlement {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
-    private ItemDef itemDef;
+    private SharedGame sharedGame;
 
 
-    private TradeStatus tradeStatus;
-    private Long price;
-
-
-    private LocalDateTime settledAt;
+    private Long score;
     private LocalDateTime createdAt;
-
 }

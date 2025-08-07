@@ -1,5 +1,6 @@
 package com.scriptopia.demo.dto;
 
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,8 +8,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class UserPiaItem {
-
+public class SharedGameFavorite {
     @Id @GeneratedValue
     private Long id;
 
@@ -16,7 +16,5 @@ public class UserPiaItem {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private PiaItem piaItem;
-
-    private Long quantity;
+    private SharedGame sharedGame;
 }

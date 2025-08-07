@@ -1,26 +1,24 @@
 package com.scriptopia.demo.dto;
 
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+
 @Entity
 @Getter
 @Setter
-public class Auction {
+public class SocialAccount{
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    private UserItem userItem;
+    private User user;
 
-
-    private Long price;
-    private LocalDateTime createdAt;
-    private LocalDateTime tradedAt;
-
+    private String socialId;
+    private Provider provider;
 }
