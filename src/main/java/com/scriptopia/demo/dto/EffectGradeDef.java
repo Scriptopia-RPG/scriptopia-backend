@@ -13,8 +13,8 @@ public class EffectGradeDef {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long price;
 
+    private Long price;
     private Double weight;
 
     @Enumerated(EnumType.STRING)
