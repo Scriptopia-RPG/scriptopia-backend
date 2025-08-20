@@ -31,7 +31,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
 	// 🐳 DB 관련
-	runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'org.postgresql:postgresql'
+
 
 	// 📦 NoSQL (MongoDB, Redis)
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
