@@ -25,4 +25,5 @@ public class User {
     private String profileImgUrl;
     private Role role;
 
+
 }
