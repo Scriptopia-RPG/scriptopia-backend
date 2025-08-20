@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/scriptopia?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: tiger
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:postgresql://localhost:5432/scriptopia
+    username: scriptopia      # PostgreSQL에서 설정한 계정
+    password: tiger     # 비밀번호
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: create
@@ -11,21 +11,8 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
-        jdbc:
-          time_zone: Asia/Seoul
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   data:
     mongodb:
-      uri: mongodb://localhost:27017/scriptopia
-
-jwt:
-  base64Secret: asdsdfjowejglwjgijsdfoijwaeiogjweijgipsoadfjiowfgwlkjsdfkjweioufhwoihfgljksdfiouwe
-
-admin:
-  memberId: test12
-  password: 1234
-
-gemini:
-  baseurl: https://generativelanguage.googleapis.com
-  api-key: AIzaSyBv-pIij9fpDqD5CRD1Cu-AT9j8FtoGeR8
+      uri: mongodb://root:tiger@localhost:27017/scriptopia_mongo?authSource=admin
