@@ -1,6 +1,5 @@
 package com.scriptopia.demo.controller;
 
-import com.scriptopia.demo.dto.auction.AuctionRequestDto;
 import com.scriptopia.demo.service.AuctionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +12,11 @@ public class AuctionController {
 
     private final AuctionService auctionService;
 
-    // 판매 아이템 등록
     @PostMapping
-    public ResponseEntity<?> createAuction(@RequestBody com.scriptopia.demo.dto.auction.AuctionRequestDto requestDto) {
-        return ResponseEntity.ok(auctionService.createAuction(requestDto));
+    public ResponseEntity<String> createAuction(
+            @RequestBody com.scriptopia.demo.dto.auction.AuctionRequest requestDto,
+            @RequestHeader("token") String userId) {   // 헤더에서 userId 가져오기 임시임
 
+        return ResponseEntity.ok(auctionService.createAuction(requestDto, userId));
     }
 }
