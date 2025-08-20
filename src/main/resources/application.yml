@@ -1,7 +1,7 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/scriptopia
-    username: scriptopia      # PostgreSQL에서 설정한 계정
+    username: root      # PostgreSQL에서 설정 계정
     password: tiger     # 비밀번호
     driver-class-name: org.postgresql.Driver
   jpa:
