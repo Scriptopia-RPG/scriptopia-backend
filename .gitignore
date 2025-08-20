@@ -35,3 +35,11 @@ out/
 
 ### VS Code ###
 .vscode/
+
+/docker_compose_files/data
+/docker_compose_files/mongo_data
+/docker_compose_files/postgres_data
+/docker_compose_files/redis_data
+
+
+
