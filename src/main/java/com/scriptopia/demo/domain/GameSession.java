@@ -17,6 +17,6 @@ public class GameSession {
     private User user;
 
     // 아직 mongoDB와 연동되는 지 모름 TYPE도 String(uuid)인지 LONG으로 할건지
-    private Long mongoId;
+    private String mongoId;
 
 }
