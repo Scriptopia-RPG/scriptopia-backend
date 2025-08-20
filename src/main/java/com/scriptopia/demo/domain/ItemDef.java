@@ -37,4 +37,6 @@ public class ItemDef {
     private MainStat mainStat;
 
     private LocalDateTime createdAt;
+
+    private Long price;
 }
