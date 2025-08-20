@@ -17,4 +17,6 @@ public class ItemGradeDef {
 
     @Enumerated(EnumType.STRING)
     private Grade grade;  // enum 필드 추가
+
+    private Long price;
 }
