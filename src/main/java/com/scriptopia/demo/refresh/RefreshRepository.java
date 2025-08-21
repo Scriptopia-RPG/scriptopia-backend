@@ -11,5 +11,5 @@ public interface RefreshRepository {
     Optional<RefreshSession> findByDevice(long userId, String device);
     void deleteByDevice(long userId, String device);
 
-    void deleteAllForUsr(long userId);
+    void deleteAllForUser(long userId);
 }
