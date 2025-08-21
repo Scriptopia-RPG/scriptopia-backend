@@ -1,6 +1,8 @@
-package com.scriptopia.demo.refresh;
+package com.scriptopia.demo.utils.service;
 
-import com.scriptopia.demo.jwt.JwtProvider;
+import com.scriptopia.demo.utils.JwtProvider;
+import com.scriptopia.demo.record.RefreshSession;
+import com.scriptopia.demo.repository.RefreshRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

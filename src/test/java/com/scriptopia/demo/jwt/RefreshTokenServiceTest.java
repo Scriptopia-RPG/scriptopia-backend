@@ -1,9 +1,11 @@
 package com.scriptopia.demo.jwt;
 
 import com.scriptopia.demo.config.JwtProperties;
-import com.scriptopia.demo.refresh.RedisRefreshRepository;
-import com.scriptopia.demo.refresh.RefreshRepository;
-import com.scriptopia.demo.refresh.RefreshTokenService;
+import com.scriptopia.demo.repository.RedisRefreshRepository;
+import com.scriptopia.demo.repository.RefreshRepository;
+import com.scriptopia.demo.utils.service.RefreshTokenService;
+import com.scriptopia.demo.utils.JwtKeyFactory;
+import com.scriptopia.demo.utils.JwtProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

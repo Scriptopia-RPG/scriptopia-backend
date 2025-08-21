@@ -1,6 +1,8 @@
 package com.scriptopia.demo.jwt;
 
 import com.scriptopia.demo.config.JwtProperties;
+import com.scriptopia.demo.utils.JwtKeyFactory;
+import com.scriptopia.demo.utils.JwtProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

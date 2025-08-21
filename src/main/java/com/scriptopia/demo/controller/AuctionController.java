@@ -1,6 +1,6 @@
 package com.scriptopia.demo.controller;
 
-import com.scriptopia.demo.service.AuctionService;
+import com.scriptopia.demo.utils.service.AuctionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

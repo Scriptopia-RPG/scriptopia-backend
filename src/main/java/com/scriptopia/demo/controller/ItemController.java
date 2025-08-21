@@ -2,7 +2,7 @@ package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.domain.ItemDef;
 import com.scriptopia.demo.dto.items.ItemDefRequest;
-import com.scriptopia.demo.service.ItemDefService;
+import com.scriptopia.demo.utils.service.ItemDefService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

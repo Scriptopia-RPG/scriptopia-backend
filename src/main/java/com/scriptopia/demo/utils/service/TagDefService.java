@@ -1,4 +1,4 @@
-package com.scriptopia.demo.service;
+package com.scriptopia.demo.utils.service;
 
 import com.scriptopia.demo.domain.TagDef;
 import com.scriptopia.demo.dto.TagDef.TagDefCreateRequest;

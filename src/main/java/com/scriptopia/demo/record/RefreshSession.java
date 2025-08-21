@@ -1,4 +1,4 @@
-package com.scriptopia.demo.refresh;
+package com.scriptopia.demo.record;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

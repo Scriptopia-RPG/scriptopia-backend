@@ -1,11 +1,11 @@
-package com.scriptopia.demo.refresh;
+package com.scriptopia.demo.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scriptopia.demo.record.RefreshSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.lang.runtime.ObjectMethods;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;

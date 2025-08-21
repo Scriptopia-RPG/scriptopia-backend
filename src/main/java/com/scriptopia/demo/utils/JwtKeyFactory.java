@@ -1,4 +1,4 @@
-package com.scriptopia.demo.jwt;
+package com.scriptopia.demo.utils;
 
 import com.scriptopia.demo.config.JwtProperties;
 import io.jsonwebtoken.io.Decoders;
