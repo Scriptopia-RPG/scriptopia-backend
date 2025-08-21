@@ -3,6 +3,7 @@ package com.scriptopia.demo.service;
 import com.scriptopia.demo.domain.GameSession;
 import com.scriptopia.demo.domain.User;
 import com.scriptopia.demo.dto.gamesession.GameSessionRequest;
+import com.scriptopia.demo.dto.gamesession.GameSessionResponse;
 import com.scriptopia.demo.repository.GameSessionRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,26 +15,33 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GameSessionService {
     private final GameSessionRepository gameSessionRepository;
-    // User Service 리포 가져오기
-    // 사용자 인증 부분 필요
+    // TODO User Service 리포 가져오기
+    // TODO 사용자 인증 부분 필요
+
+    public ResponseEntity<GameSessionResponse> getGameSession(Long id) {
+        // TODO 토큰을 통한 사용자 인증 구현
+        GameSessionResponse gameSessionResponse = new GameSessionResponse();
+        return ResponseEntity.ok(gameSessionResponse);
+    }
 
     @Transactional
-    public ResponseEntity<?> saveGameSession(GameSessionRequest gameSessionRequest) {
-        // 토큰을 통한 사용자 인증
+    public ResponseEntity<?> saveGameSession(Long id) {
+        // TODO 토큰을 통한 사용자 인증
         GameSession gameSession = new GameSession();
         return ResponseEntity.ok(gameSessionRepository.save(gameSession));
     }
 
     @Transactional
-    public ResponseEntity<?> updateGameSession(GameSessionRequest gameSessionRequest) {
-        // 토큰을 통한 사용자 인증
+    public ResponseEntity<?> updateGameSession(Long id) {
+        // TODO 토큰을 통한 사용자 인증
         GameSession gameSession = new GameSession();
         return ResponseEntity.ok(gameSessionRepository.save(gameSession));
     }
 
     @Transactional
-    public void deleteGameSession(GameSessionRequest gameSessionRequest) {
-        // 토큰을 통한 사용자 인증
-        // 게임 세션 삭제
+    public void deleteGameSession(Long id) {
+        // TODO 토큰을 통한 사용자 인증
+        GameSession gameSession = new GameSession();
+        gameSessionRepository.delete(gameSession);
     }
 }
