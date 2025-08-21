@@ -2,12 +2,18 @@ package com.scriptopia.demo.jwt;
 
 import com.scriptopia.demo.config.JwtProperties;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class JwtProvidertest {
+@SpringBootTest
+public class JwtProviderTest {
+
+    @Autowired
+    JwtProperties props;
 
     @Test
     void issue_and_parse() {
@@ -26,5 +32,9 @@ public class JwtProvidertest {
         System.out.println(rt);
         assertThat(provider.isValid(rt)).isTrue();
         assertThat(provider.getDeviceId(rt)).isEqualTo("dev-abc");
+    }
+    @Test
+    void test() {
+        System.out.println(props.secret());
     }
 }
