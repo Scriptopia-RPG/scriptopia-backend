@@ -23,6 +23,7 @@ public class GameSessionController {
     @GetMapping("/game-session")
     public ResponseEntity<?> loadGameSession(@RequestHeader("X-User-ID") Long id) {
         return gameSessionService.getGameSession(id);
+
     }
 
     // 수정
