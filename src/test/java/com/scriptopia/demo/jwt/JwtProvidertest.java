@@ -22,7 +22,7 @@ public class JwtProvidertest {
         assertThat(provider.getUserId(at)).isEqualTo(1L);
         assertThat(provider.getRoles(at)).containsExactly("ROLE_USER");
         System.out.println(at);
-        String rt = provider.createrefreshToken(1L, "dev-abc");
+        String rt = provider.createRefreshToken(1L, "dev-abc");
         System.out.println(rt);
         assertThat(provider.isValid(rt)).isTrue();
         assertThat(provider.getDeviceId(rt)).isEqualTo("dev-abc");

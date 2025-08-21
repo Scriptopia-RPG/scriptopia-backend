@@ -35,7 +35,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String createrefreshToken(Long userId, String deviceId) {
+    public String createRefreshToken(Long userId, String deviceId) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .setIssuer(props.issuer())
