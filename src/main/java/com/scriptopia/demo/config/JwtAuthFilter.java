@@ -35,7 +35,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (auth != null && auth.startsWith("Bearer ")) {
             String token = auth.substring(7);
             try {
-                jwt.parse(token); // 서명/만료 체크
+                jwt.parse(token);
 
                 Long userId = jwt.getUserId(token);
                 var roles = jwt.getRoles(token).stream()
@@ -45,7 +45,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception ignored) {
-                // 유효하지 않으면 인증 없음 상태로 계속 진행 → 최종적으로 401
+
             }
         }
         chain.doFilter(req, res);
