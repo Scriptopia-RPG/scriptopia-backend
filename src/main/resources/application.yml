@@ -16,3 +16,11 @@ spring:
   data:
     mongodb:
       uri: mongodb://root:tiger@localhost:27017/scriptopia_mongo?authSource=admin
+
+auth:
+  jwt:
+    issuer: scriptopia
+    access-exp-seconds: 1800
+    refresh-exp-seconds: 1209600
+    secret: "${JWT_SECRET}"
+
