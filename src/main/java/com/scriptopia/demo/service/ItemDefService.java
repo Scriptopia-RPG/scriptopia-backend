@@ -1,4 +1,4 @@
-package com.scriptopia.demo.utils.service;
+package com.scriptopia.demo.service;
 
 
 import com.scriptopia.demo.domain.EffectGradeDef;

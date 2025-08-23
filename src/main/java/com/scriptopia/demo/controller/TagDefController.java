@@ -2,7 +2,7 @@ package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.dto.TagDef.TagDefCreateRequest;
 import com.scriptopia.demo.dto.TagDef.TagDefDeleteRequest;
-import com.scriptopia.demo.utils.service.TagDefService;
+import com.scriptopia.demo.service.TagDefService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -8,7 +8,6 @@ import com.scriptopia.demo.dto.user.RegisterRequest;
 import com.scriptopia.demo.repository.LocalAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.utils.JwtProvider;
-import com.scriptopia.demo.utils.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

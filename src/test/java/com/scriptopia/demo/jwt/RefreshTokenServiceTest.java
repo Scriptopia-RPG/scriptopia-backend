@@ -3,7 +3,7 @@ package com.scriptopia.demo.jwt;
 import com.scriptopia.demo.config.JwtProperties;
 import com.scriptopia.demo.repository.RedisRefreshRepository;
 import com.scriptopia.demo.repository.RefreshRepository;
-import com.scriptopia.demo.utils.service.RefreshTokenService;
+import com.scriptopia.demo.service.RefreshTokenService;
 import com.scriptopia.demo.utils.JwtKeyFactory;
 import com.scriptopia.demo.utils.JwtProvider;
 import org.junit.jupiter.api.BeforeEach;

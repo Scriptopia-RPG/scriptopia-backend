@@ -7,7 +7,7 @@ import com.scriptopia.demo.dto.user.RegisterRequest;
 import com.scriptopia.demo.dto.user.RefreshResponse;
 import com.scriptopia.demo.service.LocalAccountService;
 import com.scriptopia.demo.utils.JwtProvider;
-import com.scriptopia.demo.utils.service.RefreshTokenService;
+import com.scriptopia.demo.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

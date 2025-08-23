@@ -1,4 +1,4 @@
-package com.scriptopia.demo.utils.service;
+package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.domain.TagDef;
 import com.scriptopia.demo.dto.TagDef.TagDefCreateRequest;
@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
