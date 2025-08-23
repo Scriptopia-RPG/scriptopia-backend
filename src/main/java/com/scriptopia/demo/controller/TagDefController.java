@@ -1,4 +1,4 @@
-package com.scriptopia.demo;
+package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.dto.TagDef.TagDefCreateRequest;
 import com.scriptopia.demo.dto.TagDef.TagDefDeleteRequest;

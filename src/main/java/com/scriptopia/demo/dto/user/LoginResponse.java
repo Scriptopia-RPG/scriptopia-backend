@@ -1,5 +1,6 @@
 package com.scriptopia.demo.dto.user;
 
+import com.scriptopia.demo.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,8 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
-    private String email;
-    private String password;
-    private String nickname;
+public class LoginResponse {
+    private String accessToken;
+    private Long expiresIn;
+    private Role role;
 }

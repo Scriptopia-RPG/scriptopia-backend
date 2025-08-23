@@ -1,17 +1,16 @@
 package com.scriptopia.demo.service;
 
+import com.scriptopia.demo.config.JwtProperties;
 import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.dto.user.LoginRequest;
+import com.scriptopia.demo.dto.user.LoginResponse;
 import com.scriptopia.demo.dto.user.RegisterRequest;
-import com.scriptopia.demo.dto.user.TokenResponse;
 import com.scriptopia.demo.repository.LocalAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.utils.JwtProvider;
 import com.scriptopia.demo.utils.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -23,7 +22,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -35,6 +33,7 @@ public class LocalAccountService {
     private final UserRepository userRepository;
     private final JwtProvider jwt;
     private final RefreshTokenService refreshService;
+    private final JwtProperties prop;
 
     private static final String RT_COOKIE = "RT";
     private static final boolean COOKIE_SECURE = true;
@@ -42,7 +41,7 @@ public class LocalAccountService {
 
     @Transactional
     public void register(RegisterRequest request) {
-        String normalizedEmail = normalizeEmail(request.getUserEmail());
+        String normalizedEmail = normalizeEmail(request.getEmail());
         validateParams(normalizedEmail, request.getPassword(), request.getNickname());
         isAvailable(normalizedEmail, request.getNickname());
 
@@ -75,7 +74,7 @@ public class LocalAccountService {
     }
 
     @Transactional
-    public TokenResponse login(LoginRequest req, HttpServletRequest request, HttpServletResponse response) {
+    public LoginResponse login(LoginRequest req, HttpServletRequest request, HttpServletResponse response) {
         LocalAccount localAccount = localAccountRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("아이디 혹은 비밀번호를 잘못 입력했습니다."));
 
@@ -96,7 +95,9 @@ public class LocalAccountService {
         refreshService.saveLoginRefresh(user.getId(), refresh, req.getDeviceId(), ip, ua);
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie(refresh).toString());
-        return new TokenResponse(access, null);
+
+
+        return new LoginResponse(access, prop.accessExpSeconds(), user.getRole());
     }
 
 

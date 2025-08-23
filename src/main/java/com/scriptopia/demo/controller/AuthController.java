@@ -1,8 +1,10 @@
 package com.scriptopia.demo.controller;
 
+import com.scriptopia.demo.config.JwtProperties;
 import com.scriptopia.demo.dto.user.LoginRequest;
+import com.scriptopia.demo.dto.user.LoginResponse;
 import com.scriptopia.demo.dto.user.RegisterRequest;
-import com.scriptopia.demo.dto.user.TokenResponse;
+import com.scriptopia.demo.dto.user.RefreshResponse;
 import com.scriptopia.demo.service.LocalAccountService;
 import com.scriptopia.demo.utils.JwtProvider;
 import com.scriptopia.demo.utils.service.RefreshTokenService;
@@ -25,6 +27,7 @@ public class AuthController {
     private final LocalAccountService localAccountService;
     private final JwtProvider jwt;
     private final RefreshTokenService refreshTokenService;
+    private final JwtProperties props;
 
     private static final String RT_COOKIE = "RT";
     private static final boolean COOKIE_SECURE = true;
@@ -32,7 +35,7 @@ public class AuthController {
 
 
 
-    @PostMapping("register")
+    @PostMapping("/register")
     public ResponseEntity<?> register(
             @RequestBody @Valid RegisterRequest registerRequest
     ) {
@@ -42,17 +45,18 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(
+    public ResponseEntity<LoginResponse> login(
             @RequestBody @Valid LoginRequest req,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
+
         return ResponseEntity.ok(localAccountService.login(req, request, response));
     }
 
     // 쿠키 기반 리프레시
     @PostMapping("/token/refresh")
-    public ResponseEntity<TokenResponse> refresh(
+    public ResponseEntity<RefreshResponse> refresh(
             @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
             @RequestParam(required = false) String deviceId
     ) {
@@ -66,7 +70,7 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie(pair.refreshToken()).toString())
-                .body(new TokenResponse(pair.accessToken(), null));
+                .body(new RefreshResponse(pair.accessToken(), props.accessExpSeconds()));
     }
 
     @PostMapping("/logout")
@@ -80,6 +84,8 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, localAccountService.removeRefreshCookie().toString());
         return ResponseEntity.noContent().build();
     }
+
+
 
     private ResponseCookie refreshCookie(String value) {
         return ResponseCookie.from(RT_COOKIE, value)
