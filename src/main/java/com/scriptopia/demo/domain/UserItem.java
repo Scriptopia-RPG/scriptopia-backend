@@ -23,7 +23,5 @@ public class UserItem {
 
 
     private int remainingUses;
-
-    @Enumerated(EnumType.STRING)
     private TradeStatus tradeStatus;
 }
