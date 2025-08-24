@@ -20,7 +20,7 @@ public class SharedGame {
     private User user;
 
     private String thumbnailUrl;
-    private Long recommand;
+    private Long recommend;
     private Long totalPlayed;
     private String title;
     private String worldView;

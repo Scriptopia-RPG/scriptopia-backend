@@ -23,4 +23,7 @@ public class LocalAccount {
     private String email;
     private String password;
     private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
 }
