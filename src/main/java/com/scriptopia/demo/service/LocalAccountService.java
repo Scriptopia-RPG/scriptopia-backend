@@ -11,6 +11,7 @@ import com.scriptopia.demo.utils.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,12 +22,14 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class LocalAccountService {
 
+    private final StringRedisTemplate redisTemplate;
     private final LocalAccountRepository localAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
@@ -37,11 +40,32 @@ public class LocalAccountService {
     private static final String RT_COOKIE = "RT";
     private static final boolean COOKIE_SECURE = true;
     private static final String COOKIE_SAMESITE = "None";
+    private final MailService mailService;
+
+    @Transactional
+    public void sendVerificationCode(String email) {
+        String code = String.format("%06d", (int)(Math.random() * 999999));
+        mailService.saveCode(email, code);
+        mailService.sendVerificationCode(email, code);
+    }
+
+    public boolean verifyCode(String email, String inputCode) {
+        String savedCode = redisTemplate.opsForValue().get("email:verify:" + email);
+        if (savedCode != null && savedCode.equals(inputCode)) {
+            // 인증 완료 후 30분 유지
+            redisTemplate.opsForValue().set("email:verified:" + email, "true", 30, TimeUnit.MINUTES);
+            redisTemplate.delete("email:verify:" + email); // 코드 제거
+            return true;
+        }
+        return false;
+    }
 
     @Transactional
     public void register(RegisterRequest request) {
         String normalizedEmail = normalizeEmail(request.getEmail());
-        validateParams(normalizedEmail, request.getPassword(), request.getNickname());
+        String verified = redisTemplate.opsForValue().get("email:verified:" + normalizedEmail);
+        validateParams(verified, normalizedEmail, request.getPassword(), request.getNickname());
+
         isAvailable(normalizedEmail, request.getNickname());
 
         //user 객체 생성
@@ -60,6 +84,7 @@ public class LocalAccountService {
         localAccount.setEmail(normalizedEmail);
         localAccount.setPassword(passwordEncoder.encode(request.getPassword()));
         localAccount.setUpdatedAt(LocalDateTime.now());
+        localAccount.setStatus(UserStatus.UNVERIFIED);
         localAccountRepository.save(localAccount);
 
         //환경 설정 초기 값
@@ -111,10 +136,17 @@ public class LocalAccountService {
         return email.trim().toLowerCase(Locale.ROOT);
     }
 
-    private static void validateParams(String email, String rawPassword, String nickname) {
+    private static void validateParams(String verified, String email, String rawPassword, String nickname) {
+
+        if (verified == null || !verified.equals("true")) {
+            throw new RuntimeException("이메일 인증을 먼저 완료해야 합니다.");
+        }
+
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("이메일을 입력해주세요.");
         }
+
+
         if (rawPassword == null || rawPassword.isBlank()) {
             throw new IllegalArgumentException("비밀번호를 입력해주세요.");
         }

@@ -23,6 +23,7 @@ public class User {
 
     private String profileImgUrl;
 
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
