@@ -17,7 +17,9 @@ public class User {
     @Id @GeneratedValue
     private Long id;
 
+
     private String nickname;
+
     private Long pia;
     private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
