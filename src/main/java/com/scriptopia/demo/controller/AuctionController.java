@@ -19,4 +19,6 @@ public class AuctionController {
 
         return ResponseEntity.ok(auctionService.createAuction(requestDto, userId));
     }
+
+
 }

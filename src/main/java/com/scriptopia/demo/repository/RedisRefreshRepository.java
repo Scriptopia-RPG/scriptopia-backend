@@ -46,7 +46,7 @@ public class RedisRefreshRepository implements RefreshRepository {
             // 디바이스 인덱스
             if (s.deviceId() != null) {
                 String deviceKey = kDeviceIdx(s.userId(), s.deviceId());
-                // 같은 디바이스에서 새로 로그인하면 “이전 JTI”는 무의미해지므로 덮어쓰기
+
                 redis.opsForValue().set(deviceKey, s.jti(), Duration.ofSeconds(ttlSec));
             }
         } catch (Exception e) {
