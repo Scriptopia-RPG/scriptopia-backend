@@ -34,6 +34,23 @@ public class AuthController {
     private static final String COOKIE_SAMESITE = "None";
 
 
+    @PostMapping("/send-code")
+    public ResponseEntity<String> sendCode(@RequestParam String email) {
+        localAccountService.sendVerificationCode(email);
+        return ResponseEntity.ok("인증 코드가 이메일로 발송되었습니다.");
+    }
+
+    @PostMapping("/verify-code")
+    public ResponseEntity<String> verifyCode(@RequestParam String email,
+                                             @RequestParam String code) {
+        boolean success = localAccountService.verifyCode(email, code);
+        if (success) {
+            return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("인증번호가 올바르지 않거나 만료되었습니다.");
+        }
+    }
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(

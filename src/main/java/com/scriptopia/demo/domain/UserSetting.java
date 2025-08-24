@@ -1,9 +1,6 @@
 package com.scriptopia.demo.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.awt.*;
@@ -21,6 +18,7 @@ public class UserSetting {
 
     private Theme theme;
 
+    @Enumerated(EnumType.STRING)
     private FontType fontType;
 
     private int fontSize;
