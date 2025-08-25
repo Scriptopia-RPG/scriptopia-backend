@@ -33,9 +33,21 @@ public class HistoryService {
     private static final String COLL = "game_session";
 
     @Transactional
-    public ResponseEntity<?> createhistory(Long id, HistoryRequest req) {
-        // TODO 유저 인증 구현해야함
-        User user = userRepository.findById(id).get();
+    public ResponseEntity<?> createHistory(Long userId, String sid) {
+        ObjectId oid = new ObjectId(sid);
+
+        Query q = Query.query(Criteria.where("_id").is(oid));
+        Document doc = mongoTemplate.findOne(q, Document.class, COLL);
+        if(doc == null) return ResponseEntity.badRequest().body("세션 ID 없음");
+
+        Object historyIdInSession = doc.get("history_id");
+
+        if(historyIdInSession != null) {
+            return ResponseEntity.ok(Map.of("historyId", ((Number)historyIdInSession).longValue()));
+        }
+
+        HistoryRequest req = mapMongoToHistoryRequest(doc);
+        User user = userRepository.findById(userId).orElseThrow();
         History history = new History(user, req);
 
         return ResponseEntity.ok(historyRepository.save(history));
@@ -70,34 +82,6 @@ public class HistoryService {
         Document saved = mongoTemplate.insert(doc, COLL);
         return ResponseEntity.ok(saved.getObjectId("_id").toHexString());
     }
-
-    @Transactional
-    public ResponseEntity<?> createFromMongoLatest(Long userId) {
-        Query q = Query.query(Criteria.where("user_id").is(userId))
-                .with(Sort.by(Sort.Direction.DESC, "updated_at"))
-                .limit(1);
-
-        q.fields().include("user_id").include("updated_at").include("background").include("history_info");
-        Document doc = mongoTemplate.findOne(q, Document.class, COLL);
-        if(doc == null) return ResponseEntity.badRequest().body("해당 유저의 Mongo 세션이 없습니다.");
-
-        HistoryRequest req = mapMongoToHistoryRequest(doc);
-        return createhistory(userId, req);
-    }
-
-    @Transactional
-    public ResponseEntity<?> createFromMongoSession(Long userId, String sessionIdHex) {
-        Document doc = mongoTemplate.findById(new ObjectId(sessionIdHex), Document.class, COLL);
-        if(doc == null) return ResponseEntity.badRequest().body("세션 없음");
-
-        JsonNode root = asJson(doc);
-        long owner = root.path("user_id").asLong(-1);
-        if(owner != userId) return ResponseEntity.status(403).body("본인 세션만 저장 가능");
-
-        HistoryRequest req = mapMongoToHistoryRequest(doc);
-        return createhistory(userId, req);
-    }
-
 
     private HistoryRequest mapMongoToHistoryRequest(Document doc) {
         JsonNode root = asJson(doc);
