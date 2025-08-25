@@ -9,7 +9,11 @@ import com.scriptopia.demo.repository.HistoryRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +33,21 @@ public class HistoryService {
     private static final String COLL = "game_session";
 
     @Transactional
-    public ResponseEntity<?> createhistory(Long id, HistoryRequest req) {
-        // TODO 유저 인증 구현해야함
-        User user = userRepository.findById(id).get();
+    public ResponseEntity<?> createHistory(Long userId, String sid) {
+        ObjectId oid = new ObjectId(sid);
+
+        Query q = Query.query(Criteria.where("_id").is(oid));
+        Document doc = mongoTemplate.findOne(q, Document.class, COLL);
+        if(doc == null) return ResponseEntity.badRequest().body("세션 ID 없음");
+
+        Object historyIdInSession = doc.get("history_id");
+
+        if(historyIdInSession != null) {
+            return ResponseEntity.ok(Map.of("historyId", ((Number)historyIdInSession).longValue()));
+        }
+
+        HistoryRequest req = mapMongoToHistoryRequest(doc);
+        User user = userRepository.findById(userId).orElseThrow();
         History history = new History(user, req);
 
         return ResponseEntity.ok(historyRepository.save(history));
@@ -39,16 +55,18 @@ public class HistoryService {
 
     @Transactional
     public ResponseEntity<?> seedDummySession(Long userId) {
-        Document hi = new Document(Map.of(
-                "title", "임시 여정 제목",
-                "world_prompt", "임시 세계관 프롬프트",
-                "epilogue_1_title", "엔딩A",
-                "epilogue_1_content", "엔딩A 내용",
-                "epilogue_2_title", "엔딩B",
-                "epilogue_2_content", "엔딩B 내용",
-                "epilogue_3_title", "엔딩C",
-                "epilogue_3_content", "엔딩C 내용",
-                "score", 1234
+        Document hi = new Document(Map.ofEntries(
+                Map.entry("title", "임시 여정 제목"),
+                Map.entry("world_prompt", "임시 세계관 프롬프트"),
+                Map.entry("background_story", "AI가 생성한 배경 이야기"),
+                Map.entry("world_view", "AI가 생성한 세계관"),
+                Map.entry("epilogue_1_title", "엔딩A"),
+                Map.entry("epilogue_1_content", "엔딩A 내용"),
+                Map.entry("epilogue_2_title", "엔딩B"),
+                Map.entry("epilogue_2_content", "엔딩B 내용"),
+                Map.entry("epilogue_3_title", "엔딩C"),
+                Map.entry("epilogue_3_content", "엔딩C 내용"),
+                Map.entry("score", 1234)
         ));
 
         Document doc = new Document();
@@ -83,8 +101,8 @@ public class HistoryService {
 
         req.setTitle(title);
         // 정책에 맞게 매핑: worldView는 비워두거나 world_prompt로 대체 가능
-        req.setWorldView(null); // 또는 req.setWorldView(worldPrompt);
-        req.setBackgroundStory(null); // 필요 시 done_info.story 등에서 요약해 채우기
+        req.setBackgroundStory(hi.path("background_story").asText(null));
+        req.setWorldView(hi.path("world_view").asText(null)); // 또는 req.setWorldView(worldPrompt);
         req.setWorldPrompt(worldPrompt);
 
         req.setEpilogue1Title(hi.path("epilogue_1_title").asText(null));
