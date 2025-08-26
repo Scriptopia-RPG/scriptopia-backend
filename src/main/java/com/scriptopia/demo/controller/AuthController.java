@@ -1,10 +1,7 @@
 package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.config.JwtProperties;
-import com.scriptopia.demo.dto.localaccount.LoginRequest;
-import com.scriptopia.demo.dto.localaccount.LoginResponse;
-import com.scriptopia.demo.dto.localaccount.RegisterRequest;
-import com.scriptopia.demo.dto.localaccount.RefreshResponse;
+import com.scriptopia.demo.dto.localaccount.*;
 import com.scriptopia.demo.service.LocalAccountService;
 import com.scriptopia.demo.utils.JwtProvider;
 import com.scriptopia.demo.service.RefreshTokenService;
@@ -15,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -51,6 +49,16 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/password/change")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request,
+                                                 Authentication authentication) {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        localAccountService.changePassword(userId,request);
+
+        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(

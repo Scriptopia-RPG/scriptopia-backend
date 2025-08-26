@@ -5,7 +5,7 @@ import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.dto.localaccount.LoginRequest;
 import com.scriptopia.demo.dto.localaccount.LoginResponse;
 import com.scriptopia.demo.dto.localaccount.RegisterRequest;
-import com.scriptopia.demo.dto.localaccount.changePasswordRequest;
+import com.scriptopia.demo.dto.localaccount.ChangePasswordRequest;
 import com.scriptopia.demo.repository.LocalAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.utils.JwtProvider;
@@ -126,7 +126,15 @@ public class LocalAccountService {
     }
 
     @Transactional
-    public void changePassword(changePasswordRequest request) {
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        LocalAccount localAccount = localAccountRepository.findByUserId(userId).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+
+        if (!passwordEncoder.matches(request.getOldPassword(), localAccount.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        localAccount.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
     }
 
