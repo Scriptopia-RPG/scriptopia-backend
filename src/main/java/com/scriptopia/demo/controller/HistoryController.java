@@ -1,11 +1,14 @@
 package com.scriptopia.demo.controller;
 
+import com.scriptopia.demo.dto.history.HistoryPageResponse;
 import com.scriptopia.demo.dto.history.HistoryRequest;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.service.HistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/games")
