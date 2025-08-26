@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scriptopia.demo.domain.History;
 import com.scriptopia.demo.domain.User;
+import com.scriptopia.demo.dto.history.HistoryPageResponse;
 import com.scriptopia.demo.dto.history.HistoryRequest;
 import com.scriptopia.demo.repository.HistoryRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -119,5 +122,16 @@ public class HistoryService {
     private JsonNode asJson(Document doc) {
         try { return objectMapper.readTree(doc.toJson()); }
         catch (Exception e) { throw new RuntimeException("Mongo Document → JsonNode 변환 실패", e); }
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<HistoryPageResponse>> fetchMyHisotry(Long userId, Long lastId, int size) {
+        PageRequest pr = PageRequest.of(0, size);
+        Page<History> page;
+
+        if(lastId == null) page = historyRepository.findByUserIdOrderByIdDesc(userId, pr);
+        else page = historyRepository.findByUserIdAndIdLessThanOrderByIdDesc(userId, lastId, pr);
+
+        return ResponseEntity.ok(page.getContent().stream().map(HistoryPageResponse::from).toList());
     }
 }
