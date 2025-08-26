@@ -2,9 +2,10 @@ package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.config.JwtProperties;
 import com.scriptopia.demo.domain.*;
-import com.scriptopia.demo.dto.user.LoginRequest;
-import com.scriptopia.demo.dto.user.LoginResponse;
-import com.scriptopia.demo.dto.user.RegisterRequest;
+import com.scriptopia.demo.dto.localaccount.LoginRequest;
+import com.scriptopia.demo.dto.localaccount.LoginResponse;
+import com.scriptopia.demo.dto.localaccount.RegisterRequest;
+import com.scriptopia.demo.dto.localaccount.changePasswordRequest;
 import com.scriptopia.demo.repository.LocalAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.utils.JwtProvider;
@@ -122,6 +123,11 @@ public class LocalAccountService {
 
 
         return new LoginResponse(access, prop.accessExpSeconds(), user.getRole());
+    }
+
+    @Transactional
+    public void changePassword(changePasswordRequest request) {
+
     }
 
 

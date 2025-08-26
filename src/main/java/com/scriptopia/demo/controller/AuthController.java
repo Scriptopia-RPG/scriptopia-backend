@@ -1,10 +1,10 @@
 package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.config.JwtProperties;
-import com.scriptopia.demo.dto.user.LoginRequest;
-import com.scriptopia.demo.dto.user.LoginResponse;
-import com.scriptopia.demo.dto.user.RegisterRequest;
-import com.scriptopia.demo.dto.user.RefreshResponse;
+import com.scriptopia.demo.dto.localaccount.LoginRequest;
+import com.scriptopia.demo.dto.localaccount.LoginResponse;
+import com.scriptopia.demo.dto.localaccount.RegisterRequest;
+import com.scriptopia.demo.dto.localaccount.RefreshResponse;
 import com.scriptopia.demo.service.LocalAccountService;
 import com.scriptopia.demo.utils.JwtProvider;
 import com.scriptopia.demo.service.RefreshTokenService;

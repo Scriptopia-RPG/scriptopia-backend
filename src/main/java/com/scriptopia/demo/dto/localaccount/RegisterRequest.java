@@ -1,4 +1,4 @@
-package com.scriptopia.demo.dto.user;
+package com.scriptopia.demo.dto.localaccount;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
