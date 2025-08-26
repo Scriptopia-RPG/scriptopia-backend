@@ -26,11 +26,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String uri = req.getRequestURI();
-        // 로그인/회원가입 제외, 나머지 요청은 JWT 체크
-        if (uri.startsWith("/auth/login") || uri.startsWith("/auth/register")) {
+        if (uri.startsWith("/api/v1/public")) {
             chain.doFilter(req, res);
             return;
         }
+
 
         String authHeader = req.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
