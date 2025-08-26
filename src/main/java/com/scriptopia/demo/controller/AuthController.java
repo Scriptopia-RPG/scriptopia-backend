@@ -1,10 +1,7 @@
 package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.config.JwtProperties;
-import com.scriptopia.demo.dto.user.LoginRequest;
-import com.scriptopia.demo.dto.user.LoginResponse;
-import com.scriptopia.demo.dto.user.RegisterRequest;
-import com.scriptopia.demo.dto.user.RefreshResponse;
+import com.scriptopia.demo.dto.localaccount.*;
 import com.scriptopia.demo.service.LocalAccountService;
 import com.scriptopia.demo.utils.JwtProvider;
 import com.scriptopia.demo.service.RefreshTokenService;
@@ -15,13 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final LocalAccountService localAccountService;
@@ -33,14 +30,45 @@ public class AuthController {
     private static final boolean COOKIE_SECURE = true;
     private static final String COOKIE_SAMESITE = "None";
 
+    @PostMapping("/public/auth/login")
+    public ResponseEntity<LoginResponse> login(
+            @RequestBody @Valid LoginRequest req,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
 
-    @PostMapping("/send-code")
+        return ResponseEntity.ok(localAccountService.login(req, request, response));
+    }
+
+    @PostMapping("/user/auth/logout")
+    public ResponseEntity<Void> logout(
+            @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            refreshTokenService.logout(refreshToken);
+        }
+        response.addHeader(HttpHeaders.SET_COOKIE, localAccountService.removeRefreshCookie().toString());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/public/auth/register")
+    public ResponseEntity<?> register(
+            @RequestBody @Valid RegisterRequest registerRequest
+    ) {
+        localAccountService.register(registerRequest);
+        return ResponseEntity.status(201).build();
+
+    }
+
+
+    @PostMapping("/public/auth/send-code")
     public ResponseEntity<String> sendCode(@RequestParam String email) {
         localAccountService.sendVerificationCode(email);
         return ResponseEntity.ok("인증 코드가 이메일로 발송되었습니다.");
     }
 
-    @PostMapping("/verify-code")
+    @PostMapping("/public/auth/verify-code")
     public ResponseEntity<String> verifyCode(@RequestParam String email,
                                              @RequestParam String code) {
         boolean success = localAccountService.verifyCode(email, code);
@@ -52,27 +80,21 @@ public class AuthController {
     }
 
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(
-            @RequestBody @Valid RegisterRequest registerRequest
-    ) {
-        localAccountService.register(registerRequest);
-        return ResponseEntity.status(201).build();
 
+    @PatchMapping("/user/auth/password/change")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request,
+                                                 Authentication authentication) {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        localAccountService.changePassword(userId,request);
+
+        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(
-            @RequestBody @Valid LoginRequest req,
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) {
-
-        return ResponseEntity.ok(localAccountService.login(req, request, response));
-    }
 
     // 쿠키 기반 리프레시
-    @PostMapping("/token/refresh")
+    @PostMapping("/user/auth/token/refresh")
     public ResponseEntity<RefreshResponse> refresh(
             @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
             @RequestParam(required = false) String deviceId
@@ -90,17 +112,7 @@ public class AuthController {
                 .body(new RefreshResponse(pair.accessToken(), props.accessExpSeconds()));
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(
-            @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
-            HttpServletResponse response
-    ) {
-        if (refreshToken != null && !refreshToken.isBlank()) {
-            refreshTokenService.logout(refreshToken);
-        }
-        response.addHeader(HttpHeaders.SET_COOKIE, localAccountService.removeRefreshCookie().toString());
-        return ResponseEntity.noContent().build();
-    }
+
 
 
 

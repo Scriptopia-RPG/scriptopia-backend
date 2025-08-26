@@ -26,8 +26,8 @@ public class JwtProvider {
         Instant now = Instant.now();
         return Jwts.builder()
                 .setIssuer(props.issuer())
-                .setSubject(String.valueOf(userId))
-                .claim("roles",roles)
+                .setSubject(String.valueOf(userId)) // userId를 subject로
+                .claim("roles", roles)
                 .setId(UUID.randomUUID().toString())
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plusSeconds(props.accessExpSeconds())))
@@ -84,6 +84,10 @@ public class JwtProvider {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    public String getEmail(String token) {
+        return parse(token).getBody().getSubject();
     }
 
 }

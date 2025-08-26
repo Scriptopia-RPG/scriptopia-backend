@@ -1,4 +1,4 @@
-package com.scriptopia.demo.dto.user;
+package com.scriptopia.demo.dto.localaccount;
 
 import com.scriptopia.demo.domain.Role;
 import lombok.AllArgsConstructor;

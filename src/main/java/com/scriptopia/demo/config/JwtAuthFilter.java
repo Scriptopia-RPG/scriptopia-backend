@@ -26,28 +26,37 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String uri = req.getRequestURI();
-        if (uri.startsWith("/auth/")) {
+        if (uri.startsWith("/api/v1/public")) {
             chain.doFilter(req, res);
             return;
         }
 
-        String auth = req.getHeader("Authorization");
-        if (auth != null && auth.startsWith("Bearer ")) {
-            String token = auth.substring(7);
-            try {
-                jwt.parse(token);
 
-                Long userId = jwt.getUserId(token);
+        String authHeader = req.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            try {
+                jwt.parse(token); // 유효성 체크
+
+                String userId = jwt.getUserId(token).toString();
                 var roles = jwt.getRoles(token).stream()
-                        .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
 
                 var authentication = new UsernamePasswordAuthenticationToken(userId, null, roles);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (Exception ignored) {
 
+            } catch (Exception e) {
+                logger.error("JWT parse error", e);
+                res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
+                return;
             }
+        } else {
+            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing Authorization header");
+            return;
         }
+
         chain.doFilter(req, res);
     }
 }
