@@ -38,7 +38,22 @@ public class SharedGameService {
 
         SharedGame sharedGame = SharedGame.from(user, history);
         return ResponseEntity.ok(sharedGameRepository.save(sharedGame));
+    }
 
+    @Transactional
+    public void deletesharedGame(String header, Long sharedId) {
+        Long userId = jwtProvider.getUserId(header);
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        SharedGame game = sharedGameRepository.findById(sharedId)
+                .orElseThrow(() -> new RuntimeException("Shared game not found"));
+
+        if(!game.getUser().getId().equals(userId)) {        // 공유된 게임과 로그인한 사용자가 아닌 경우
+            new RuntimeException("User not your history");
+        }
+
+        sharedGameRepository.delete(game);
     }
 }
