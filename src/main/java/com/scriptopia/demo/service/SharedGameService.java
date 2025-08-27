@@ -39,5 +39,6 @@ public class SharedGameService {
         SharedGame sharedGame = SharedGame.from(user, history);
         return ResponseEntity.ok(sharedGameRepository.save(sharedGame));
 
+
     }
 }
