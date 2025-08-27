@@ -1,4 +1,4 @@
-package com.scriptopia.demo.domain;
+package com.scriptopia.demo.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,4 +14,5 @@ public enum ErrorCode {
     private final String code;
     private final String message;
     private final HttpStatus status;
+
 }
