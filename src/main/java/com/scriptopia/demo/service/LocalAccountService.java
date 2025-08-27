@@ -6,6 +6,8 @@ import com.scriptopia.demo.dto.localaccount.LoginRequest;
 import com.scriptopia.demo.dto.localaccount.LoginResponse;
 import com.scriptopia.demo.dto.localaccount.RegisterRequest;
 import com.scriptopia.demo.dto.localaccount.ChangePasswordRequest;
+import com.scriptopia.demo.exception.CustomException;
+import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.LocalAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.utils.JwtProvider;
@@ -100,11 +102,15 @@ public class LocalAccountService {
 
     @Transactional
     public LoginResponse login(LoginRequest req, HttpServletRequest request, HttpServletResponse response) {
+
+
+
         LocalAccount localAccount = localAccountRepository.findByEmail(req.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("아이디 혹은 비밀번호를 잘못 입력했습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_401_INVALID_CREDENTIALS));
+
 
         if (!passwordEncoder.matches(req.getPassword(), localAccount.getPassword())) {
-            throw new IllegalArgumentException("아이디 혹은 비밀번호를 잘못 입력했습니다.");
+            throw new CustomException(ErrorCode.AUTH_401_INVALID_CREDENTIALS);
         }
 
 

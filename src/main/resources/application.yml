@@ -12,6 +12,9 @@ spring:
         show_sql: true
         format_sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  web:
+    resources:
+      add-mappings: true
 
   data:
     mongodb:
@@ -34,4 +37,9 @@ auth:
     access-exp-seconds: 1800
     refresh-exp-seconds: 1209600
     secret: ${JWT_SECRET}
+
+server:
+  error:
+    whitelabel:
+      enabled: false   # 톰캣/화이트라벨 HTML 끄기(우리가 직접 분기하므로)
 
