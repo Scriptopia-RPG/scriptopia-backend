@@ -17,4 +17,10 @@ public class SharedGameController {
                                    @PathVariable Long Id) {
         return sharedGameService.saveSharedGame(token, Id);
     }
+
+    @DeleteMapping("/share/{id}")
+    public void delete(@RequestHeader(value = "Authorization")String token,
+                                @PathVariable Long gameId) {
+        sharedGameService.deletesharedGame(token, gameId);
+    }
 }
