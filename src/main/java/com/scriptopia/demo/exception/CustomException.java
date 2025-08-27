@@ -1,7 +1,7 @@
 package com.scriptopia.demo.exception;
 
-import lombok.Getter;
 
+import lombok.Getter;
 
 @Getter
 public class CustomException extends RuntimeException {
@@ -10,10 +10,6 @@ public class CustomException extends RuntimeException {
     public CustomException(final ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
-    }
-
-    public ErrorCode getErrorCode() {
-        return errorCode;
     }
 
 }
