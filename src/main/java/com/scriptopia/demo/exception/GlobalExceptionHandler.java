@@ -21,9 +21,9 @@ public class GlobalExceptionHandler {
 
         if (fieldError != null && "email".equals(fieldError.getField())) {
             if (Objects.equals(fieldError.getCode(), "NotBlank")) {
-                errorCode = ErrorCode.REQ_400_MISSING_EMAIL;
+                errorCode = ErrorCode.E_400_MISSING_EMAIL;
             } else if (Objects.equals(fieldError.getCode(), "Email")) {
-                errorCode = ErrorCode.REQ_400_INVALID_EMAIL_FORMAT;
+                errorCode = ErrorCode.E_400_INVALID_EMAIL_FORMAT;
             }
         }
 

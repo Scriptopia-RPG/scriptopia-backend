@@ -106,11 +106,11 @@ public class LocalAccountService {
 
 
         LocalAccount localAccount = localAccountRepository.findByEmail(req.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_401_INVALID_CREDENTIALS));
+                .orElseThrow(() -> new CustomException(ErrorCode.E_401_INVALID_CREDENTIALS));
 
 
         if (!passwordEncoder.matches(req.getPassword(), localAccount.getPassword())) {
-            throw new CustomException(ErrorCode.AUTH_401_INVALID_CREDENTIALS);
+            throw new CustomException(ErrorCode.E_401_INVALID_CREDENTIALS);
         }
 
 
