@@ -8,6 +8,7 @@ import com.scriptopia.demo.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -63,8 +64,8 @@ public class AuthController {
 
 
     @PostMapping("/public/auth/send-code")
-    public ResponseEntity<String> sendCode(@RequestParam String email) {
-        localAccountService.sendVerificationCode(email);
+    public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest sendCodeRequest) {
+        localAccountService.sendVerificationCode(sendCodeRequest.getEmail());
         return ResponseEntity.ok("인증 코드가 이메일로 발송되었습니다.");
     }
 

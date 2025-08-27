@@ -1,38 +1,36 @@
 package com.scriptopia.demo.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import com.scriptopia.demo.dto.exception.ErrorResponse;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException e) {
-        var fieldError = e.getBindingResult().getFieldError();
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e) {
+        FieldError fieldError = e.getBindingResult().getFieldError();
 
-        ErrorCode errorCode;
+        ErrorCode errorCode = ErrorCode.E_400; // 기본값
+
         if (fieldError != null && "email".equals(fieldError.getField())) {
-            errorCode = ErrorCode.AUTH_401_INVALID_CREDENTIALS;
-        } else {
-            errorCode = ErrorCode.REQ_400_INVALID_BODY;
+            if (Objects.equals(fieldError.getCode(), "NotBlank")) {
+                errorCode = ErrorCode.REQ_400_MISSING_EMAIL;
+            } else if (Objects.equals(fieldError.getCode(), "Email")) {
+                errorCode = ErrorCode.REQ_400_INVALID_EMAIL_FORMAT;
+            }
         }
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("code", errorCode.getCode());
-        body.put("message", fieldError != null ? fieldError.getDefaultMessage() : errorCode.getMessage());
-        body.put("status", errorCode.getStatus());
 
-        return ResponseEntity.status(errorCode.getStatus())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body);
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(new ErrorResponse(errorCode));
     }
 
     @ExceptionHandler(CustomException.class)
@@ -49,6 +47,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(ErrorCode.GEN_500));
+                .body(new ErrorResponse(ErrorCode.E_500));
     }
 }
