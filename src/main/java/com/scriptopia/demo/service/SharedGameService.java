@@ -23,16 +23,14 @@ public class SharedGameService {
     private final UserRepository userRepository;
 
     @Transactional
-    public ResponseEntity<?> saveSharedGame(String header, Long historyId) {
-        Long userId = jwtProvider.getUserId(header);
-
-        User user = userRepository.findById(userId)
+    public ResponseEntity<?> saveSharedGame(Long Id, Long historyId) {
+        User user = userRepository.findById(Id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         History history = historyRepository.findById(historyId)
                 .orElseThrow(() -> new RuntimeException("History not found"));
 
-        if(!history.getUser().getId().equals(userId)) {
+        if(!history.getUser().getId().equals(Id)) {
             return ResponseEntity.status(403).body("not your history");
         }
 
@@ -41,17 +39,15 @@ public class SharedGameService {
     }
 
     @Transactional
-    public void deletesharedGame(String header, Long sharedId) {
-        Long userId = jwtProvider.getUserId(header);
-
-        User user = userRepository.findById(userId)
+    public void deletesharedGame(Long id, Long sharedId) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         SharedGame game = sharedGameRepository.findById(sharedId)
                 .orElseThrow(() -> new RuntimeException("Shared game not found"));
 
-        if(!game.getUser().getId().equals(userId)) {        // 공유된 게임과 로그인한 사용자가 아닌 경우
-            new RuntimeException("User not your history");
+        if(!game.getUser().getId().equals(user.getId())) {        // 공유된 게임과 로그인한 사용자가 아닌 경우
+            throw new RuntimeException("User not your history");
         }
 
         sharedGameRepository.delete(game);
