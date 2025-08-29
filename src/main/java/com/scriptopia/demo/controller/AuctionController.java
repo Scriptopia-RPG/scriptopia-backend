@@ -36,7 +36,6 @@ public class AuctionController {
 
         TradeResponse response = auctionService.getTrades(requestDto);
         return ResponseEntity.ok(response);
-
     }
 
 
