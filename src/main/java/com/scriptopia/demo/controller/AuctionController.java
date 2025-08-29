@@ -1,7 +1,16 @@
 package com.scriptopia.demo.controller;
 
+import com.scriptopia.demo.dto.auction.AuctionRequest;
+import com.scriptopia.demo.dto.auction.TradeResponse;
+import com.scriptopia.demo.dto.auction.TradeFilterRequest;
+import com.scriptopia.demo.exception.auction.AuctionException;
+import com.scriptopia.demo.exception.auction.AuctionNotFoundException;
+import com.scriptopia.demo.exception.auction.InsufficientPiaException;
+import com.scriptopia.demo.exception.auction.SelfPurchaseException;
 import com.scriptopia.demo.service.AuctionService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +28,41 @@ public class AuctionController {
 
         return ResponseEntity.ok(auctionService.createAuction(requestDto, userId));
     }
+
+
+    @GetMapping
+    public ResponseEntity<TradeResponse> getTrades(
+            @RequestBody TradeFilterRequest requestDto) {
+
+        TradeResponse response = auctionService.getTrades(requestDto);
+        return ResponseEntity.ok(response);
+
+    }
+
+
+    @PostMapping("/{auctionId}/purchase")
+    public ResponseEntity<String> purchaseItem(
+            @PathVariable String auctionId,
+            @RequestHeader("token") String userId) {
+
+        try {
+            String result = auctionService.purchaseItem(auctionId, userId);
+            return ResponseEntity.ok(result);
+
+        } catch (InsufficientPiaException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (SelfPurchaseException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (AuctionNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (AuctionException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+
+
+
 
 
 }
