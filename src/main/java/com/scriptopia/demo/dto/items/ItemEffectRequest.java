@@ -8,4 +8,5 @@ public class ItemEffectRequest {
     private String effectName;
     private String effectDescription;
     private Grade grade;
+    private Integer effectValue;
 }

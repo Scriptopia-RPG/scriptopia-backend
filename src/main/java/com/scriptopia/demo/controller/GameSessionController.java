@@ -8,32 +8,32 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/game-session")
 @RequiredArgsConstructor
 public class GameSessionController {
     private final GameSessionService gameSessionService;
 
-    @PostMapping("/game-session")
+    @PostMapping
     public ResponseEntity<?> createGameSession(@RequestHeader("X-User-ID") Long id) {
         // 게임 세션 정보 저장
         return gameSessionService.saveGameSession(id);
     }
 
     // 정보 불러오기
-    @GetMapping("/game-session")
+    @GetMapping
     public ResponseEntity<?> loadGameSession(@RequestHeader("X-User-ID") Long id) {
         return gameSessionService.getGameSession(id);
 
     }
 
     // 수정
-    @PutMapping("/game-session")
+    @PutMapping
     public ResponseEntity<?> updateGameSession(@RequestHeader("X-User-ID") Long id) {
         return gameSessionService.updateGameSession(id);
     }
 
     // 삭제
-    @DeleteMapping("/game-session")
+    @DeleteMapping
     public void deleteGameSession(@RequestHeader("X-User-ID") Long id) {
         gameSessionService.deleteGameSession(id);
     }
