@@ -31,6 +31,12 @@ public class AuthController {
     private static final String COOKIE_SAMESITE = "None";
 
 
+    @PostMapping("/public/auth/verify-email")
+    public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+
+        return ResponseEntity.ok("사용 가능한 이메일입니다.");
+    }
+
     @PostMapping("/public/auth/login")
     public ResponseEntity<LoginResponse> login(
             @RequestBody @Valid LoginRequest req,
