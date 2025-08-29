@@ -34,6 +34,8 @@ public class AuthController {
     @PostMapping("/public/auth/verify-email")
     public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
 
+        localAccountService.verifyEmail(request);
+
         return ResponseEntity.ok("사용 가능한 이메일입니다.");
     }
 
