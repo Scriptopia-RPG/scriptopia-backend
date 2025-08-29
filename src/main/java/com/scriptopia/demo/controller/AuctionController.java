@@ -29,7 +29,6 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.createAuction(requestDto, userId));
     }
 
-
     @GetMapping
     public ResponseEntity<TradeResponse> getTrades(
             @RequestBody TradeFilterRequest requestDto) {
