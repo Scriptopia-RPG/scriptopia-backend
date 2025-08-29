@@ -76,7 +76,7 @@ public class AuthController {
 
 
     @PatchMapping("/user/auth/password/change")
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request,
+    public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest request,
                                                  Authentication authentication) {
 
         Long userId = Long.valueOf(authentication.getName());

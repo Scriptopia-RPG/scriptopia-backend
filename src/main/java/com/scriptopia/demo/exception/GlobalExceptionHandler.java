@@ -30,7 +30,9 @@ public class GlobalExceptionHandler {
                     errorCode = ErrorCode.E_400_INVALID_EMAIL_FORMAT;
                 }
             }
-            else if ("password".equals(fieldError.getField())){
+            else if ("password".equals(fieldError.getField()) ||
+                    "oldPassword".equals(fieldError.getField()) ||
+                    "newPassword".equals(fieldError.getField())){
                 if (Objects.equals(fieldError.getCode(), "NotBlank")) {
                     errorCode = ErrorCode.E_400_MISSING_PASSWORD;
                 } else if (Objects.equals(fieldError.getCode(), "Size")) {
