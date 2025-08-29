@@ -19,7 +19,11 @@ public class LocalAccount {
     @OneToOne(fetch = FetchType.LAZY)
     private User user;
 
+    @Column(unique = true, nullable = false)
     private String email;
     private String password;
     private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
 }

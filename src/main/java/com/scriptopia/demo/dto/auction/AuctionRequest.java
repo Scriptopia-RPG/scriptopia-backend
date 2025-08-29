@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class AuctionRequest {
-    private String itemDefId; // 단수형으로 바꿔주세요
+    private String itemDefsId;
+    private TradeStatus tradeStatus; // ENUM이면 String으로 받아서 변환
     private Long price;
 }
