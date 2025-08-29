@@ -4,6 +4,7 @@ import com.scriptopia.demo.domain.SharedGame;
 import com.scriptopia.demo.service.SharedGameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,9 +13,17 @@ import org.springframework.web.bind.annotation.*;
 public class SharedGameController {
     private final SharedGameService sharedGameService;
 
-    @PostMapping("/share/{id}")
-    public ResponseEntity<?> share(@RequestHeader(value = "Authorization")String token,
-                                   @PathVariable Long Id) {
-        return sharedGameService.saveSharedGame(token, Id);
+    @PostMapping("/share/{hid}")
+    public ResponseEntity<?> share(Authentication authentication, @PathVariable Long hid) {
+        Long userId = Long.valueOf(authentication.getName());
+
+        return sharedGameService.saveSharedGame(userId, hid);
+    }
+
+    @DeleteMapping("/share/{gameid}")
+    public void delete(Authentication authentication, @PathVariable Long gameid) {
+        Long userId = Long.valueOf(authentication.getName());
+
+        sharedGameService.deletesharedGame(userId, gameid);
     }
 }
