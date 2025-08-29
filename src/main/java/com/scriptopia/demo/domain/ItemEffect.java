@@ -10,18 +10,20 @@ import lombok.Setter;
 public class ItemEffect {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     // FK: ItemDefs
     @ManyToOne(fetch = FetchType.LAZY)
-    private ItemDef itemDefs;
+    private ItemDef itemDef;
 
     // FK: EffectGradeDef
     @ManyToOne(fetch = FetchType.LAZY)
     private EffectGradeDef effectGradeDef;
 
-    // 예를 들어 효과 이름이나 수치 같은 필드가 있다면 여기에 추가
+    // 예를 들어 효과 이름
     private String effectName;
-    private int effectValue;
+
+    // 아이템 효과 설명
+    private String effect_description;
 }

@@ -23,7 +23,8 @@ public class Settlement {
     private ItemDef itemDef;
 
 
-    private TradeStatus tradeStatus;
+    @Enumerated(EnumType.STRING)
+    private TradeType tradeType;
     private Long price;
 
 
