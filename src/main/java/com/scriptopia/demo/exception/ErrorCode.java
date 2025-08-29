@@ -24,6 +24,10 @@ public enum ErrorCode {
     E_400_INSUFFICIENT_PIA("E400011", "금액이 부족합니다.", HttpStatus.BAD_REQUEST),
     E_400_SELF_PURCHASE("E400012", "자기 물건은 구매할 수 없습니다.", HttpStatus.BAD_REQUEST),
 
+    E_400_INVALID_USER_ITEM_ID("E400013", "잘못된 아이템 ID 형식입니다.", HttpStatus.BAD_REQUEST),
+    E_400_ITEM_NOT_OWNED("E400014", "해당 아이템은 사용자가 소유하지 않았습니다.", HttpStatus.BAD_REQUEST),
+    E_400_ITEM_NOT_TRADEABLE("E400015", "해당 아이템은 현재 경매장에 올릴 수 없습니다.", HttpStatus.BAD_REQUEST),
+    E_400_ITEM_ALREADY_REGISTERED("E400016", "이미 경매장에 등록된 아이템입니다.", HttpStatus.BAD_REQUEST),
 
 
     //401 Unauthorized

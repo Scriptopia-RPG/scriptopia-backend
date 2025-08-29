@@ -35,7 +35,9 @@ public class AuctionService {
     private final SettlementRepository settlementRepository;
 
     @Transactional
-    public String createAuction(AuctionRequest requestDto, String userId) {
+    public String createAuction(AuctionRequest requestDto, Long userId) {
+
+
 
         // UUID(String) → Long 변환 (임시)
         long userItemId;
@@ -50,7 +52,7 @@ public class AuctionService {
                 .orElseThrow(() -> new IllegalArgumentException("UserItem not found"));
 
         // 유저 소유 여부 확인
-        if (!userItem.getUser().getId().equals(Long.parseLong(userId))) {
+        if (!userItem.getUser().getId().equals(userId)) {
             throw new IllegalStateException("해당 아이템은 사용자가 소유하지 않았습니다.");
         }
 

@@ -8,6 +8,7 @@ import com.scriptopia.demo.service.AuctionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,8 +20,9 @@ public class AuctionController {
 
     @PostMapping("/user/trades")
     public ResponseEntity<String> createAuction(@RequestBody AuctionRequest dto,
-                                                @RequestHeader("token") String userId ){   // 헤더에서 userId 가져오기 임시임
+                                                Authentication authentication ){
 
+        Long userId = Long.valueOf(authentication.getName());
         return ResponseEntity.ok(auctionService.createAuction(dto, userId));
     }
 
@@ -44,5 +46,8 @@ public class AuctionController {
         return ResponseEntity.ok(result);
 
     }
+
+
+
 
 }
