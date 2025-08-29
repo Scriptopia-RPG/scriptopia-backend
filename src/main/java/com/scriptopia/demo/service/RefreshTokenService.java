@@ -1,7 +1,5 @@
 package com.scriptopia.demo.service;
 
-import com.scriptopia.demo.exception.CustomException;
-import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.utils.JwtProvider;
 import com.scriptopia.demo.record.RefreshSession;
 import com.scriptopia.demo.repository.RefreshRepository;
@@ -49,16 +47,16 @@ public class RefreshTokenService {
         String deviceInToken = (String) parsed.getBody().get("device");
 
         if (expectedDeviceId != null && !expectedDeviceId.equals(deviceInToken)) {
-            throw new CustomException(ErrorCode.E_403_DEVICE_MISMATCH);
+            throw new IllegalArgumentException("Device mismatch");
         }
 
         var saved = refreshRepository.find(userId, jti)
-                .orElseThrow(() -> new CustomException(ErrorCode.E_404_REFRESH_NOT_FOUND));
+                .orElseThrow(() -> new IllegalArgumentException("Refresh not found"));
 
 
         String input = sha256Base64Url(refreshToken);
         if (!passwordEncoder.matches(input, saved.tokenHash())) {
-            throw new CustomException(ErrorCode.E_409_REFRESH_REUSE_DETECTED);
+            throw new IllegalArgumentException("Refresh hash mismatch");
         }
 
 
@@ -93,7 +91,7 @@ public class RefreshTokenService {
             byte[] digest = md.digest(s.getBytes(StandardCharsets.UTF_8));
             return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.E_500_TOKEN_HASHING_FAILED);
+            throw new IllegalStateException("Hashing failed", e);
         }
     }
 }

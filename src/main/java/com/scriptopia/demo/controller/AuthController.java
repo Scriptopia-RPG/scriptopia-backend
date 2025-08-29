@@ -8,6 +8,7 @@ import com.scriptopia.demo.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -41,7 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/user/auth/logout")
-    public ResponseEntity<?> logout(
+    public ResponseEntity<Void> logout(
             @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
             HttpServletResponse response
     ) {
@@ -49,26 +50,27 @@ public class AuthController {
             refreshTokenService.logout(refreshToken);
         }
         response.addHeader(HttpHeaders.SET_COOKIE, localAccountService.removeRefreshCookie().toString());
-        return ResponseEntity.ok("로그아웃 되었습니다.");
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/public/auth/register")
     public ResponseEntity<?> register(
-            @RequestBody @Valid RegisterRequest request
+            @RequestBody @Valid RegisterRequest registerRequest
     ) {
-        localAccountService.register(request);
+        localAccountService.register(registerRequest);
         return ResponseEntity.ok("회원가입에 성공했습니다.");
     }
 
     @PostMapping("/public/auth/send-code")
-    public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest request) {
-        localAccountService.sendVerificationCode(request.getEmail());
+    public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest sendCodeRequest) {
+        localAccountService.sendVerificationCode(sendCodeRequest.getEmail());
         return ResponseEntity.ok("인증 코드가 이메일로 발송되었습니다.");
     }
 
     @PostMapping("/public/auth/verify-code")
-    public ResponseEntity<String> verifyCode(@RequestBody @Valid VerifyCodeRequest request) {
-        localAccountService.verifyCode(request.getEmail(), request.getCode());
+    public ResponseEntity<String> verifyCode(@RequestParam String email,
+                                             @RequestParam String code) {
+        localAccountService.verifyCode(email, code);
         return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
 
     }
@@ -76,7 +78,7 @@ public class AuthController {
 
 
     @PatchMapping("/user/auth/password/change")
-    public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest request,
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request,
                                                  Authentication authentication) {
 
         Long userId = Long.valueOf(authentication.getName());
