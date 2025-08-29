@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -39,4 +41,8 @@ public class ItemDef {
     private LocalDateTime createdAt;
 
     private Long price;
+
+    @OneToMany(mappedBy = "itemDef", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemEffect> itemEffects = new ArrayList<>();
+
 }
