@@ -41,5 +41,5 @@ out/
 /docker_compose_files/postgres_data
 /docker_compose_files/redis_data
 
-
+*.properties
 
