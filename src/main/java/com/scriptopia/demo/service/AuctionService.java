@@ -40,31 +40,26 @@ public class AuctionService {
 
 
         // UUID(String) → Long 변환 (임시)
-        long userItemId;
-        try {
-            userItemId = Long.parseLong(requestDto.getItemDefId());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid UserItem UUID");
-        }
+        long userItemId = Long.parseLong(requestDto.getItemDefId());
+
 
         // UserItem 조회
         UserItem userItem = userItemRepository.findById(userItemId)
-                .orElseThrow(() -> new IllegalArgumentException("UserItem not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
         // 유저 소유 여부 확인
         if (!userItem.getUser().getId().equals(userId)) {
-            throw new IllegalStateException("해당 아이템은 사용자가 소유하지 않았습니다.");
+            throw new CustomException(ErrorCode.E_400_ITEM_NOT_OWNED);
         }
 
         // 거래 상태 확인
         if (userItem.getTradeStatus() != TradeStatus.OWNED) {
-            throw new IllegalStateException(
-                    "해당 아이템은 현재 경매장에 올릴 수 없습니다. 상태: " + userItem.getTradeStatus());
+            throw new CustomException(ErrorCode.E_400_ITEM_NOT_TRADEABLE);
         }
 
         // 이미 경매장에 등록되어 있는지 확인
         if (auctionRepository.existsByUserItem(userItem)) {
-            throw new IllegalStateException("이미 경매장에 등록된 아이템입니다.");
+            throw new CustomException(ErrorCode.E_400_ITEM_ALREADY_REGISTERED);
         }
 
         // Auction 등록
