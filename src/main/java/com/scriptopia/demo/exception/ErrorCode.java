@@ -19,6 +19,8 @@ public enum ErrorCode {
     //401 Unauthorized
     E_401_INVALID_CREDENTIALS("E401001","이메일 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
 
+    E_401_CODE_MISMATCH("E401002","인증 코드가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
+
     //403 Forbidden
     E_403_ROLE_FORBIDDEN("E403001", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
 

@@ -67,6 +67,9 @@ public class LocalAccountService {
             redisTemplate.opsForValue().set("email:verified:" + email, "true", 30, TimeUnit.MINUTES);
             redisTemplate.delete("email:verify:" + email); // 코드 제거
         }
+        else{
+            throw new CustomException(ErrorCode.E_401_CODE_MISMATCH);
+        }
 
 
     }
