@@ -13,7 +13,6 @@ public class AuctionItemResponse {
     private Long auctionId;
     private Long price;
     private LocalDateTime createdAt;
-
     private UserDto seller;
     private ItemDto item;
 

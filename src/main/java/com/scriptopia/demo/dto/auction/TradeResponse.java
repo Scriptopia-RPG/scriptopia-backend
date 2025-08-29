@@ -8,7 +8,6 @@ import java.util.List;
 public class TradeResponse {
     private List<AuctionItemResponse> content;
     private PageInfo pageInfo;
-
     @Data
     public static class PageInfo {
         private int currentPage;

@@ -12,7 +12,6 @@ public class TradeFilterRequest {
 
     private Long pageIndex;   // 0부터 시작
     private Long pageSize;    // 한 페이지당 아이템 수
-
     private String itemName;           // 판매 아이템 이름
     private ItemType category;         // 아이템 분류 (WEAPON, ARMOR, ARTIFACT, POTION)
     private Long minPrice;             // 최소 가격 (nullable)

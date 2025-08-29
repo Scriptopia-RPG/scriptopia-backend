@@ -8,4 +8,6 @@ import lombok.Data;
 public class AuctionRequest {
     private String itemDefId; // 단수형으로 바꿔주세요
     private Long price;
+
+
 }
