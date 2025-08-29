@@ -41,7 +41,7 @@ public class AuthController {
     }
 
     @PostMapping("/user/auth/logout")
-    public ResponseEntity<Void> logout(
+    public ResponseEntity<?> logout(
             @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
             HttpServletResponse response
     ) {
@@ -49,7 +49,7 @@ public class AuthController {
             refreshTokenService.logout(refreshToken);
         }
         response.addHeader(HttpHeaders.SET_COOKIE, localAccountService.removeRefreshCookie().toString());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
     @PostMapping("/public/auth/register")
