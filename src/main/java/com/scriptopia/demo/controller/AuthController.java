@@ -30,6 +30,7 @@ public class AuthController {
     private static final boolean COOKIE_SECURE = true;
     private static final String COOKIE_SAMESITE = "None";
 
+
     @PostMapping("/public/auth/login")
     public ResponseEntity<LoginResponse> login(
             @RequestBody @Valid LoginRequest req,

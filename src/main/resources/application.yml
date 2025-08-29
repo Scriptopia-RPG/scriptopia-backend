@@ -1,6 +1,9 @@
 server:
   servlet:
     context-path: /api/v1
+  error:
+    whitelabel:
+      enabled: false   # 톰캣/화이트라벨 HTML 끄기(우리가 직접 분기하므로)
 
 spring:
   config:
@@ -12,7 +15,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         show_sql: true
@@ -44,8 +47,4 @@ auth:
     refresh-exp-seconds: 1209600
     secret: ${JWT_SECRET}
 
-server:
-  error:
-    whitelabel:
-      enabled: false   # 톰캣/화이트라벨 HTML 끄기(우리가 직접 분기하므로)
 
