@@ -55,22 +55,21 @@ public class AuthController {
 
     @PostMapping("/public/auth/register")
     public ResponseEntity<?> register(
-            @RequestBody @Valid RegisterRequest registerRequest
+            @RequestBody @Valid RegisterRequest request
     ) {
-        localAccountService.register(registerRequest);
+        localAccountService.register(request);
         return ResponseEntity.ok("회원가입에 성공했습니다.");
     }
 
     @PostMapping("/public/auth/send-code")
-    public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest sendCodeRequest) {
-        localAccountService.sendVerificationCode(sendCodeRequest.getEmail());
+    public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest request) {
+        localAccountService.sendVerificationCode(request.getEmail());
         return ResponseEntity.ok("인증 코드가 이메일로 발송되었습니다.");
     }
 
     @PostMapping("/public/auth/verify-code")
-    public ResponseEntity<String> verifyCode(@RequestParam String email,
-                                             @RequestParam String code) {
-        localAccountService.verifyCode(email, code);
+    public ResponseEntity<String> verifyCode(@RequestBody @Valid VerifyCodeRequest request) {
+        localAccountService.verifyCode(request.getEmail(), request.getCode());
         return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
 
     }
