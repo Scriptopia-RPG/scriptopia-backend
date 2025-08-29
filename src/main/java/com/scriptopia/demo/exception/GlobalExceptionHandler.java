@@ -42,6 +42,7 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(errorCode));
     }
 
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
 

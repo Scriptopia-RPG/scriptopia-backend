@@ -58,10 +58,8 @@ public class AuthController {
             @RequestBody @Valid RegisterRequest registerRequest
     ) {
         localAccountService.register(registerRequest);
-        return ResponseEntity.status(201).build();
-
+        return ResponseEntity.ok("회원가입에 성공했습니다.");
     }
-
 
     @PostMapping("/public/auth/send-code")
     public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest sendCodeRequest) {
@@ -72,12 +70,9 @@ public class AuthController {
     @PostMapping("/public/auth/verify-code")
     public ResponseEntity<String> verifyCode(@RequestParam String email,
                                              @RequestParam String code) {
-        boolean success = localAccountService.verifyCode(email, code);
-        if (success) {
-            return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
-        } else {
-            return ResponseEntity.badRequest().body("인증번호가 올바르지 않거나 만료되었습니다.");
-        }
+        localAccountService.verifyCode(email, code);
+        return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
+
     }
 
 

@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import static org.thymeleaf.util.StringUtils.length;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -52,15 +54,21 @@ public class LocalAccountService {
         mailService.sendVerificationCode(email, code);
     }
 
-    public boolean verifyCode(String email, String inputCode) {
+    public void verifyCode(String email, String inputCode) {
+
+        if (length(inputCode) != 6){
+            throw new CustomException(ErrorCode.E_400_INVALID_CODE);
+        }
+
         String savedCode = redisTemplate.opsForValue().get("email:verify:" + email);
+
         if (savedCode != null && savedCode.equals(inputCode)) {
             // 인증 완료 후 30분 유지
             redisTemplate.opsForValue().set("email:verified:" + email, "true", 30, TimeUnit.MINUTES);
             redisTemplate.delete("email:verify:" + email); // 코드 제거
-            return true;
         }
-        return false;
+
+
     }
 
     @Transactional
