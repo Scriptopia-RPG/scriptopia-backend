@@ -175,7 +175,6 @@ public class LocalAccountService {
             throw new IllegalArgumentException("이메일을 입력해주세요.");
         }
 
-
         if (rawPassword == null || rawPassword.isBlank()) {
             throw new IllegalArgumentException("비밀번호를 입력해주세요.");
         }

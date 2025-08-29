@@ -15,6 +15,11 @@ public enum ErrorCode {
     E_400_MISSING_EMAIL("E400001", "이메일은 필수 입력 값입니다.", HttpStatus.BAD_REQUEST),
     E_400_INVALID_EMAIL_FORMAT("E400002","이메일 형식이 올바르지 않습니다.",HttpStatus.BAD_REQUEST),
     E_400_INVALID_CODE("E400003", "인증 코드는 6자리 숫자여야 합니다.", HttpStatus.BAD_REQUEST),
+    E_400_MISSING_PASSWORD("E400004", "비밀번호는 필수 입력 값입니다.", HttpStatus.BAD_REQUEST),
+    E_400_PASSWORD_SIZE("E400005", "비밀번호는 8~20자리여야 합니다.", HttpStatus.BAD_REQUEST),
+    E_400_PASSWORD_COMPLEXITY("E400006", "비밀번호는 소문자, 숫자, 특수문자를 포함해야 합니다.", HttpStatus.BAD_REQUEST),
+    E_400_MISSING_NICKNAME("E400007", "닉네임은 필수 입력 값입니다.", HttpStatus.BAD_REQUEST),
+
 
     //401 Unauthorized
     E_401_INVALID_CREDENTIALS("E401001","이메일 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),

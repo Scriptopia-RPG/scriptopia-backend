@@ -17,13 +17,32 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e) {
         FieldError fieldError = e.getBindingResult().getFieldError();
 
-        ErrorCode errorCode = ErrorCode.E_400; // 기본값
-
-        if (fieldError != null && "email".equals(fieldError.getField())) {
-            if (Objects.equals(fieldError.getCode(), "NotBlank")) {
-                errorCode = ErrorCode.E_400_MISSING_EMAIL;
-            } else if (Objects.equals(fieldError.getCode(), "Email")) {
-                errorCode = ErrorCode.E_400_INVALID_EMAIL_FORMAT;
+        ErrorCode errorCode = ErrorCode.E_400;
+        if (fieldError == null || fieldError.getDefaultMessage() == null) {
+             // 기본값
+        }
+        else {
+            if ("email".equals(fieldError.getField())){
+                if (Objects.equals(fieldError.getCode(), "NotBlank")) {
+                    errorCode = ErrorCode.E_400_MISSING_EMAIL;
+                } else if (Objects.equals(fieldError.getCode(), "Email")) {
+                    errorCode = ErrorCode.E_400_INVALID_EMAIL_FORMAT;
+                }
+            }
+            else if ("password".equals(fieldError.getField())){
+                if (Objects.equals(fieldError.getCode(), "NotBlank")) {
+                    errorCode = ErrorCode.E_400_MISSING_PASSWORD;
+                } else if (Objects.equals(fieldError.getCode(), "Size")) {
+                    errorCode = ErrorCode.E_400_PASSWORD_SIZE;
+                }
+                else if (Objects.equals(fieldError.getCode(), "Pattern")) {
+                    errorCode = ErrorCode.E_400_PASSWORD_COMPLEXITY;
+                }
+            }
+            else if ("nickname".equals(fieldError.getField())){
+                if (Objects.equals(fieldError.getCode(), "NotBlank")) {
+                    errorCode = ErrorCode.E_400_MISSING_NICKNAME;
+                }
             }
         }
 
