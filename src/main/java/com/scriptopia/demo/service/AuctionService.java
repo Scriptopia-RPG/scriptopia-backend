@@ -12,14 +12,22 @@ import com.scriptopia.demo.repository.AuctionRepository;
 import com.scriptopia.demo.repository.SettlementRepository;
 import com.scriptopia.demo.repository.UserItemRepository;
 import com.scriptopia.demo.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuctionService {
 
     private final AuctionRepository auctionRepository;
@@ -33,7 +41,7 @@ public class AuctionService {
         // UUID(String) → Long 변환 (임시)
         long userItemId;
         try {
-            userItemId = Long.parseLong(requestDto.getItemDefsId());
+            userItemId = Long.parseLong(requestDto.getItemDefId());
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid UserItem UUID");
         }

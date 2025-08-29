@@ -1,5 +1,6 @@
 package com.scriptopia.demo.controller;
 
+
 import com.scriptopia.demo.dto.auction.AuctionRequest;
 import com.scriptopia.demo.dto.auction.TradeResponse;
 import com.scriptopia.demo.dto.auction.TradeFilterRequest;
@@ -8,7 +9,6 @@ import com.scriptopia.demo.exception.auction.AuctionNotFoundException;
 import com.scriptopia.demo.exception.auction.InsufficientPiaException;
 import com.scriptopia.demo.exception.auction.SelfPurchaseException;
 import com.scriptopia.demo.service.AuctionService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +21,12 @@ public class AuctionController {
 
     private final AuctionService auctionService;
 
-    @PostMapping
-    public ResponseEntity<String> createAuction(
-            @RequestBody com.scriptopia.demo.dto.auction.AuctionRequest requestDto,
-            @RequestHeader("token") String userId) {   // 헤더에서 userId 가져오기 임시임
 
-        return ResponseEntity.ok(auctionService.createAuction(requestDto, userId));
+    @PostMapping
+    public ResponseEntity<String> createAuction(@RequestBody AuctionRequest dto,
+                                                @RequestHeader("token") String userId ){   // 헤더에서 userId 가져오기 임시임
+
+        return ResponseEntity.ok(auctionService.createAuction(dto, userId));
     }
 
 
@@ -59,10 +59,6 @@ public class AuctionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
-
-
-
-
 
 
 }
