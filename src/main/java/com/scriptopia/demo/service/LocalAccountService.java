@@ -2,10 +2,7 @@ package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.config.JwtProperties;
 import com.scriptopia.demo.domain.*;
-import com.scriptopia.demo.dto.localaccount.LoginRequest;
-import com.scriptopia.demo.dto.localaccount.LoginResponse;
-import com.scriptopia.demo.dto.localaccount.RegisterRequest;
-import com.scriptopia.demo.dto.localaccount.ChangePasswordRequest;
+import com.scriptopia.demo.dto.localaccount.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.LocalAccountRepository;
@@ -50,6 +47,17 @@ public class LocalAccountService {
 
     private static final Pattern WS = Pattern.compile("[\\s\\p{Z}\\u200B\\u200C\\u200D\\uFEFF]");
 
+
+    @Transactional
+    public void verifyEmail(VerifyEmailRequest request) {
+        String email = request.getEmail();
+
+        if (localAccountRepository.existsByEmail(email)){
+            throw new CustomException(ErrorCode.E_409_EMAIL_TAKEN);
+        }
+
+    }
+
     @Transactional
     public void sendVerificationCode(String email) {
         String code = String.format("%06d", (int)(Math.random() * 999999));
@@ -57,6 +65,7 @@ public class LocalAccountService {
         mailService.sendVerificationCode(email, code);
     }
 
+    @Transactional
     public void verifyCode(String email, String inputCode) {
 
         if (length(inputCode) != 6){
@@ -79,9 +88,16 @@ public class LocalAccountService {
 
     @Transactional
     public void register(RegisterRequest request) {
-        String normalizedEmail = normalizeEmail(request.getEmail());
-        String verified = redisTemplate.opsForValue().get("email:verified:" + normalizedEmail);
+        String email = request.getEmail();
 
+        //중복 검증
+        if (localAccountRepository.existsByEmail(email)){
+            throw new CustomException(ErrorCode.E_409_EMAIL_TAKEN);
+        }
+
+        String verified = redisTemplate.opsForValue().get("email:verified:" + email);
+
+        //이메일 인증 검증
         if (verified == null || !verified.equals("true")) {
             throw new CustomException(ErrorCode.E_412_EMAIL_NOT_VERIFIED);
         }
@@ -91,7 +107,7 @@ public class LocalAccountService {
             throw new CustomException(ErrorCode.E_400_PASSWORD_WHITESPACE);
         }
 
-        isAvailable(normalizedEmail, request.getNickname());
+        isAvailable(email, request.getNickname());
 
         //user 객체 생성
         User user = new User();
@@ -106,7 +122,7 @@ public class LocalAccountService {
         //localAccount 객체 생성
         LocalAccount localAccount = new LocalAccount();
         localAccount.setUser(user);
-        localAccount.setEmail(normalizedEmail);
+        localAccount.setEmail(email);
         localAccount.setPassword(passwordEncoder.encode(request.getPassword()));
         localAccount.setUpdatedAt(LocalDateTime.now());
         localAccount.setStatus(UserStatus.UNVERIFIED);
@@ -185,12 +201,6 @@ public class LocalAccountService {
 
     public List<String> getRoles(Long userId) {
         return List.of(Role.USER.toString());
-    }
-
-    //소문자로 변경
-    private static String normalizeEmail(String email) {
-        if (email == null) return null;
-        return email.trim().toLowerCase(Locale.ROOT);
     }
 
 
