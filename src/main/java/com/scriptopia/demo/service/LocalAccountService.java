@@ -114,8 +114,6 @@ public class LocalAccountService {
     @Transactional
     public LoginResponse login(LoginRequest req, HttpServletRequest request, HttpServletResponse response) {
 
-
-
         LocalAccount localAccount = localAccountRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.E_401_INVALID_CREDENTIALS));
 
@@ -170,7 +168,7 @@ public class LocalAccountService {
     private static void validateParams(String verified, String email, String rawPassword, String nickname) {
 
         if (verified == null || !verified.equals("true")) {
-            throw new RuntimeException("이메일 인증을 먼저 완료해야 합니다.");
+            throw new CustomException(ErrorCode.E_412_EMAIL_NOT_VERIFIED);
         }
 
         if (email == null || email.isBlank()) {

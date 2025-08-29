@@ -24,7 +24,10 @@ public enum ErrorCode {
     //403 Forbidden
     E_403_ROLE_FORBIDDEN("E403001", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
 
-    //500 INTERNAL_SERVER_ERROR
+    //412 Precondition Failed
+    E_412_EMAIL_NOT_VERIFIED("E412001", "이메일 인증이 필요합니다.",HttpStatus.PRECONDITION_FAILED),
+
+    //500 Internal Server Error
     E_500("E_500000", "예상치 못한 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String code;
