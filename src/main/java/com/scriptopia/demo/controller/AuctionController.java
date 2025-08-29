@@ -45,20 +45,9 @@ public class AuctionController {
             @PathVariable String auctionId,
             @RequestHeader("token") String userId) {
 
-        try {
-            String result = auctionService.purchaseItem(auctionId, userId);
-            return ResponseEntity.ok(result);
+        String result = auctionService.purchaseItem(auctionId, userId);
+        return ResponseEntity.ok(result);
 
-        } catch (InsufficientPiaException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (SelfPurchaseException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (AuctionNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (AuctionException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
     }
-
 
 }

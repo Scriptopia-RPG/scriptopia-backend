@@ -5,9 +5,8 @@ import com.scriptopia.demo.dto.auction.AuctionRequest;
 import com.scriptopia.demo.dto.auction.AuctionItemResponse;
 import com.scriptopia.demo.dto.auction.TradeResponse;
 import com.scriptopia.demo.dto.auction.TradeFilterRequest;
-import com.scriptopia.demo.exception.auction.AuctionNotFoundException;
-import com.scriptopia.demo.exception.auction.InsufficientPiaException;
-import com.scriptopia.demo.exception.auction.SelfPurchaseException;
+import com.scriptopia.demo.exception.CustomException;
+import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.AuctionRepository;
 import com.scriptopia.demo.repository.SettlementRepository;
 import com.scriptopia.demo.repository.UserItemRepository;
@@ -182,21 +181,21 @@ public class AuctionService {
 
         // 1. 거래소 정보 조회
         Auction auction = auctionRepository.findById(auctionId)
-                .orElseThrow(AuctionNotFoundException::new);
+                .orElseThrow(() ->  new CustomException(ErrorCode.E_404_AUCTION_NOT_FOUND));
 
         User buyer = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() ->  new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
         User seller = auction.getUserItem().getUser();
 
         // 2. 자기 물건 구매 금지
         if (buyer.getId().equals(seller.getId())) {
-            throw new SelfPurchaseException();
+            throw new CustomException(ErrorCode.E_400_SELF_PURCHASE);
         }
 
         // 3. 금액 확인
         if (buyer.getPia() < auction.getPrice()) {
-            throw new InsufficientPiaException();
+            throw new CustomException(ErrorCode.E_400_INSUFFICIENT_PIA);
         }
 
         // 4. 금액 처리
