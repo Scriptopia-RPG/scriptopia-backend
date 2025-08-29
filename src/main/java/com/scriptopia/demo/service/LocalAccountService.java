@@ -78,7 +78,10 @@ public class LocalAccountService {
     public void register(RegisterRequest request) {
         String normalizedEmail = normalizeEmail(request.getEmail());
         String verified = redisTemplate.opsForValue().get("email:verified:" + normalizedEmail);
-        validateParams(verified, normalizedEmail, request.getPassword(), request.getNickname());
+
+        if (verified == null || !verified.equals("true")) {
+            throw new CustomException(ErrorCode.E_412_EMAIL_NOT_VERIFIED);
+        }
 
         isAvailable(normalizedEmail, request.getNickname());
 
@@ -165,21 +168,14 @@ public class LocalAccountService {
         return email.trim().toLowerCase(Locale.ROOT);
     }
 
-    private static void validateParams(String verified, String email, String rawPassword, String nickname) {
-
-        if (verified == null || !verified.equals("true")) {
-            throw new CustomException(ErrorCode.E_412_EMAIL_NOT_VERIFIED);
-        }
-
-    }
 
     private void isAvailable(String email, String nickname) {
         if (localAccountRepository.existsByEmail(email)) {
-            throw new DuplicateEmailException(email);
+            throw new CustomException(ErrorCode.E_409_EMAIL_TAKEN);
         }
 
         if (userRepository.existsByNickname(nickname)) {
-            throw new DuplicateNicknameException(nickname);
+            throw new CustomException(ErrorCode.E_409_NICKNAME_TAKEN);
         }
 
     }
