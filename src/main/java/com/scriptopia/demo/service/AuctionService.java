@@ -1,14 +1,17 @@
 package com.scriptopia.demo.service;
 
-import com.scriptopia.demo.domain.Auction;
-import com.scriptopia.demo.domain.TradeStatus;
-import com.scriptopia.demo.domain.UserItem;
+import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.dto.auction.AuctionRequest;
 import com.scriptopia.demo.dto.auction.AuctionItemResponse;
 import com.scriptopia.demo.dto.auction.TradeResponse;
 import com.scriptopia.demo.dto.auction.TradeFilterRequest;
+import com.scriptopia.demo.exception.auction.AuctionNotFoundException;
+import com.scriptopia.demo.exception.auction.InsufficientPiaException;
+import com.scriptopia.demo.exception.auction.SelfPurchaseException;
 import com.scriptopia.demo.repository.AuctionRepository;
+import com.scriptopia.demo.repository.SettlementRepository;
 import com.scriptopia.demo.repository.UserItemRepository;
+import com.scriptopia.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -29,6 +32,8 @@ public class AuctionService {
 
     private final AuctionRepository auctionRepository;
     private final UserItemRepository userItemRepository;
+    private final UserRepository userRepository;
+    private final SettlementRepository settlementRepository;
 
     @Transactional
     public String createAuction(AuctionRequest requestDto, String userId) {
@@ -78,7 +83,7 @@ public class AuctionService {
 
 
 
-    public TradeResponse getTrades(TradeFilterRequest request){
+    public TradeResponse getTrades(TradeFilterRequest request) {
         int page = request.getPageIndex().intValue();
         int size = request.getPageSize().intValue();
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -99,7 +104,6 @@ public class AuctionService {
                     pageable
             );
         }
-
 
 
         List<AuctionItemResponse> items = auctionPage.stream()
@@ -167,15 +171,65 @@ public class AuctionService {
 
         return response;
 
-
     }
 
 
 
+    @Transactional
+    public String purchaseItem(String auctionIdStr, String userIdStr) {
+        Long auctionId = Long.parseLong(auctionIdStr);
+        Long userId = Long.parseLong(userIdStr);
 
+        // 1. 거래소 정보 조회
+        Auction auction = auctionRepository.findById(auctionId)
+                .orElseThrow(AuctionNotFoundException::new);
 
+        User buyer = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        User seller = auction.getUserItem().getUser();
 
+        // 2. 자기 물건 구매 금지
+        if (buyer.getId().equals(seller.getId())) {
+            throw new SelfPurchaseException();
+        }
+
+        // 3. 금액 확인
+        if (buyer.getPia() < auction.getPrice()) {
+            throw new InsufficientPiaException();
+        }
+
+        // 4. 금액 처리
+        buyer.setPia(buyer.getPia() - auction.getPrice());
+
+        // 5. UserItem 상태 변경
+        UserItem userItem = auction.getUserItem();
+        userItem.setTradeStatus(TradeStatus.SOLD);
+
+        // 6. Settlement 기록 추가
+        Settlement buyerSettlement = new Settlement();
+        buyerSettlement.setUser(buyer);
+        buyerSettlement.setItemDef(userItem.getItemDef());
+        buyerSettlement.setPrice(auction.getPrice());
+        buyerSettlement.setTradeType(TradeType.BUY);
+        buyerSettlement.setCreatedAt(LocalDateTime.now());
+        buyerSettlement.setSettledAt(null);
+        settlementRepository.save(buyerSettlement);
+
+        Settlement sellerSettlement = new Settlement();
+        sellerSettlement.setUser(seller);
+        sellerSettlement.setItemDef(userItem.getItemDef());
+        sellerSettlement.setPrice(auction.getPrice());
+        sellerSettlement.setTradeType(TradeType.SELL);
+        sellerSettlement.setCreatedAt(LocalDateTime.now());
+        sellerSettlement.setSettledAt(null);
+        settlementRepository.save(sellerSettlement);
+
+        // 7. 경매 테이블에서 삭제
+        auctionRepository.delete(auction);
+
+        return "구매 완료";
+    }
 
 
 }
