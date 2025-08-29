@@ -21,7 +21,6 @@ public enum ErrorCode {
     E_400_REFRESH_REQUIRED("E400008", "리프레쉬 토큰이 필요합니다.", HttpStatus.BAD_REQUEST),
     E_400_PASSWORD_CONFIRM_MISMATCH("E400009", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다.",HttpStatus.BAD_REQUEST),
     E_400_PASSWORD_WHITESPACE("E400010","비밀번호에 공백을 포함할 수 없습니다.",HttpStatus.BAD_REQUEST),
-
     E_400_INSUFFICIENT_PIA("E400011", "금액이 부족합니다.", HttpStatus.BAD_REQUEST),
     E_400_SELF_PURCHASE("E400012", "자기 물건은 구매할 수 없습니다.", HttpStatus.BAD_REQUEST),
 
@@ -40,7 +39,7 @@ public enum ErrorCode {
     //404 Not Found
     E_404_REFRESH_NOT_FOUND("E404001", "유효한 리프레시 세션을 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
     E_404_USER_NOT_FOUND("E404002","사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
-    E_404_AUCTION_NOT_FOUND("E404003", "해당 경매가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    E_404_AUCTION_NOT_FOUND("E404003", "해당 아이템이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
 
     //409 Conflict
     E_409_EMAIL_TAKEN("E409001", "이미 사용 중인 이메일입니다.", HttpStatus.CONFLICT),

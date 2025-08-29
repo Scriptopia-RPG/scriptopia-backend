@@ -72,7 +72,7 @@ public class ItemDefService {
         return toResponse(itemDef);
     }
 
-    // ================== DTO 변환 ==================
+    // DTO 변환
     private ItemDefResponse toResponse(ItemDef itemDef) {
         ItemDefResponse response = new ItemDefResponse();
         response.setId(itemDef.getId());

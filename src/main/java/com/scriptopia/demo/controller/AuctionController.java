@@ -12,13 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/trades")
 public class AuctionController {
 
     private final AuctionService auctionService;
 
 
-    @PostMapping
+    @PostMapping("/user/trades")
     public ResponseEntity<String> createAuction(@RequestBody AuctionRequest dto,
                                                 @RequestHeader("token") String userId ){   // 헤더에서 userId 가져오기 임시임
 
@@ -26,7 +25,7 @@ public class AuctionController {
     }
 
 
-    @GetMapping
+    @GetMapping("/public/trades")
     public ResponseEntity<TradeResponse> getTrades(
             @RequestBody TradeFilterRequest requestDto) {
 
@@ -36,7 +35,7 @@ public class AuctionController {
     }
 
 
-    @PostMapping("/{auctionId}/purchase")
+    @PostMapping("/user/{auctionId}/purchase")
     public ResponseEntity<String> purchaseItem(
             @PathVariable String auctionId,
             @RequestHeader("token") String userId) {
