@@ -1,6 +1,7 @@
 package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.dto.piashop.PiaItemRequest;
+import com.scriptopia.demo.dto.piashop.PiaItemUpdateRequest;
 import com.scriptopia.demo.service.PiaShopService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,5 +19,15 @@ public class PiaShopController {
         return ResponseEntity.ok("PIA 아이템이 등록되었습니다.");
     }
 
+
+    @PutMapping("/public/items/pia/{itemId}")
+    public ResponseEntity<String> updatePiaItem(
+            @PathVariable String itemId,
+            @RequestBody PiaItemUpdateRequest requestDto) {
+
+
+        String result = piaShopService.updatePiaItem(requestDto);
+        return ResponseEntity.ok(result);
+    }
 
 }
