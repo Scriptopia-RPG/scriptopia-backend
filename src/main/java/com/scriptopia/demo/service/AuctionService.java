@@ -277,6 +277,7 @@ public class AuctionService {
         // 1. userId 으로 Settlement 조회
         Page<Settlement> settlements = settlementRepository.findByUserId(userId, pageable);
 
+
         // 2. Settlement → SettlementHistoryResponseItem 변환
         List<SettlementHistoryResponseItem> content = settlements.stream()
                 .map(s -> new SettlementHistoryResponseItem(
