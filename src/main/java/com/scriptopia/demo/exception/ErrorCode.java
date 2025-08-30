@@ -36,6 +36,7 @@ public enum ErrorCode {
     E_401_CODE_MISMATCH("E401002","인증 코드가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
     E_401_REFRESH_EXPIRED("E401003","리프레쉬 토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
     E_401_CURRENT_PASSWORD_MISMATCH("E401004","현재 비밀번호가 올바르지 않습니다.",HttpStatus.UNAUTHORIZED),
+    E_401_INVALID_SIGNATURE("E401001", "JWT 서명이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED),
 
     //403 Forbidden
     E_403("E403000", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
