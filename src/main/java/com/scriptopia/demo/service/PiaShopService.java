@@ -7,6 +7,7 @@ import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.PiaItemRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +34,6 @@ public class PiaShopService {
         if(piaItemRepository.existsByName(request.getName())) {
             throw new CustomException(ErrorCode.E_400_PIA_ITEM_DUPLICATE); // 중복 이름 오류
         }
-
 
         // 3. PiaItem 생성
         PiaItem piaItem = new PiaItem();
