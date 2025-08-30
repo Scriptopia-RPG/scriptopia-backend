@@ -23,4 +23,10 @@ public class PiaItemPurchaseLog {
 
     private LocalDateTime purchaseDate;
     private Long price;
+
+    @PrePersist
+    public void prePersist() {
+        this.purchaseDate = LocalDateTime.now();
+    }
+
 }
