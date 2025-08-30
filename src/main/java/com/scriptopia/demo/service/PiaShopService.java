@@ -11,6 +11,7 @@ import com.scriptopia.demo.dto.piashop.PurchasePiaItemRequest;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.PiaItemRepository;
+import com.scriptopia.demo.repository.PurchaseLogRepository;
 import com.scriptopia.demo.repository.UserPiaItemRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class PiaShopService {
     private final PiaItemRepository piaItemRepository;
     private final UserRepository userRepository;
     private final UserPiaItemRepository userPiaItemRepository;
+    private final PurchaseLogRepository purchaseLogRepository;
 
     @Transactional
     public String createPiaItem(PiaItemRequest request) {
@@ -102,15 +104,17 @@ public class PiaShopService {
     }
 
 
+    @Transactional
     public void purchasePiaItem(Long userId, PurchasePiaItemRequest request) {
 
+        // uuid 로 사용할 것이기 때문에 임시임
+        Long piaItemId = Long.valueOf(request.getItemId());
 
         // 1. 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
         // 2. 아이템 조회
-        Long piaItemId = Long.parseLong(request.getItemId());
         PiaItem piaItem = piaItemRepository.findById(piaItemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_AUCTION_NOT_FOUND));
 
@@ -144,12 +148,6 @@ public class PiaShopService {
         log.setPrice(totalPrice);
         purchaseLogRepository.save(log);
     }
-
-
-
-
-
-
 
 
 }
