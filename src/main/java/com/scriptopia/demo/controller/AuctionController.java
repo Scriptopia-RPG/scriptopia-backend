@@ -70,8 +70,6 @@ public class AuctionController {
     }
 
 
-
-
     @GetMapping("/user/trades/me")
     public ResponseEntity<MySaleItemResponse> mySaleItems(
             @RequestBody MySaleItemRequest requestDto,
