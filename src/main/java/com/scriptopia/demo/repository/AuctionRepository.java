@@ -60,5 +60,12 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     );
 
 
+    Page<Auction> findByUserItem_User_IdAndUserItem_TradeStatus(
+            Long userId,
+            TradeStatus tradeStatus,
+            Pageable pageable
+    );
+
+
 
 }

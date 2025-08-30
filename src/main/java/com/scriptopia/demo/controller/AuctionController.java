@@ -70,4 +70,15 @@ public class AuctionController {
     }
 
 
+    @GetMapping("/user/trades/me")
+    public ResponseEntity<MySaleItemResponse> mySaleItems(
+            @RequestBody MySaleItemRequest requestDto,
+            Authentication authentication) {
+
+
+        Long userId = Long.valueOf(authentication.getName());
+        MySaleItemResponse result = auctionService.getMySaleItems(userId, requestDto);
+        return ResponseEntity.ok(result);
+    }
+
 }

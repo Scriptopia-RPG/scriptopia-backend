@@ -302,4 +302,42 @@ public class AuctionService {
     }
 
 
+
+    public MySaleItemResponse getMySaleItems(Long userId, MySaleItemRequest requestDto) {
+        int page = requestDto.getPageIndex().intValue();
+        int size = requestDto.getPageSize().intValue();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+
+        // 현재 판매중(LISTED)인 아이템만 조회
+        Page<Auction> auctions = auctionRepository.findByUserItem_User_IdAndUserItem_TradeStatus(
+                userId,
+                TradeStatus.LISTED,
+                pageable
+        );
+
+        // 응답 content 변환
+        List<MySaleItemResponseItem> content = auctions.stream()
+                .map(auction -> new MySaleItemResponseItem(
+                        auction.getId(),
+                        auction.getPrice(),
+                        auction.getCreatedAt(),
+                        new MySaleItemResponseItem.ItemDto(
+                                auction.getUserItem().getItemDef().getId(),
+                                auction.getUserItem().getItemDef().getName(),
+                                auction.getUserItem().getItemDef().getItemGradeDef().getGrade().name(),
+                                auction.getUserItem().getItemDef().getItemType().name(),
+                                auction.getUserItem().getItemDef().getMainStat().name(),
+                                auction.getUserItem().getItemDef().getPicSrc()
+                        )
+                )).toList();
+
+
+
+        // 페이지 정보
+        MySaleItemResponse.PageInfo pageInfo = new MySaleItemResponse.PageInfo(page, size);
+        return new MySaleItemResponse(content, pageInfo);
+    }
+
+
 }
