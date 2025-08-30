@@ -55,6 +55,7 @@ public enum ErrorCode {
     E_404_USER_NOT_FOUND("E404002","사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
     E_404_AUCTION_NOT_FOUND("E404003", "해당 아이템이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     E_404_SETTLEMENT_NOT_FOUND("E404004","정산 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    E_404_SHARED_GAME_NOT_FOUND("E404005", "공유된 게임을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
 
     //409 Conflict
