@@ -1,5 +1,7 @@
 package com.scriptopia.demo.config;
 
+import com.scriptopia.demo.exception.CustomException;
+import com.scriptopia.demo.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -51,18 +53,10 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) -> {
-                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                            res.getOutputStream().write(
-                                    "{\"code\":\"AUTH_401\",\"message\":\"Unauthorized\"}"
-                                            .getBytes(StandardCharsets.UTF_8));
+                            throw new CustomException(ErrorCode.E_401);
                         })
                         .accessDeniedHandler((req, res, e) -> {
-                            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                            res.getOutputStream().write(
-                                    "{\"code\":\"AUTH_403\",\"message\":\"Forbidden\"}"
-                                            .getBytes(StandardCharsets.UTF_8));
+                            throw new CustomException(ErrorCode.E_403);
                         })
                 );
         return http.build();
