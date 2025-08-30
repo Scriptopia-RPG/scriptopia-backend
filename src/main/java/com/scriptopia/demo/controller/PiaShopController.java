@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.*;
 public class PiaShopController {
     private final PiaShopService piaShopService;
 
-    @PostMapping("/admin/items/pia")
+    // admin → public 으로 테스트용 변경했음 나중에 수정 바람
+    @PostMapping("/public/items/pia")
     public ResponseEntity<String> createPiaItem(@RequestBody PiaItemRequest request) {
 
 
