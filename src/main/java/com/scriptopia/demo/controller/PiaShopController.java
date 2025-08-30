@@ -1,7 +1,6 @@
 package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.dto.piashop.PiaItemRequest;
-import com.scriptopia.demo.repository.PiaItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/admin/items")
 public class PiaShopController {
-
+    private final P
 
     @PostMapping("/pia")
     public ResponseEntity<String> createPiaItem(@RequestBody PiaItemRequest request) {
