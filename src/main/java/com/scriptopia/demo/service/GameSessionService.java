@@ -23,7 +23,7 @@ public class GameSessionService {
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
-        var sessions = gameSessionRepository.findAllByUserId(user.getId());
+        var sessions = gameSessionRepository.findAllByUser_Id(user.getId());
         var dtos = sessions.stream().map(s -> {
             var dto = new GameSessionResponse();
             dto.setId(s.getId());
@@ -50,7 +50,7 @@ public class GameSessionService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
-        GameSession gameSession = gameSessionRepository.findBySessionId(sessionId)
+        GameSession gameSession = gameSessionRepository.findByUser_IdAndMongoId(user.getId(), sessionId)
                         .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
         gameSessionRepository.delete(gameSession);
 

@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface GameSessionRepository extends JpaRepository<GameSession, Long> {
-    Optional<GameSession> findBySessionId(String sessionId);
+    Optional<GameSession> findByUser_IdAndMongoId(Long userId, String mongoId);
 
-    Optional<GameSession> findByMongoId(String mongoId);
-
-    List<GameSession> findAllByUserId(Long userId);
+    List<GameSession> findAllByUser_Id(Long userId);
 }
