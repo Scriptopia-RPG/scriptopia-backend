@@ -39,6 +39,7 @@ public enum ErrorCode {
     E_401_INVALID_SIGNATURE("E401001", "JWT 서명이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED),
     E_401_MALFORMED("E401002", "JWT 형식이 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
     E_401_EXPIRED_JWT("E401003", "JWT 토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
+    E_401_UNSUPPORTED_JWT("E401004", "지원하지 않는 JWT 형식입니다.", HttpStatus.UNAUTHORIZED),
 
     //403 Forbidden
     E_403("E403000", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
