@@ -340,4 +340,35 @@ public class AuctionService {
     }
 
 
+
+    @Transactional
+    public String cancelMySaleItem(Long userId, String auctionIdStr) {
+        
+        //임시 uuid를 사용한다면 추후 변형하는 메소드로 변경바람
+        Long auctionId = Long.parseLong(auctionIdStr);
+
+        
+        // 1. 경매 정보 조회
+        Auction auction = auctionRepository.findById(auctionId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_AUCTION_NOT_FOUND));
+
+        UserItem userItem = auction.getUserItem();
+
+        // 2. 본인 검증
+        if (!userItem.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.E_403_ROLE_FORBIDDEN);
+        }
+
+
+        // 3. UserItem 상태 원복
+        userItem.setTradeStatus(TradeStatus.OWNED);
+        userItemRepository.save(userItem);
+
+
+        // 4. 경매장에서 삭제
+        auctionRepository.delete(auction);
+
+        return "판매 등록이 취소되었습니다.";
+    }
+
 }
