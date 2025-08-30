@@ -31,6 +31,21 @@ public class AuthController {
     private static final String COOKIE_SAMESITE = "None";
 
 
+    @PatchMapping("public/auth/password/reset")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        localAccountService.resetPassword(request.getToken(), request.getNewPassword());
+
+        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+    }
+
+    @PostMapping("/public/auth/password/send-link")
+    public ResponseEntity<?> sendResetMail(@Valid @RequestBody SendCodeRequest request){
+
+        localAccountService.sendResetPasswordMail(request.getEmail());
+
+        return ResponseEntity.ok("비밀번호 초기화 링크를 전송했습니다.");
+    }
+
     @PostMapping("/public/auth/verify-email")
     public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
 
