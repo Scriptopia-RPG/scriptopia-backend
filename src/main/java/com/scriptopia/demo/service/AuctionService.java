@@ -234,7 +234,7 @@ public class AuctionService {
 
         // 정산 대상 유저 확인
         if (!settlement.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorCode.E_403_ROLE_FORBIDDEN);
+            throw new CustomException(ErrorCode.E_403);
         }
 
         // 이미 정산 완료 여부 확인
@@ -356,7 +356,7 @@ public class AuctionService {
 
         // 2. 본인 검증
         if (!userItem.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorCode.E_403_ROLE_FORBIDDEN);
+            throw new CustomException(ErrorCode.E_403);
         }
 
 
