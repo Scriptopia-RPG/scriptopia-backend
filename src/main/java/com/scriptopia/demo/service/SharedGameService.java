@@ -3,24 +3,25 @@ package com.scriptopia.demo.service;
 import com.scriptopia.demo.domain.History;
 import com.scriptopia.demo.domain.SharedGame;
 import com.scriptopia.demo.domain.User;
-import com.scriptopia.demo.dto.sharedgame.SharedGameRequest;
-import com.scriptopia.demo.repository.HistoryRepository;
-import com.scriptopia.demo.repository.SharedGameRepository;
-import com.scriptopia.demo.repository.UserRepository;
-import com.scriptopia.demo.utils.JwtProvider;
-import jakarta.servlet.http.HttpServletRequest;
+import com.scriptopia.demo.dto.sharedgame.MySharedGameResponse;
+import com.scriptopia.demo.exception.CustomException;
+import com.scriptopia.demo.exception.ErrorCode;
+import com.scriptopia.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class SharedGameService {
     private final SharedGameRepository sharedGameRepository;
     private final HistoryRepository historyRepository;
-    private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
+    private final SharedGameScoreRepository sharedGameScoreRepository;
+    private final GameTagRepository gameTagRepository;
 
     @Transactional
     public ResponseEntity<?> saveSharedGame(Long Id, Long historyId) {
@@ -36,6 +37,33 @@ public class SharedGameService {
 
         SharedGame sharedGame = SharedGame.from(user, history);
         return ResponseEntity.ok(sharedGameRepository.save(sharedGame));
+    }
+
+    public ResponseEntity<?> getMySharedGames(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+
+        List<SharedGame> games = sharedGameRepository.findAllByUserId(user.getId());
+
+        List<MySharedGameResponse> responses = games.stream().map(game -> {
+            MySharedGameResponse dto = new MySharedGameResponse();
+            dto.setThumbnailUrl(game.getThumbnailUrl());
+            dto.setTotalPlayed(sharedGameScoreRepository.countBySharedGameId(game.getId()));
+            dto.setTitle(game.getTitle());
+            dto.setWorldView(game.getWorldView());
+            dto.setBackgroundStory(game.getBackgroundStory());
+            dto.setSharedAt(game.getSharedAt());
+
+            List<String> names = gameTagRepository.findTagNamesBySharedGameId(game.getId());
+            dto.setTags(
+                    names.stream()
+                            .map(MySharedGameResponse.TagDto::new)
+                            .toList()
+            );
+            return dto;
+                }).toList();
+
+        return ResponseEntity.ok(responses);
     }
 
     @Transactional
