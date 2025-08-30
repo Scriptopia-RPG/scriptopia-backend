@@ -1,5 +1,7 @@
 package com.scriptopia.demo.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scriptopia.demo.dto.exception.ErrorResponse;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +19,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import static com.scriptopia.demo.exception.ErrorCode.E_403;
 
 @Configuration
 @EnableWebSecurity
@@ -53,10 +57,14 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) -> {
-                            throw new CustomException(ErrorCode.E_401);
+                            res.setStatus(ErrorCode.E_401.getStatus().value());
+                            res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            new ObjectMapper().writeValue(res.getOutputStream(),new ErrorResponse(ErrorCode.E_401));
                         })
                         .accessDeniedHandler((req, res, e) -> {
-                            throw new CustomException(ErrorCode.E_403);
+                            res.setStatus(ErrorCode.E_403.getStatus().value());
+                            res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            new ObjectMapper().writeValue(res.getOutputStream(),new ErrorResponse(ErrorCode.E_403));
                         })
                 );
         return http.build();
