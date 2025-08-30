@@ -30,8 +30,8 @@ public enum ErrorCode {
     E_401_CURRENT_PASSWORD_MISMATCH("E401004","현재 비밀번호가 올바르지 않습니다.",HttpStatus.UNAUTHORIZED),
 
     //403 Forbidden
-    E_403_ROLE_FORBIDDEN("E403001", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
-    E_403_DEVICE_MISMATCH("E403002", "요청 디바이스와 토큰의 디바이스가 일치하지 않습니다.", HttpStatus.FORBIDDEN),
+    E_403("E403000", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
+    E_403_DEVICE_MISMATCH("E403001", "요청 디바이스와 토큰의 디바이스가 일치하지 않습니다.", HttpStatus.FORBIDDEN),
 
     //404 Not Found
     E_404_REFRESH_NOT_FOUND("E404001", "유효한 리프레시 세션을 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
