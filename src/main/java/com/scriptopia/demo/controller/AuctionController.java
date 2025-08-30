@@ -79,7 +79,7 @@ public class AuctionController {
 
 
         Long userId = Long.valueOf(authentication.getName());
-        SettlementHistoryResponse result = auctionService.getMySaleItems(userId, requestDto);
+        MySaleItemResponse result = auctionService.getMySaleItems(userId, requestDto);
         return ResponseEntity.ok(result);
     }
 
