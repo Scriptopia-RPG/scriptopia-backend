@@ -26,7 +26,7 @@ public class PiaShopController {
             @RequestBody PiaItemUpdateRequest requestDto) {
 
 
-        String result = piaShopService.updatePiaItem(requestDto);
+        String result = piaShopService.updatePiaItem(itemId, requestDto);
         return ResponseEntity.ok(result);
     }
 

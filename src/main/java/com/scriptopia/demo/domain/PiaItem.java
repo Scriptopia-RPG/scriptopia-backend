@@ -15,6 +15,6 @@ public class PiaItem {
     private Long id;
 
     private String name;
-    private String price;
+    private Long price;
     private String description;
 }
