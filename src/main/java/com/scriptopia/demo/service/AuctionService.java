@@ -1,10 +1,7 @@
 package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.domain.*;
-import com.scriptopia.demo.dto.auction.AuctionRequest;
-import com.scriptopia.demo.dto.auction.AuctionItemResponse;
-import com.scriptopia.demo.dto.auction.TradeResponse;
-import com.scriptopia.demo.dto.auction.TradeFilterRequest;
+import com.scriptopia.demo.dto.auction.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.AuctionRepository;
@@ -270,6 +267,39 @@ public class AuctionService {
         return "정산이 완료되었습니다.";
     }
 
+
+
+    public SettlementHistoryResponse settlementHistory(Long userId, SettlementHistoryRequest requestDto) {
+        int page = requestDto.getPageIndex().intValue();
+        int size = requestDto.getPageSize().intValue();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        // 1. userId 으로 Settlement 조회
+        Page<Settlement> settlements = settlementRepository.findByUserId(userId, pageable);
+
+
+        // 2. Settlement → SettlementHistoryResponseItem 변환
+        List<SettlementHistoryResponseItem> content = settlements.stream()
+                .map(s -> new SettlementHistoryResponseItem(
+                        s.getId(),
+                        s.getItemDef().getName(),
+                        s.getItemDef().getItemType().name(),
+                        s.getItemDef().getItemGradeDef().getGrade().name(),
+                        s.getPrice(),
+                        s.getTradeType().name(),
+                        s.getSettledAt()
+                ))
+                .toList();
+
+        // 3. 페이지 정보 구성
+        SettlementHistoryResponse.PageInfo pageInfo = new SettlementHistoryResponse.PageInfo();
+        pageInfo.setCurrentPage(settlements.getNumber());
+        pageInfo.setPageSize(settlements.getSize());
+
+        // 4. Response DTO 생성
+        return new SettlementHistoryResponse(content, pageInfo);
+
+    }
 
 
 }

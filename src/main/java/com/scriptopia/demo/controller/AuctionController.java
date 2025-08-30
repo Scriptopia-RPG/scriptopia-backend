@@ -1,12 +1,9 @@
 package com.scriptopia.demo.controller;
 
 
-import com.scriptopia.demo.dto.auction.AuctionRequest;
-import com.scriptopia.demo.dto.auction.TradeResponse;
-import com.scriptopia.demo.dto.auction.TradeFilterRequest;
+import com.scriptopia.demo.dto.auction.*;
 import com.scriptopia.demo.service.AuctionService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -59,6 +56,18 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
+
+
+    @GetMapping("/user/trades/me/history")
+    public ResponseEntity<SettlementHistoryResponse> settlementHistory(
+            @RequestBody SettlementHistoryRequest requestDto,
+            Authentication authentication) {
+
+
+        Long userId = Long.valueOf(authentication.getName());
+        SettlementHistoryResponse result = auctionService.settlementHistory(userId, requestDto);
+        return ResponseEntity.ok(result);
+    }
 
 
 }

@@ -1,13 +1,17 @@
 package com.scriptopia.demo.dto.auction;
 
 import com.scriptopia.demo.domain.TradeStatus;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuctionItemResponse {
 
     private Long auctionId;
@@ -18,12 +22,16 @@ public class AuctionItemResponse {
     private ItemDto item;
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class UserDto {
         private Long userId;
         private String nickname;
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ItemDto {
         private Long userItemId;
         private Long itemDefId;
@@ -42,6 +50,8 @@ public class AuctionItemResponse {
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ItemEffectDto {
         private String effectName;
         private String effectDescription;
