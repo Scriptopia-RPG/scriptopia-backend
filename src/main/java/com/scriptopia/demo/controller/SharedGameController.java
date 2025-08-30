@@ -1,6 +1,5 @@
 package com.scriptopia.demo.controller;
 
-import com.scriptopia.demo.domain.SharedGame;
 import com.scriptopia.demo.service.SharedGameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
