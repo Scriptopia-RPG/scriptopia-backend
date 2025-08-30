@@ -1,36 +1,30 @@
 package com.scriptopia.demo.controller;
 
 
-import com.scriptopia.demo.dto.auction.AuctionRequest;
-import com.scriptopia.demo.dto.auction.TradeResponse;
-import com.scriptopia.demo.dto.auction.TradeFilterRequest;
-import com.scriptopia.demo.exception.auction.AuctionException;
-import com.scriptopia.demo.exception.auction.AuctionNotFoundException;
-import com.scriptopia.demo.exception.auction.InsufficientPiaException;
-import com.scriptopia.demo.exception.auction.SelfPurchaseException;
+import com.scriptopia.demo.dto.auction.*;
 import com.scriptopia.demo.service.AuctionService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/trades")
 public class AuctionController {
 
     private final AuctionService auctionService;
 
 
-    @PostMapping
+    @PostMapping("/user/trades")
     public ResponseEntity<String> createAuction(@RequestBody AuctionRequest dto,
-                                                @RequestHeader("token") String userId ){   // 헤더에서 userId 가져오기 임시임
+                                                Authentication authentication ){
 
+        Long userId = Long.valueOf(authentication.getName());
         return ResponseEntity.ok(auctionService.createAuction(dto, userId));
     }
 
 
-    @GetMapping
+    @GetMapping("/public/trades")
     public ResponseEntity<TradeResponse> getTrades(
             @RequestBody TradeFilterRequest requestDto) {
 
@@ -40,24 +34,63 @@ public class AuctionController {
     }
 
 
-    @PostMapping("/{auctionId}/purchase")
+    @PostMapping("/user/{auctionId}/purchase")
     public ResponseEntity<String> purchaseItem(
             @PathVariable String auctionId,
-            @RequestHeader("token") String userId) {
+            Authentication authentication) {
 
-        try {
-            String result = auctionService.purchaseItem(auctionId, userId);
-            return ResponseEntity.ok(result);
 
-        } catch (InsufficientPiaException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (SelfPurchaseException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (AuctionNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (AuctionException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        Long userId = Long.valueOf(authentication.getName());
+        String result = auctionService.purchaseItem(auctionId, userId);
+        return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping("/user/trades/{settlementId}/confirm")
+    public ResponseEntity<String> confirmItem(
+            @PathVariable String settlementId,
+            Authentication authentication) {
+
+
+        Long userId = Long.valueOf(authentication.getName());
+        String result = auctionService.confirmItem(settlementId, userId);
+        return ResponseEntity.ok(result);
+    }
+
+
+
+    @GetMapping("/user/trades/me/history")
+    public ResponseEntity<SettlementHistoryResponse> settlementHistory(
+            @RequestBody SettlementHistoryRequest requestDto,
+            Authentication authentication) {
+
+
+        Long userId = Long.valueOf(authentication.getName());
+        SettlementHistoryResponse result = auctionService.settlementHistory(userId, requestDto);
+        return ResponseEntity.ok(result);
+    }
+
+
+    @GetMapping("/user/trades/me")
+    public ResponseEntity<MySaleItemResponse> mySaleItems(
+            @RequestBody MySaleItemRequest requestDto,
+            Authentication authentication) {
+
+
+        Long userId = Long.valueOf(authentication.getName());
+        MySaleItemResponse result = auctionService.getMySaleItems(userId, requestDto);
+        return ResponseEntity.ok(result);
+    }
+
+
+
+    @DeleteMapping("/user/trades/{auctionId}")
+    public ResponseEntity<String> cancelMySaleItem(
+            @PathVariable String auctionId,
+            Authentication authentication) {
+
+        Long userId = Long.valueOf(authentication.getName());
+        String result = auctionService.cancelMySaleItem(userId, auctionId);
+        return ResponseEntity.ok(result);
     }
 
 

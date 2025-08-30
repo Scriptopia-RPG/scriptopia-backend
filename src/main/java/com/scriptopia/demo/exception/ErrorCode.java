@@ -21,6 +21,14 @@ public enum ErrorCode {
     E_400_REFRESH_REQUIRED("E400008", "리프레쉬 토큰이 필요합니다.", HttpStatus.BAD_REQUEST),
     E_400_PASSWORD_CONFIRM_MISMATCH("E400009", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다.",HttpStatus.BAD_REQUEST),
     E_400_PASSWORD_WHITESPACE("E400010","비밀번호에 공백을 포함할 수 없습니다.",HttpStatus.BAD_REQUEST),
+    E_400_INSUFFICIENT_PIA("E400011", "금액이 부족합니다.", HttpStatus.BAD_REQUEST),
+    E_400_SELF_PURCHASE("E400012", "자기 물건은 구매할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    E_400_INVALID_USER_ITEM_ID("E400013", "잘못된 아이템 ID 형식입니다.", HttpStatus.BAD_REQUEST),
+    E_400_ITEM_NOT_OWNED("E400014", "해당 아이템은 사용자가 소유하지 않았습니다.", HttpStatus.BAD_REQUEST),
+    E_400_ITEM_NOT_TRADEABLE("E400015", "해당 아이템은 현재 경매장에 올릴 수 없습니다.", HttpStatus.BAD_REQUEST),
+    E_400_ITEM_ALREADY_REGISTERED("E400016", "이미 경매장에 등록된 아이템입니다.", HttpStatus.BAD_REQUEST),
+    E_400_INVALID_AMOUNT("E400017", "금액은 0보다 커야 합니다.", HttpStatus.BAD_REQUEST),
+
 
     //401 Unauthorized
     E_401("401000", "인증되지 않은 요청입니다. (토큰 없음, 만료, 잘못됨)",HttpStatus.UNAUTHORIZED),
@@ -32,16 +40,23 @@ public enum ErrorCode {
     //403 Forbidden
     E_403("E403000", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
     E_403_DEVICE_MISMATCH("E403001", "요청 디바이스와 토큰의 디바이스가 일치하지 않습니다.", HttpStatus.FORBIDDEN),
+    E_403_SETTLEMENT_FORBIDDEN("E403002", "해당 정산 내역에 접근할 권한이 없습니다.", HttpStatus.FORBIDDEN),
+
 
     //404 Not Found
     E_404_REFRESH_NOT_FOUND("E404001", "유효한 리프레시 세션을 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
     E_404_USER_NOT_FOUND("E404002","사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
+    E_404_AUCTION_NOT_FOUND("E404003", "해당 아이템이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    E_404_SETTLEMENT_NOT_FOUND("E404004","정산 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
 
     //409 Conflict
     E_409_EMAIL_TAKEN("E409001", "이미 사용 중인 이메일입니다.", HttpStatus.CONFLICT),
     E_409_NICKNAME_TAKEN("E409002", "이미 사용 중인 닉네임입니다.", HttpStatus.CONFLICT),
     E_409_REFRESH_REUSE_DETECTED("E409003", "리프레시 토큰 재사용이 감지되었습니다.", HttpStatus.CONFLICT),
     E_409_PASSWORD_SAME_AS_OLD("E409004","기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다.",HttpStatus.CONFLICT),
+    E_409_ALREADY_CONFIRMED("E409005","이미 정산이 완료된 항목입니다.", HttpStatus.CONFLICT),
+
 
     //412 Precondition Failed
     E_412_EMAIL_NOT_VERIFIED("E412001", "이메일 인증이 필요합니다.",HttpStatus.PRECONDITION_FAILED),
