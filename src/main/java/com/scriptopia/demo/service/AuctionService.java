@@ -172,9 +172,8 @@ public class AuctionService {
 
 
     @Transactional
-    public String purchaseItem(String auctionIdStr, String userIdStr) {
+    public String purchaseItem(String auctionIdStr, Long userId) {
         Long auctionId = Long.parseLong(auctionIdStr);
-        Long userId = Long.parseLong(userIdStr);
 
         // 1. 거래소 정보 조회
         Auction auction = auctionRepository.findById(auctionId)
@@ -226,6 +225,50 @@ public class AuctionService {
 
         return "구매 완료";
     }
+
+
+    @Transactional
+    public String confirmItem(String settlementIdStr, Long userId) {
+        Long settlementId = Long.parseLong(settlementIdStr);
+
+        Settlement settlement = settlementRepository.findById(settlementId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_SETTLEMENT_NOT_FOUND));
+
+        // 정산 대상 유저 확인
+        if (!settlement.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.E_403_ROLE_FORBIDDEN);
+        }
+
+        // 이미 정산 완료 여부 확인
+        if (settlement.getSettledAt() != null) {
+            throw new CustomException(ErrorCode.E_409_ALREADY_CONFIRMED);
+        }
+
+        if (settlement.getTradeType() == TradeType.BUY) {
+            // 구매자 → 기존 UserItem 소유권 이전 및 상태 변경
+            User buyer = settlement.getUser();
+
+            UserItem userItem = userItemRepository
+                    .findByItemDefAndTradeStatus(settlement.getItemDef(), TradeStatus.SOLD)
+                    .orElseThrow(() -> new CustomException(ErrorCode.E_404_AUCTION_NOT_FOUND));
+
+            userItem.setUser(settlement.getUser());    // 구매자로 소유권 이전
+            userItem.setTradeStatus(TradeStatus.OWNED); // 거래 가능 상태로 변경
+            userItemRepository.save(userItem);
+
+        } else if (settlement.getTradeType() == TradeType.SELL) {
+            // 판매자 → 금액 지급
+            User seller = settlement.getUser();
+            seller.addPia(settlement.getPrice()); // user domain 에서 관리
+            userRepository.save(seller);
+        }
+
+        settlement.setSettledAt(LocalDateTime.now());
+        settlementRepository.save(settlement);
+
+        return "정산이 완료되었습니다.";
+    }
+
 
 
 }

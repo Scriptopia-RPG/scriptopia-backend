@@ -40,13 +40,24 @@ public class AuctionController {
     @PostMapping("/user/{auctionId}/purchase")
     public ResponseEntity<String> purchaseItem(
             @PathVariable String auctionId,
-            @RequestHeader("token") String userId) {
+            Authentication authentication) {
 
+
+        Long userId = Long.valueOf(authentication.getName());
         String result = auctionService.purchaseItem(auctionId, userId);
         return ResponseEntity.ok(result);
-
     }
 
+    @PatchMapping("/user/trades/{settlementId}/confirm")
+    public ResponseEntity<String> confirmItem(
+            @PathVariable String settlementId,
+            Authentication authentication) {
+
+
+        Long userId = Long.valueOf(authentication.getName());
+        String result = auctionService.confirmItem(settlementId, userId);
+        return ResponseEntity.ok(result);
+    }
 
 
 
