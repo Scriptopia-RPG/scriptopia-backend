@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -47,6 +48,26 @@ public class LocalAccountService {
 
     private static final Pattern WS = Pattern.compile("[\\s\\p{Z}\\u200B\\u200C\\u200D\\uFEFF]");
 
+    private static final long TOKEN_EXPIRATION = 30;
+
+
+
+    @Transactional
+    public void resetPassword(String token,String newPassword) {
+        String key = "reset:token:" + token;
+        String email = redisTemplate.opsForValue().get(key);
+        System.out.println(key);
+        if (email == null) {
+            throw new CustomException(ErrorCode.E_401);
+        }
+
+        LocalAccount localAccount = localAccountRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+
+        localAccount.setPassword(passwordEncoder.encode(newPassword));
+        localAccountRepository.save(localAccount);
+
+        redisTemplate.delete(key);
+    }
 
     @Transactional
     public void verifyEmail(VerifyEmailRequest request) {
@@ -66,6 +87,17 @@ public class LocalAccountService {
     }
 
     @Transactional
+    public void sendResetPasswordMail(String email) {
+
+        if (!localAccountRepository.existsByEmail(email)){
+            throw new CustomException(ErrorCode.E_404_USER_NOT_FOUND);
+        }
+
+        String resetToken = createResetToken(email);
+        mailService.sendResetLink(email, resetToken);
+    }
+
+    @Transactional
     public void verifyCode(String email, String inputCode) {
 
         if (length(inputCode) != 6){
@@ -76,15 +108,16 @@ public class LocalAccountService {
 
         if (savedCode != null && savedCode.equals(inputCode)) {
             // 인증 완료 후 30분 유지
-            redisTemplate.opsForValue().set("email:verified:" + email, "true", 30, TimeUnit.MINUTES);
+            redisTemplate.opsForValue().set("email:verified:" + email, "true", TOKEN_EXPIRATION, TimeUnit.MINUTES);
             redisTemplate.delete("email:verify:" + email); // 코드 제거
         }
         else{
             throw new CustomException(ErrorCode.E_401_CODE_MISMATCH);
         }
 
-
     }
+
+
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -195,6 +228,15 @@ public class LocalAccountService {
 
         localAccount.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
+    }
+
+    public String createResetToken(String email) {
+        String token = UUID.randomUUID().toString();
+
+        redisTemplate.opsForValue()
+                .set("reset:token:" + token, email, TOKEN_EXPIRATION, TimeUnit.MINUTES);
+
+        return token;
     }
 
 
