@@ -2,10 +2,9 @@ package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.config.JwtProperties;
 import com.scriptopia.demo.domain.*;
-import com.scriptopia.demo.dto.localaccount.LoginRequest;
-import com.scriptopia.demo.dto.localaccount.LoginResponse;
-import com.scriptopia.demo.dto.localaccount.RegisterRequest;
-import com.scriptopia.demo.dto.localaccount.ChangePasswordRequest;
+import com.scriptopia.demo.dto.localaccount.*;
+import com.scriptopia.demo.exception.CustomException;
+import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.LocalAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.utils.JwtProvider;
@@ -24,6 +23,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+
+import static org.thymeleaf.util.StringUtils.length;
 
 @Service
 @Transactional
@@ -43,6 +45,19 @@ public class LocalAccountService {
     private static final String COOKIE_SAMESITE = "None";
     private final MailService mailService;
 
+    private static final Pattern WS = Pattern.compile("[\\s\\p{Z}\\u200B\\u200C\\u200D\\uFEFF]");
+
+
+    @Transactional
+    public void verifyEmail(VerifyEmailRequest request) {
+        String email = request.getEmail();
+
+        if (localAccountRepository.existsByEmail(email)){
+            throw new CustomException(ErrorCode.E_409_EMAIL_TAKEN);
+        }
+
+    }
+
     @Transactional
     public void sendVerificationCode(String email) {
         String code = String.format("%06d", (int)(Math.random() * 999999));
@@ -50,24 +65,49 @@ public class LocalAccountService {
         mailService.sendVerificationCode(email, code);
     }
 
-    public boolean verifyCode(String email, String inputCode) {
+    @Transactional
+    public void verifyCode(String email, String inputCode) {
+
+        if (length(inputCode) != 6){
+            throw new CustomException(ErrorCode.E_400_INVALID_CODE);
+        }
+
         String savedCode = redisTemplate.opsForValue().get("email:verify:" + email);
+
         if (savedCode != null && savedCode.equals(inputCode)) {
             // 인증 완료 후 30분 유지
             redisTemplate.opsForValue().set("email:verified:" + email, "true", 30, TimeUnit.MINUTES);
             redisTemplate.delete("email:verify:" + email); // 코드 제거
-            return true;
         }
-        return false;
+        else{
+            throw new CustomException(ErrorCode.E_401_CODE_MISMATCH);
+        }
+
+
     }
 
     @Transactional
     public void register(RegisterRequest request) {
-        String normalizedEmail = normalizeEmail(request.getEmail());
-        String verified = redisTemplate.opsForValue().get("email:verified:" + normalizedEmail);
-        validateParams(verified, normalizedEmail, request.getPassword(), request.getNickname());
+        String email = request.getEmail();
 
-        isAvailable(normalizedEmail, request.getNickname());
+        //중복 검증
+        if (localAccountRepository.existsByEmail(email)){
+            throw new CustomException(ErrorCode.E_409_EMAIL_TAKEN);
+        }
+
+        String verified = redisTemplate.opsForValue().get("email:verified:" + email);
+
+        //이메일 인증 검증
+        if (verified == null || !verified.equals("true")) {
+            throw new CustomException(ErrorCode.E_412_EMAIL_NOT_VERIFIED);
+        }
+
+        // 공백 검증
+        if (WS.matcher(request.getPassword()).find()) {
+            throw new CustomException(ErrorCode.E_400_PASSWORD_WHITESPACE);
+        }
+
+        isAvailable(email, request.getNickname());
 
         //user 객체 생성
         User user = new User();
@@ -82,7 +122,7 @@ public class LocalAccountService {
         //localAccount 객체 생성
         LocalAccount localAccount = new LocalAccount();
         localAccount.setUser(user);
-        localAccount.setEmail(normalizedEmail);
+        localAccount.setEmail(email);
         localAccount.setPassword(passwordEncoder.encode(request.getPassword()));
         localAccount.setUpdatedAt(LocalDateTime.now());
         localAccount.setStatus(UserStatus.UNVERIFIED);
@@ -100,11 +140,13 @@ public class LocalAccountService {
 
     @Transactional
     public LoginResponse login(LoginRequest req, HttpServletRequest request, HttpServletResponse response) {
+
         LocalAccount localAccount = localAccountRepository.findByEmail(req.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("아이디 혹은 비밀번호를 잘못 입력했습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.E_401_INVALID_CREDENTIALS));
+
 
         if (!passwordEncoder.matches(req.getPassword(), localAccount.getPassword())) {
-            throw new IllegalArgumentException("아이디 혹은 비밀번호를 잘못 입력했습니다.");
+            throw new CustomException(ErrorCode.E_401_INVALID_CREDENTIALS);
         }
 
 
@@ -127,11 +169,28 @@ public class LocalAccountService {
 
     @Transactional
     public void changePassword(Long userId, ChangePasswordRequest request) {
-        LocalAccount localAccount = localAccountRepository.findByUserId(userId).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        //현재, 변경 비밀번호 불일치
+        if(!request.getNewPassword().equals(request.getConfirmPassword())){
+            throw new CustomException(ErrorCode.E_400_PASSWORD_CONFIRM_MISMATCH);
+        }
+
+        // 공백 검증
+        if (WS.matcher(request.getNewPassword()).find()) {
+            throw new CustomException(ErrorCode.E_400_PASSWORD_WHITESPACE);
+        }
+
+        LocalAccount localAccount = localAccountRepository.findByUserId(userId).orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
 
+        //현재 암호 불일치
         if (!passwordEncoder.matches(request.getOldPassword(), localAccount.getPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.E_401_CURRENT_PASSWORD_MISMATCH);
+        }
+
+        //이전과 동일한 암호
+        if (passwordEncoder.matches(request.getNewPassword(), localAccount.getPassword())) {
+            throw new CustomException(ErrorCode.E_409_PASSWORD_SAME_AS_OLD);
         }
 
         localAccount.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -144,52 +203,16 @@ public class LocalAccountService {
         return List.of(Role.USER.toString());
     }
 
-    //대 소문자 구별
-    private static String normalizeEmail(String email) {
-        if (email == null) return null;
-        return email.trim().toLowerCase(Locale.ROOT);
-    }
-
-    private static void validateParams(String verified, String email, String rawPassword, String nickname) {
-
-        if (verified == null || !verified.equals("true")) {
-            throw new RuntimeException("이메일 인증을 먼저 완료해야 합니다.");
-        }
-
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("이메일을 입력해주세요.");
-        }
-
-
-        if (rawPassword == null || rawPassword.isBlank()) {
-            throw new IllegalArgumentException("비밀번호를 입력해주세요.");
-        }
-        if (nickname == null || nickname.isBlank()) {
-            throw new IllegalArgumentException("닉네임 입력해주세요.");
-        }
-    }
 
     private void isAvailable(String email, String nickname) {
         if (localAccountRepository.existsByEmail(email)) {
-            throw new DuplicateEmailException(email);
+            throw new CustomException(ErrorCode.E_409_EMAIL_TAKEN);
         }
 
         if (userRepository.existsByNickname(nickname)) {
-            throw new DuplicateNicknameException(nickname);
+            throw new CustomException(ErrorCode.E_409_NICKNAME_TAKEN);
         }
 
-    }
-
-    public static class DuplicateEmailException extends RuntimeException {
-        public DuplicateEmailException(String email) {
-            super("이미 존재하는 이메일입니다.: " + email);
-        }
-    }
-
-    public static class DuplicateNicknameException extends RuntimeException {
-        public DuplicateNicknameException(String nickname) {
-            super("이미 존재하는 닉네임입니다.: " + nickname);
-        }
     }
 
     public ResponseCookie refreshCookie(String value) {
