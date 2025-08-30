@@ -1,10 +1,7 @@
 package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.domain.*;
-import com.scriptopia.demo.dto.auction.AuctionRequest;
-import com.scriptopia.demo.dto.auction.AuctionItemResponse;
-import com.scriptopia.demo.dto.auction.TradeResponse;
-import com.scriptopia.demo.dto.auction.TradeFilterRequest;
+import com.scriptopia.demo.dto.auction.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.AuctionRepository;
@@ -270,6 +267,15 @@ public class AuctionService {
         return "정산이 완료되었습니다.";
     }
 
+
+
+    public TradeResponse settlementHistory(Long userId, SettlementHistoryRequest requestDto) {
+        int page = requestDto.getPageIndex().intValue();
+        int size = requestDto.getPageSize().intValue();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+
+    }
 
 
 }
