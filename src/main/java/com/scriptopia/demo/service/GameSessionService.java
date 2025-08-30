@@ -23,7 +23,7 @@ public class GameSessionService {
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
-        var sessions = gameSessionRepository.findAllByUserId(user);
+        var sessions = gameSessionRepository.findAllByUserId(user.getId());
         var dtos = sessions.stream().map(s -> {
             var dto = new GameSessionResponse();
             dto.setId(s.getId());
