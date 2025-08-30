@@ -15,5 +15,8 @@ public class GameTag {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    private SharedGame sharedGame;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     private TagDef tagDef;
 }

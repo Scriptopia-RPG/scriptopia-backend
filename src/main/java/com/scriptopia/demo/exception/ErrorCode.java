@@ -35,6 +35,7 @@ public enum ErrorCode {
     //404 Not Found
     E_404_REFRESH_NOT_FOUND("E404001", "유효한 리프레시 세션을 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
     E_404_USER_NOT_FOUND("E404002","사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
+    E_404_SHARED_GAME_NOT_FOUND("E404005", "공유된 게임을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     //409 Conflict
     E_409_EMAIL_TAKEN("E409001", "이미 사용 중인 이메일입니다.", HttpStatus.CONFLICT),
