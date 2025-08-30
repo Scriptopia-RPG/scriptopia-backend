@@ -5,9 +5,8 @@ import com.scriptopia.demo.dto.auction.AuctionRequest;
 import com.scriptopia.demo.dto.auction.AuctionItemResponse;
 import com.scriptopia.demo.dto.auction.TradeResponse;
 import com.scriptopia.demo.dto.auction.TradeFilterRequest;
-import com.scriptopia.demo.exception.auction.AuctionNotFoundException;
-import com.scriptopia.demo.exception.auction.InsufficientPiaException;
-import com.scriptopia.demo.exception.auction.SelfPurchaseException;
+import com.scriptopia.demo.exception.CustomException;
+import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.AuctionRepository;
 import com.scriptopia.demo.repository.SettlementRepository;
 import com.scriptopia.demo.repository.UserItemRepository;
@@ -36,34 +35,31 @@ public class AuctionService {
     private final SettlementRepository settlementRepository;
 
     @Transactional
-    public String createAuction(AuctionRequest requestDto, String userId) {
+    public String createAuction(AuctionRequest requestDto, Long userId) {
+
+
 
         // UUID(String) → Long 변환 (임시)
-        long userItemId;
-        try {
-            userItemId = Long.parseLong(requestDto.getItemDefId());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid UserItem UUID");
-        }
+        long userItemId = Long.parseLong(requestDto.getItemDefId());
+
 
         // UserItem 조회
         UserItem userItem = userItemRepository.findById(userItemId)
-                .orElseThrow(() -> new IllegalArgumentException("UserItem not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
         // 유저 소유 여부 확인
-        if (!userItem.getUser().getId().equals(Long.parseLong(userId))) {
-            throw new IllegalStateException("해당 아이템은 사용자가 소유하지 않았습니다.");
+        if (!userItem.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.E_400_ITEM_NOT_OWNED);
         }
 
         // 거래 상태 확인
         if (userItem.getTradeStatus() != TradeStatus.OWNED) {
-            throw new IllegalStateException(
-                    "해당 아이템은 현재 경매장에 올릴 수 없습니다. 상태: " + userItem.getTradeStatus());
+            throw new CustomException(ErrorCode.E_400_ITEM_NOT_TRADEABLE);
         }
 
         // 이미 경매장에 등록되어 있는지 확인
         if (auctionRepository.existsByUserItem(userItem)) {
-            throw new IllegalStateException("이미 경매장에 등록된 아이템입니다.");
+            throw new CustomException(ErrorCode.E_400_ITEM_ALREADY_REGISTERED);
         }
 
         // Auction 등록
@@ -176,31 +172,31 @@ public class AuctionService {
 
 
     @Transactional
-    public String purchaseItem(String auctionIdStr, String userIdStr) {
+    public String purchaseItem(String auctionIdStr, Long userId) {
         Long auctionId = Long.parseLong(auctionIdStr);
-        Long userId = Long.parseLong(userIdStr);
 
         // 1. 거래소 정보 조회
         Auction auction = auctionRepository.findById(auctionId)
-                .orElseThrow(AuctionNotFoundException::new);
+                .orElseThrow(() ->  new CustomException(ErrorCode.E_404_AUCTION_NOT_FOUND));
 
         User buyer = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() ->  new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
         User seller = auction.getUserItem().getUser();
 
         // 2. 자기 물건 구매 금지
         if (buyer.getId().equals(seller.getId())) {
-            throw new SelfPurchaseException();
+            throw new CustomException(ErrorCode.E_400_SELF_PURCHASE);
         }
 
         // 3. 금액 확인
         if (buyer.getPia() < auction.getPrice()) {
-            throw new InsufficientPiaException();
+            throw new CustomException(ErrorCode.E_400_INSUFFICIENT_PIA);
         }
 
         // 4. 금액 처리
-        buyer.setPia(buyer.getPia() - auction.getPrice());
+        buyer.subtractPia(auction.getPrice());
+        userRepository.save(buyer);
 
         // 5. UserItem 상태 변경
         UserItem userItem = auction.getUserItem();
@@ -230,6 +226,50 @@ public class AuctionService {
 
         return "구매 완료";
     }
+
+
+    @Transactional
+    public String confirmItem(String settlementIdStr, Long userId) {
+        Long settlementId = Long.parseLong(settlementIdStr);
+
+        Settlement settlement = settlementRepository.findById(settlementId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_SETTLEMENT_NOT_FOUND));
+
+        // 정산 대상 유저 확인
+        if (!settlement.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.E_403_ROLE_FORBIDDEN);
+        }
+
+        // 이미 정산 완료 여부 확인
+        if (settlement.getSettledAt() != null) {
+            throw new CustomException(ErrorCode.E_409_ALREADY_CONFIRMED);
+        }
+
+        if (settlement.getTradeType() == TradeType.BUY) {
+            // 구매자 → 기존 UserItem 소유권 이전 및 상태 변경
+            User buyer = settlement.getUser();
+
+            UserItem userItem = userItemRepository
+                    .findByItemDefAndTradeStatus(settlement.getItemDef(), TradeStatus.SOLD)
+                    .orElseThrow(() -> new CustomException(ErrorCode.E_404_AUCTION_NOT_FOUND));
+
+            userItem.setUser(settlement.getUser());    // 구매자로 소유권 이전
+            userItem.setTradeStatus(TradeStatus.OWNED); // 거래 가능 상태로 변경
+            userItemRepository.save(userItem);
+
+        } else if (settlement.getTradeType() == TradeType.SELL) {
+            // 판매자 → 금액 지급
+            User seller = settlement.getUser();
+            seller.addPia(settlement.getPrice()); // user domain 에서 관리
+            userRepository.save(seller);
+        }
+
+        settlement.setSettledAt(LocalDateTime.now());
+        settlementRepository.save(settlement);
+
+        return "정산이 완료되었습니다.";
+    }
+
 
 
 }

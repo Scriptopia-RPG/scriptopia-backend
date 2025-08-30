@@ -1,5 +1,7 @@
 package com.scriptopia.demo.domain;
 
+import com.scriptopia.demo.exception.CustomException;
+import com.scriptopia.demo.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,5 +28,18 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+
+    // 거래 관련 도메인 메소드
+    public void addPia(Long amount) {
+        if (amount <= 0) throw new CustomException(ErrorCode.E_400_INVALID_AMOUNT);
+        this.pia += amount;
+    }
+
+    public void subtractPia(Long amount) {
+        if (amount <= 0) throw new CustomException(ErrorCode.E_400_INVALID_AMOUNT);
+        if (this.pia < amount) throw new CustomException(ErrorCode.E_400_INSUFFICIENT_PIA);
+        this.pia -= amount;
+    }
 
 }
