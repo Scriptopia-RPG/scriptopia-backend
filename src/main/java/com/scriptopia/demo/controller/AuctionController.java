@@ -81,4 +81,17 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
+
+
+    @DeleteMapping("/user/trades/{auctionId}")
+    public ResponseEntity<String> cancelMySaleItem(
+            @PathVariable String auctionId,
+            Authentication authentication) {
+
+        Long userId = Long.valueOf(authentication.getName());
+        String result = auctionService.cancelMySaleItem(userId, auctionId);
+        return ResponseEntity.ok(result);
+    }
+
+
 }
