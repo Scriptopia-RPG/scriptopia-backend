@@ -56,7 +56,7 @@ public class LocalAccountService {
     public void resetPassword(String token,String newPassword) {
         String key = "reset:token:" + token;
         String email = redisTemplate.opsForValue().get(key);
-
+        System.out.println(key);
         if (email == null) {
             throw new CustomException(ErrorCode.E_401);
         }
@@ -234,7 +234,7 @@ public class LocalAccountService {
         String token = UUID.randomUUID().toString();
 
         redisTemplate.opsForValue()
-                .set("reset:token" + token, email, TOKEN_EXPIRATION, TimeUnit.MINUTES);
+                .set("reset:token:" + token, email, TOKEN_EXPIRATION, TimeUnit.MINUTES);
 
         return token;
     }
