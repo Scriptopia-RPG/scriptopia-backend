@@ -195,7 +195,8 @@ public class AuctionService {
         }
 
         // 4. 금액 처리
-        buyer.setPia(buyer.getPia() - auction.getPrice());
+        buyer.subtractPia(auction.getPrice());
+        userRepository.save(buyer);
 
         // 5. UserItem 상태 변경
         UserItem userItem = auction.getUserItem();
