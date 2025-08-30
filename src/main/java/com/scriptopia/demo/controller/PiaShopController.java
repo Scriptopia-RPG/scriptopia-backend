@@ -3,9 +3,11 @@ package com.scriptopia.demo.controller;
 import com.scriptopia.demo.dto.piashop.PiaItemRequest;
 import com.scriptopia.demo.dto.piashop.PiaItemResponse;
 import com.scriptopia.demo.dto.piashop.PiaItemUpdateRequest;
+import com.scriptopia.demo.dto.piashop.PurchasePiaItemRequest;
 import com.scriptopia.demo.service.PiaShopService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,9 +38,21 @@ public class PiaShopController {
 
 
 
-    @GetMapping("/public/shops/pia/items")
+    @GetMapping("/user/shops/pia/items")
     public ResponseEntity<List<PiaItemResponse>> getPiaItems() {
         return ResponseEntity.ok(piaShopService.getPiaItems());
     }
+
+
+    @PostMapping("/user/shops/pia/item/purchase")
+    public ResponseEntity<String> purchasePiaItem(
+            @RequestBody PurchasePiaItemRequest requestDto,
+            Authentication authentication) {
+
+        Long userId = Long.valueOf(authentication.getName());
+        piaShopService.purchasePiaItem(userId, requestDto);
+        return ResponseEntity.ok("PIA 아이템을 구매했습니다.");
+    }
+
 
 }
