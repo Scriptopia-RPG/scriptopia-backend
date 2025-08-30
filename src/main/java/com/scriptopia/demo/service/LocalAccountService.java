@@ -53,6 +53,23 @@ public class LocalAccountService {
 
 
     @Transactional
+    public void resetPassword(String token,String newPassword) {
+        String key = "reset:token:" + token;
+        String email = redisTemplate.opsForValue().get(key);
+
+        if (email == null) {
+            throw new CustomException(ErrorCode.E_401);
+        }
+
+        LocalAccount localAccount = localAccountRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+
+        localAccount.setPassword(passwordEncoder.encode(newPassword));
+        localAccountRepository.save(localAccount);
+
+        redisTemplate.delete(key);
+    }
+
+    @Transactional
     public void verifyEmail(VerifyEmailRequest request) {
         String email = request.getEmail();
 
