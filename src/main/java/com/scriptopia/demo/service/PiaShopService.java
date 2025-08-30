@@ -2,6 +2,7 @@ package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.domain.PiaItem;
 import com.scriptopia.demo.dto.piashop.PiaItemRequest;
+import com.scriptopia.demo.dto.piashop.PiaItemResponse;
 import com.scriptopia.demo.dto.piashop.PiaItemUpdateRequest;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
@@ -10,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -80,5 +84,14 @@ public class PiaShopService {
 
         return "PIA 아이템이 성공적으로 수정되었습니다.";
     }
+
+
+
+    public List<PiaItemResponse> getPiaItems() {
+        return piaItemRepository.findAll().stream()
+                .map(PiaItemResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
 
 }
