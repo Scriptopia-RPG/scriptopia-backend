@@ -25,21 +25,26 @@ public enum ErrorCode {
     E_400_SELF_PURCHASE("E400012", "자기 물건은 구매할 수 없습니다.", HttpStatus.BAD_REQUEST),
     E_400_INVALID_USER_ITEM_ID("E400013", "잘못된 아이템 ID 형식입니다.", HttpStatus.BAD_REQUEST),
     E_400_ITEM_NOT_OWNED("E400014", "해당 아이템은 사용자가 소유하지 않았습니다.", HttpStatus.BAD_REQUEST),
-    E_400_ITEM_NOT_TRADEABLE("E400015", "해당 아이템은 현재 경매장에 올릴 수 없습니다.", HttpStatus.BAD_REQUEST),
+    E_400_ITEM_NOT_TRADE_ABLE("E400015", "해당 아이템은 현재 경매장에 올릴 수 없습니다.", HttpStatus.BAD_REQUEST),
     E_400_ITEM_ALREADY_REGISTERED("E400016", "이미 경매장에 등록된 아이템입니다.", HttpStatus.BAD_REQUEST),
     E_400_INVALID_AMOUNT("E400017", "금액은 0보다 커야 합니다.", HttpStatus.BAD_REQUEST),
-
+    E_400_MISSING_JWT("E400018", "토큰 값이 비어있습니다.", HttpStatus.BAD_REQUEST),
 
     //401 Unauthorized
+    E_401("401000", "인증되지 않은 요청입니다. (토큰 없음, 만료, 잘못됨)",HttpStatus.UNAUTHORIZED),
     E_401_INVALID_CREDENTIALS("E401001","이메일 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
     E_401_CODE_MISMATCH("E401002","인증 코드가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
     E_401_REFRESH_EXPIRED("E401003","리프레쉬 토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
     E_401_CURRENT_PASSWORD_MISMATCH("E401004","현재 비밀번호가 올바르지 않습니다.",HttpStatus.UNAUTHORIZED),
+    E_401_INVALID_SIGNATURE("E401005", "JWT 서명이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    E_401_MALFORMED("E401006", "JWT 형식이 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
+    E_401_EXPIRED_JWT("E401007", "JWT 토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
+    E_401_UNSUPPORTED_JWT("E401008", "지원하지 않는 JWT 형식입니다.", HttpStatus.UNAUTHORIZED),
 
     //403 Forbidden
-    E_403_ROLE_FORBIDDEN("E403001", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
-    E_403_DEVICE_MISMATCH("E403002", "요청 디바이스와 토큰의 디바이스가 일치하지 않습니다.", HttpStatus.FORBIDDEN),
-    E_403_SETTLEMENT_FORBIDDEN("E403003", "해당 정산 내역에 접근할 권한이 없습니다.", HttpStatus.FORBIDDEN),
+    E_403("E403000", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
+    E_403_DEVICE_MISMATCH("E403001", "요청 디바이스와 토큰의 디바이스가 일치하지 않습니다.", HttpStatus.FORBIDDEN),
+    E_403_SETTLEMENT_FORBIDDEN("E403002", "해당 정산 내역에 접근할 권한이 없습니다.", HttpStatus.FORBIDDEN),
 
 
     //404 Not Found

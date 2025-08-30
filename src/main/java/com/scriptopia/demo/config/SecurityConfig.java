@@ -1,5 +1,9 @@
 package com.scriptopia.demo.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scriptopia.demo.dto.exception.ErrorResponse;
+import com.scriptopia.demo.exception.CustomException;
+import com.scriptopia.demo.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -7,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +20,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import static com.scriptopia.demo.exception.ErrorCode.E_403;
 
 @Configuration
 @EnableWebSecurity
@@ -31,7 +38,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(req -> {
                     var c = new CorsConfiguration();
                     c.setAllowedOrigins(List.of("http://localhost:3000")); // 현재는 로컬로 해놓고 나중에 바꿔야 댐
@@ -51,18 +58,14 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) -> {
-                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            res.setStatus(ErrorCode.E_401.getStatus().value());
                             res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                            res.getOutputStream().write(
-                                    "{\"code\":\"AUTH_401\",\"message\":\"Unauthorized\"}"
-                                            .getBytes(StandardCharsets.UTF_8));
+                            new ObjectMapper().writeValue(res.getOutputStream(),new ErrorResponse(ErrorCode.E_401));
                         })
                         .accessDeniedHandler((req, res, e) -> {
-                            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            res.setStatus(ErrorCode.E_403.getStatus().value());
                             res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                            res.getOutputStream().write(
-                                    "{\"code\":\"AUTH_403\",\"message\":\"Forbidden\"}"
-                                            .getBytes(StandardCharsets.UTF_8));
+                            new ObjectMapper().writeValue(res.getOutputStream(),new ErrorResponse(ErrorCode.E_403));
                         })
                 );
         return http.build();
