@@ -23,6 +23,7 @@ public enum ErrorCode {
     E_400_PASSWORD_WHITESPACE("E400010","비밀번호에 공백을 포함할 수 없습니다.",HttpStatus.BAD_REQUEST),
 
     //401 Unauthorized
+    E_401("401000", "인증되지 않은 요청입니다. (토큰 없음, 만료, 잘못됨)",HttpStatus.UNAUTHORIZED),
     E_401_INVALID_CREDENTIALS("E401001","이메일 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
     E_401_CODE_MISMATCH("E401002","인증 코드가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
     E_401_REFRESH_EXPIRED("E401003","리프레쉬 토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
