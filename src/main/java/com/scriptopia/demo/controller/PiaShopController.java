@@ -44,7 +44,7 @@ public class PiaShopController {
     }
 
 
-    @PostMapping("/user/shops/pia/orders")
+    @PostMapping("/user/shops/pia/item/purchase")
     public ResponseEntity<String> purchasePiaItem(
             @RequestBody PurchasePiaItemRequest requestDto,
             Authentication authentication) {
