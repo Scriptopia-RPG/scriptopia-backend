@@ -70,4 +70,17 @@ public class AuctionController {
     }
 
 
+
+
+    @GetMapping("/user/trades/me")
+    public ResponseEntity<SettlementHistoryResponse> mySaleItems(
+            @RequestBody mySaleItemRequest requestDto,
+            Authentication authentication) {
+
+
+        Long userId = Long.valueOf(authentication.getName());
+        SettlementHistoryResponse result = auctionService.settlementHistory(userId, requestDto);
+        return ResponseEntity.ok(result);
+    }
+
 }
