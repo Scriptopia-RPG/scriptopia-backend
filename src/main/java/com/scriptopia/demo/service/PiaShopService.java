@@ -21,16 +21,18 @@ public class PiaShopService {
 
         // 1. 필수 값 확인
         if(request.getName() == null || request.getName().isBlank()) {
-            throw new CustomException(ErrorCode.E_400_MISSING_NICKNAME); // 이름 필수 체크
+            throw new CustomException(ErrorCode.E_400_INVALID_REQUEST); // 이름 필수 체크
         }
+
         if(request.getPrice() == null || request.getPrice() <= 0) {
-            throw new CustomException(ErrorCode.E_400_INVALID_AMOUNT);
+            throw new CustomException(ErrorCode.E_400_INVALID_REQUEST); // 금액 유효성 체크
         }
 
         // 2. 중복 이름 체크
         if(piaItemRepository.existsByName(request.getName())) {
-            throw new CustomException(ErrorCode.E_409_ALREADY_CONFIRMED); // 적절한 오류 코드 선택
+            throw new CustomException(ErrorCode.E_400_PIA_ITEM_DUPLICATE); // 중복 이름 오류
         }
+
 
         // 3. PiaItem 생성
         PiaItem piaItem = new PiaItem();
