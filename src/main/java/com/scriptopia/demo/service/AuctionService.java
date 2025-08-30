@@ -51,7 +51,7 @@ public class AuctionService {
 
         // 거래 상태 확인
         if (userItem.getTradeStatus() != TradeStatus.OWNED) {
-            throw new CustomException(ErrorCode.E_400_ITEM_NOT_TRADEABLE);
+            throw new CustomException(ErrorCode.E_400_ITEM_NOT_TRADE_ABLE);
         }
 
         // 이미 경매장에 등록되어 있는지 확인

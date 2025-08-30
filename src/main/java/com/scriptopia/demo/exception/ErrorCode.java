@@ -25,7 +25,7 @@ public enum ErrorCode {
     E_400_SELF_PURCHASE("E400012", "자기 물건은 구매할 수 없습니다.", HttpStatus.BAD_REQUEST),
     E_400_INVALID_USER_ITEM_ID("E400013", "잘못된 아이템 ID 형식입니다.", HttpStatus.BAD_REQUEST),
     E_400_ITEM_NOT_OWNED("E400014", "해당 아이템은 사용자가 소유하지 않았습니다.", HttpStatus.BAD_REQUEST),
-    E_400_ITEM_NOT_TRADEABLE("E400015", "해당 아이템은 현재 경매장에 올릴 수 없습니다.", HttpStatus.BAD_REQUEST),
+    E_400_ITEM_NOT_TRADE_ABLE("E400015", "해당 아이템은 현재 경매장에 올릴 수 없습니다.", HttpStatus.BAD_REQUEST),
     E_400_ITEM_ALREADY_REGISTERED("E400016", "이미 경매장에 등록된 아이템입니다.", HttpStatus.BAD_REQUEST),
     E_400_INVALID_AMOUNT("E400017", "금액은 0보다 커야 합니다.", HttpStatus.BAD_REQUEST),
     E_400_MISSING_JWT("E400018", "토큰 값이 비어있습니다.", HttpStatus.BAD_REQUEST),
