@@ -14,9 +14,9 @@ public class PiaShopController {
     // admin → public 으로 테스트용 변경했음 나중에 수정 바람
     @PostMapping("/public/items/pia")
     public ResponseEntity<String> createPiaItem(@RequestBody PiaItemRequest request) {
-
-
         piaShopService.createPiaItem(request);
         return ResponseEntity.ok("PIA 아이템이 등록되었습니다.");
     }
+
+
 }
