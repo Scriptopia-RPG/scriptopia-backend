@@ -1,11 +1,14 @@
 package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.dto.piashop.PiaItemRequest;
+import com.scriptopia.demo.dto.piashop.PiaItemResponse;
 import com.scriptopia.demo.dto.piashop.PiaItemUpdateRequest;
 import com.scriptopia.demo.service.PiaShopService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class PiaShopController {
     }
 
 
+    // admin → public 으로 테스트용 변경했음 나중에 수정 바람
     @PutMapping("/public/items/pia/{itemId}")
     public ResponseEntity<String> updatePiaItem(
             @PathVariable String itemId,
@@ -28,6 +32,13 @@ public class PiaShopController {
 
         String result = piaShopService.updatePiaItem(itemId, requestDto);
         return ResponseEntity.ok(result);
+    }
+
+
+
+    @GetMapping("/public/shops/pia/items")
+    public ResponseEntity<List<PiaItemResponse>> getPiaItems() {
+        return ResponseEntity.ok(piaShopService.getPiaItems());
     }
 
 }
