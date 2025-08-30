@@ -19,6 +19,13 @@ public class SharedGameController {
         return sharedGameService.saveSharedGame(userId, hid);
     }
 
+    @GetMapping("/games/shared")
+    public ResponseEntity<?> getMySharedGames(Authentication authentication) {
+        Long userId = Long.valueOf(authentication.getName());
+
+        return sharedGameService.getMySharedGames(userId);
+    }
+
     @DeleteMapping("/share/{gameid}")
     public void delete(Authentication authentication, @PathVariable Long gameid) {
         Long userId = Long.valueOf(authentication.getName());

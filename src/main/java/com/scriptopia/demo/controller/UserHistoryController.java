@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/public")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserHistoryController {
     private final HistoryService historyService;
@@ -19,8 +19,8 @@ public class UserHistoryController {
     @GetMapping("/history")
     public ResponseEntity<List<HistoryPageResponse>> getHistory(@RequestParam(required = false) Long lastId,
                                                                 @RequestParam(defaultValue = "10") int size,
-                                                                @RequestParam Long userId) {
-//        Long userId = Long.valueOf(authentication.getName());
+                                                                Authentication authentication) {
+        Long userId = Long.valueOf(authentication.getName());
 
         return historyService.fetchMyHisotry(userId, lastId, size);
     }

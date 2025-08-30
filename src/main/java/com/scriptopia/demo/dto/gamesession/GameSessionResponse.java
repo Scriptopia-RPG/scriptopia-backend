@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GameSessionResponse {
+    private Long id;
     private String sessionId;
 }

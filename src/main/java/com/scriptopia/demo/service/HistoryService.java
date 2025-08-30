@@ -6,6 +6,8 @@ import com.scriptopia.demo.domain.History;
 import com.scriptopia.demo.domain.User;
 import com.scriptopia.demo.dto.history.HistoryPageResponse;
 import com.scriptopia.demo.dto.history.HistoryRequest;
+import com.scriptopia.demo.exception.CustomException;
+import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.HistoryRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +52,8 @@ public class HistoryService {
         }
 
         HistoryRequest req = mapMongoToHistoryRequest(doc);
-        User user = userRepository.findById(userId).orElseThrow();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
         History history = new History(user, req);
 
         return ResponseEntity.ok(historyRepository.save(history));
