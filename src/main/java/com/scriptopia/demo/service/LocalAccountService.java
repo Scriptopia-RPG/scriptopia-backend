@@ -48,7 +48,7 @@ public class LocalAccountService {
 
     private static final Pattern WS = Pattern.compile("[\\s\\p{Z}\\u200B\\u200C\\u200D\\uFEFF]");
 
-    private static final long TOKEN_EXPIRATION = 30L;
+    private static final long TOKEN_EXPIRATION = 30;
 
 
 
