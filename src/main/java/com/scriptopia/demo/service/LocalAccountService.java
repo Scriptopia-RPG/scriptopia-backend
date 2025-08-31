@@ -150,6 +150,7 @@ public class LocalAccountService {
         user.setLastLoginAt(null);
         user.setProfileImgUrl(null);
         user.setRole(Role.USER);
+        user.setLoginType(LoginType.LOCAL);
         userRepository.save(user);
 
         //localAccount 객체 생성
