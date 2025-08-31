@@ -7,6 +7,7 @@ import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.GameSessionMongoRepository;
 import com.scriptopia.demo.repository.GameSessionRepository;
+import com.scriptopia.demo.repository.UserItemRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.utils.GameBalanceUtil;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +28,9 @@ import java.util.Random;
 public class GameSessionService {
     private final GameSessionRepository gameSessionRepository;
     private final UserRepository userRepository;
-    private final RestTemplateBuilder restTemplateBuilder;
     private final RestTemplate restTemplate;
     private final GameSessionMongoRepository gameSessionMongoRepository;
+    private final UserItemRepository userItemRepository;
 
     public ResponseEntity<?> getGameSession(Long userid) {
         User user = userRepository.findById(userid)
@@ -74,10 +75,19 @@ public class GameSessionService {
     public StartGameResponse startNewGame(Long userId, StartGameRequest request) {
 
 
-
         // 1. 진행중인 게임 체크
         if (gameSessionRepository.existsByUser_Id(userId)) {
             throw new CustomException(ErrorCode.E_400_GAME_ALREADY_IN_PROGRESS);
+        }
+
+
+        UserItem userItem = null;
+
+        // 물건을 가져왔다면 그 물건이 해당 플레이어의 것인지, 존재하는 것인지 확인
+        if (request.getItemId() != null){
+            Long itemId = Long.parseLong(request.getItemId());
+            userItem = userItemRepository.findByUserIdAndItemId(userId, itemId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.E_400_ITEM_NOT_OWNED));
         }
 
 
