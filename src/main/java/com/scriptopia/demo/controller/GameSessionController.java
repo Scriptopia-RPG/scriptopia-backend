@@ -3,6 +3,7 @@ package com.scriptopia.demo.controller;
 import com.scriptopia.demo.dto.gamesession.GameSessionRequest;
 import com.scriptopia.demo.dto.gamesession.GameSessionResponse;
 import com.scriptopia.demo.dto.gamesession.StartGameRequest;
+import com.scriptopia.demo.dto.gamesession.StartGameResponse;
 import com.scriptopia.demo.service.GameSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,12 +42,12 @@ public class GameSessionController {
     
     // 게임 시작
     @PostMapping
-    public ResponseEntity<Start> startNewGame(
+    public ResponseEntity<StartGameResponse> startNewGame(
             @RequestBody StartGameRequest request,
             Authentication authentication) {
 
         Long userId = Long.valueOf(authentication.getName());
-        StartGameRequest response = gameSessionService.startNewGame(userId, request);
+        StartGameResponse response = gameSessionService.startNewGame(userId, request);
         return ResponseEntity.ok(response);
     }
 

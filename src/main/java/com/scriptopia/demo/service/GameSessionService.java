@@ -71,7 +71,7 @@ public class GameSessionService {
 
 
     @Transactional
-    public String startNewGame(Long userId, StartGameRequest request) {
+    public StartGameResponse startNewGame(Long userId, StartGameRequest request) {
 
         // 1. 진행중인 게임 체크
         if (gameSessionRepository.existsByUserIdAndSceneTypeNotDone(userId)) {
@@ -218,8 +218,14 @@ public class GameSessionService {
         mysqlSession.setMongoId(savedMongo.getId());
         gameSessionRepository.save(mysqlSession);
 
+
+        StartGameResponse response = new StartGameResponse(
+                "게임이 생성되었습니다.",
+                mysqlSession.getMongoId()
+        );
+
         // 6. MongoDB PK 반환
-        return savedMongo.getId();
+        return response;
     }
 
 
