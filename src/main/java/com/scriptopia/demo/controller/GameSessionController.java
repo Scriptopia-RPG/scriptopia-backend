@@ -2,6 +2,7 @@ package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.dto.gamesession.GameSessionRequest;
 import com.scriptopia.demo.dto.gamesession.GameSessionResponse;
+import com.scriptopia.demo.dto.gamesession.StartGameRequest;
 import com.scriptopia.demo.service.GameSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -47,4 +48,6 @@ public class GameSessionController {
         gameSessionService.startNewGame(request);
         return ResponseEntity.ok("새 게임이 시작되었습니다.");
     }
+
+
 }
