@@ -30,5 +30,5 @@ public class ItemDefMongo {
     private MainStat mainStat; // strength, agility, intelligence, luck
     private Integer weight;
     private Grade grade; // COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
-    private Integer price;
+    private Long price;
 }

@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface UserItemRepository extends JpaRepository<UserItem, Long> {
     Optional<UserItem> findByItemDefAndTradeStatus(ItemDef itemDef, TradeStatus tradeStatus);
 
-    Optional<UserItem> findByUserIdAndItemId(Long userId, Long itemId);
+    Optional<UserItem> findByUserIdAndItemDefId(Long userId, Long itemDefId);
+
 }

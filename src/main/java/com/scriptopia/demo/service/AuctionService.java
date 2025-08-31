@@ -137,7 +137,7 @@ public class AuctionService {
                                     .map(e -> {
                                         AuctionItemResponse.ItemEffectDto effDto = new AuctionItemResponse.ItemEffectDto();
                                         effDto.setEffectName(e.getEffectName());
-                                        effDto.setEffectDescription(e.getEffect_description());
+                                        effDto.setEffectDescription(e.getEffectDescription());
                                         effDto.setGrade(e.getEffectGradeDef().getGrade().name());
                                         return effDto;
                                     })

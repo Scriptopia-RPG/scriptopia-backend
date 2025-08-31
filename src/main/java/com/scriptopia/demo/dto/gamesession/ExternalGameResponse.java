@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -41,8 +42,8 @@ public class ExternalGameResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class InventoryItem {
-        private int itemDefId;
-        private String acquiredAt;
+        private Long itemDefId;
+        private LocalDateTime acquiredAt;
         private boolean equipped;
         private String source;
     }
@@ -65,7 +66,7 @@ public class ExternalGameResponse {
         private MainStat mainStat;
         private int weight;
         private Grade grade;
-        private int price;
+        private Long price;
 
         @Data
         @AllArgsConstructor

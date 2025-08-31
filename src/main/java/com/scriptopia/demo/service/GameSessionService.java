@@ -5,14 +5,9 @@ import com.scriptopia.demo.domain.mongo.*;
 import com.scriptopia.demo.dto.gamesession.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
-import com.scriptopia.demo.repository.GameSessionMongoRepository;
-import com.scriptopia.demo.repository.GameSessionRepository;
-import com.scriptopia.demo.repository.UserItemRepository;
-import com.scriptopia.demo.repository.UserRepository;
+import com.scriptopia.demo.repository.*;
 import com.scriptopia.demo.utils.GameBalanceUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +15,10 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +28,7 @@ public class GameSessionService {
     private final RestTemplate restTemplate;
     private final GameSessionMongoRepository gameSessionMongoRepository;
     private final UserItemRepository userItemRepository;
+    private final ItemDefRepository itemDefRepository;
 
     public ResponseEntity<?> getGameSession(Long userid) {
         User user = userRepository.findById(userid)
@@ -86,7 +84,7 @@ public class GameSessionService {
         // 물건을 가져왔다면 그 물건이 해당 플레이어의 것인지, 존재하는 것인지 확인
         if (request.getItemId() != null){
             Long itemId = Long.parseLong(request.getItemId());
-            userItem = userItemRepository.findByUserIdAndItemId(userId, itemId)
+            userItem = userItemRepository.findByUserIdAndItemDefId(userId, itemId)
                     .orElseThrow(() -> new CustomException(ErrorCode.E_400_ITEM_NOT_OWNED));
         }
 
@@ -139,33 +137,31 @@ public class GameSessionService {
 
 
         // 아이템 정보
-        List<InventoryItemMongo> mongoInventory = externalGame.getInventory().stream()
-                .map(inv -> new InventoryItemMongo(
-                        inv.getItemDefId(),
-                        inv.getAcquiredAt(),
-                        inv.isEquipped(),
-                        inv.getSource()
-                ))
-                .toList();
-        mongoSession.setInventory(mongoInventory);
+        List<InventoryItemMongo> mongoInventory = new ArrayList<>();
+        List<ItemDefMongo> mongoItemDefs = new ArrayList<>();
 
-        // ItemDef
-        List<ItemDefMongo> mongoItemDefs = externalGame.getItemDef().stream()
-                .map(item -> new ItemDefMongo(
+        // FAST API 아이템 변환
+        if (externalGame.getItemDef() != null) {
+            for (var item : externalGame.getItemDef()) {
+                var effects = item.getItemEffect() != null
+                        ? item.getItemEffect().stream()
+                        .map(e -> new ItemEffectMongo(
+                                e.getItemEffectName(),
+                                e.getItemEffectDescription(),
+                                e.getGrade(),
+                                e.getItemEffectWeight()
+                        ))
+                        .toList()
+                        : Collections.emptyList();
+
+                ItemDefMongo itemDefMongo = new ItemDefMongo(
                         item.getItemDefId(),
                         item.getItemPicSrc(),
                         item.getName(),
                         item.getDescription(),
                         item.getCategory(),
                         item.getBaseStat(),
-                        item.getItemEffect().stream()
-                                .map(e -> new ItemEffectMongo(
-                                        e.getItemEffectName(),
-                                        e.getItemEffectDescription(),
-                                        e.getGrade(),
-                                        e.getItemEffectWeight()
-                                ))
-                                .toList(),
+                        (List<ItemEffectMongo>) effects,
                         item.getStrength(),
                         item.getAgility(),
                         item.getIntelligence(),
@@ -174,9 +170,81 @@ public class GameSessionService {
                         item.getWeight(),
                         item.getGrade(),
                         item.getPrice()
-                ))
-                .toList();
+                );
+
+                mongoItemDefs.add(itemDefMongo);
+            }
+        }
+
+        if (externalGame.getInventory() != null) {
+            for (var inv : externalGame.getInventory()) {
+                mongoInventory.add(new InventoryItemMongo(
+                        inv.getItemDefId(),
+                        inv.getAcquiredAt(),
+                        inv.isEquipped(),
+                        inv.getSource()
+                ));
+            }
+        }
+
+        // 2. 사용자 아이템 추가 (두 번째 위치)
+        if (userItem != null) {
+            ItemDef userItemDef = userItem.getItemDef();
+
+            ItemDefMongo userItemDefMongo = new ItemDefMongo(
+                    userItemDef.getId(),
+                    userItemDef.getPicSrc(),
+                    userItemDef.getName(),
+                    userItemDef.getDescription(),
+                    userItemDef.getItemType(),
+                    userItemDef.getBaseStat(),
+                    userItemDef.getItemEffects() != null
+                            ? userItemDef.getItemEffects().stream()
+                            .map(e -> new ItemEffectMongo(
+                                    e.getEffectName(),
+                                    e.getEffectDescription(),
+                                    e.getEffectGradeDef().getGrade(),
+                                    1
+                            ))
+                            .toList()
+                            : Collections.emptyList(),
+                    userItemDef.getStrength(),
+                    userItemDef.getAgility(),
+                    userItemDef.getIntelligence(),
+                    userItemDef.getLuck(),
+                    userItemDef.getMainStat(),
+                    1,
+                    userItemDef.getItemGradeDef().getGrade(),
+                    userItemDef.getPrice()
+            );
+
+            // 아이템 정의 리스트 두 번째 위치에 삽입
+            if (mongoItemDefs.size() >= 1) {
+                mongoItemDefs.add(1, userItemDefMongo);
+            } else {
+                mongoItemDefs.add(userItemDefMongo);
+            }
+
+            // Inventory 리스트에도 두 번째 위치에 삽입
+            InventoryItemMongo userInventoryMongo = new InventoryItemMongo(
+                    userItemDefMongo.getItemDefId(),
+                    LocalDateTime.now(),
+                    false,
+                    "USER_ITEM"
+            );
+
+            if (mongoInventory.size() >= 1) {
+                mongoInventory.add(1, userInventoryMongo);
+            } else {
+                mongoInventory.add(userInventoryMongo);
+            }
+        }
+
+// 3. MongoSession 저장
+        mongoSession.setInventory(mongoInventory);
         mongoSession.setItemDef(mongoItemDefs);
+
+
 
         // 플레이어 정보
         ExternalGameResponse.PlayerInfo p = externalGame.getPlayerInfo();

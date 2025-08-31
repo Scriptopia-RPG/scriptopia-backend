@@ -13,7 +13,4 @@ public class InventoryItemMongo {
     private LocalDateTime acquiredAt;
     private Boolean equipped;
     private String source;
-
-    public InventoryItemMongo(int itemDefId, String acquiredAt, boolean equipped, String source) {
-    }
 }
