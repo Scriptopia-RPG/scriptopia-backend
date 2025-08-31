@@ -129,11 +129,14 @@ public class HistoryService {
 
     @Transactional(readOnly = true)
     public ResponseEntity<List<HistoryPageResponse>> fetchMyHisotry(Long userId, Long lastId, int size) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+
         PageRequest pr = PageRequest.of(0, size);
         Page<History> page;
 
-        if(lastId == null) page = historyRepository.findByUserIdOrderByIdDesc(userId, pr);
-        else page = historyRepository.findByUserIdAndIdLessThanOrderByIdDesc(userId, lastId, pr);
+        if(lastId == null) page = historyRepository.findByUserIdOrderByIdDesc(user.getId(), pr);
+        else page = historyRepository.findByUserIdAndIdLessThanOrderByIdDesc(user.getId(), lastId, pr);
 
         return ResponseEntity.ok(page.getContent().stream().map(HistoryPageResponse::from).toList());
     }

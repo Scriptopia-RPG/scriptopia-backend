@@ -84,4 +84,8 @@ public class SharedGameService {
 
         sharedGameRepository.delete(game);
     }
+
+//    public ResponseEntity<?> getPublicSharedGame() {
+//
+//    }
 }
