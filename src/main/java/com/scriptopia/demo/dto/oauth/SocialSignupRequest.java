@@ -1,15 +1,17 @@
 package com.scriptopia.demo.dto.oauth;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OAUthUserInfo {
-    private String id;
+public class SocialSignupRequest {
+    private String provider;
+    private String socialId;
     private String email;
-    private String name;
-    private String profileImage;
+    private String nickname;
 }
