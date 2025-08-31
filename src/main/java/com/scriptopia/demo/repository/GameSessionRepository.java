@@ -10,4 +10,6 @@ public interface GameSessionRepository extends JpaRepository<GameSession, Long> 
     Optional<GameSession> findByUser_IdAndMongoId(Long userId, String mongoId);
 
     List<GameSession> findAllByUser_Id(Long userId);
+
+    boolean existsByUserIdAndSceneTypeNot(Long userId, String sceneType);
 }
