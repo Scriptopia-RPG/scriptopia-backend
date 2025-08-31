@@ -2,27 +2,27 @@ package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.domain.GameSession;
 import com.scriptopia.demo.domain.User;
-import com.scriptopia.demo.dto.gamesession.ExternalGameResponse;
-import com.scriptopia.demo.dto.gamesession.GameSessionRequest;
-import com.scriptopia.demo.dto.gamesession.GameSessionResponse;
-import com.scriptopia.demo.dto.gamesession.StartGameRequest;
+import com.scriptopia.demo.dto.gamesession.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.GameSessionRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
 public class GameSessionService {
     private final GameSessionRepository gameSessionRepository;
     private final UserRepository userRepository;
+    private final RestTemplateBuilder restTemplateBuilder;
+    private final RestTemplateAutoConfiguration restTemplateAutoConfiguration;
+    private final RestTemplate restTemplate;
 
     public ResponseEntity<?> getGameSession(Long userid) {
         User user = userRepository.findById(userid)
@@ -70,11 +70,23 @@ public class GameSessionService {
             throw new CustomException(ErrorCode.E_400_GAME_ALREADY_IN_PROGRESS);
         }
 
+
+        CreateGameRequest createGameRequest = new CreateGameRequest(
+                request.getBackground(),
+                request.getCharacterName(),
+                request.getCharacterDescription()
+        );
+
         // 2. FastAPI 호출(테스트용 추후 변경 가능)
         String url = "http://localhost:8000/games/init";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<CreateGameRequest> requestEntity = new HttpEntity<>(createGameRequest, headers);
+
+        ResponseEntity<ExternalGameResponse> responseEntity =
+                restTemplateBuilder.build(url, HttpMethod.POST, requestEntity, ExternalGameResponse.class);
 
         String requestBody = String.format(
                 "{\"background\":\"%s\",\"characterName\":\"%s\",\"characterDescription\":\"%s\"}",
