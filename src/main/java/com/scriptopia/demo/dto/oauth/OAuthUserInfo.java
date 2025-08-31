@@ -12,4 +12,6 @@ public class OAuthUserInfo {
     private String email;
     private String name;
     private String profileImage;
+    private String provider;
+
 }

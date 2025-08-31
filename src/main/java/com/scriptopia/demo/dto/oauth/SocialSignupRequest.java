@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SocialSignupRequest {
-    private String provider;
-    private String socialId;
-    private String email;
     private String nickname;
     private String deviceId;
+    private String signupToken;
 }
