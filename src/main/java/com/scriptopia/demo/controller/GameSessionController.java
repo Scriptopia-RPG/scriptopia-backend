@@ -36,4 +36,15 @@ public class GameSessionController {
 
         return gameSessionService.deleteGameSession(userId, sessionId);
     }
+    
+    
+    // 게임 시작
+    @PostMapping
+    public ResponseEntity<String> startNewGame(
+            @RequestBody StartGameRequest request,
+            Authentication authentication) {
+
+        gameSessionService.startNewGame(request);
+        return ResponseEntity.ok("새 게임이 시작되었습니다.");
+    }
 }
