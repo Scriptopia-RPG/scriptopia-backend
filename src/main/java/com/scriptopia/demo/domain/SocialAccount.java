@@ -19,6 +19,8 @@ public class SocialAccount{
 
     private String socialId;
 
+    private String email;
+
     @Enumerated(EnumType.STRING)
     private Provider provider;
 }
