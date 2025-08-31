@@ -1,5 +1,6 @@
 package com.scriptopia.demo.utils;
 
+import com.scriptopia.demo.domain.Provider;
 import com.scriptopia.demo.dto.oauth.OAuthUserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +30,7 @@ public class GoogleClient {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public OAuthUserInfo getUserInfo(String code) {
-        // 1. Authorization Code -> Access Token 교환
+
         String tokenUrl = "https://oauth2.googleapis.com/token";
 
         Map<String, String> params = new HashMap<>();
@@ -44,7 +45,7 @@ public class GoogleClient {
 
         String accessToken = (String) tokenResponse.getBody().get("access_token");
 
-        // 2. Access Token으로 사용자 정보 조회
+
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
 
@@ -60,12 +61,13 @@ public class GoogleClient {
 
         Map<String, Object> userInfo = userInfoResponse.getBody();
 
-        // 3. DTO 매핑
+
         return OAuthUserInfo.builder()
                 .id((String) userInfo.get("id"))
                 .email((String) userInfo.get("email"))
                 .name((String) userInfo.get("name"))
                 .profileImage((String) userInfo.get("picture"))
+                .provider(Provider.GOOGLE.toString())
                 .build();
     }
 }
