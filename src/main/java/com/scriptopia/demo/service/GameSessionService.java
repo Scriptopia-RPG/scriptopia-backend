@@ -21,7 +21,6 @@ public class GameSessionService {
     private final GameSessionRepository gameSessionRepository;
     private final UserRepository userRepository;
     private final RestTemplateBuilder restTemplateBuilder;
-    private final RestTemplateAutoConfiguration restTemplateAutoConfiguration;
     private final RestTemplate restTemplate;
 
     public ResponseEntity<?> getGameSession(Long userid) {
@@ -84,16 +83,6 @@ public class GameSessionService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<CreateGameRequest> requestEntity = new HttpEntity<>(createGameRequest, headers);
-
-        ResponseEntity<ExternalGameResponse> responseEntity =
-                restTemplateBuilder.build(url, HttpMethod.POST, requestEntity, ExternalGameResponse.class);
-
-        String requestBody = String.format(
-                "{\"background\":\"%s\",\"characterName\":\"%s\",\"characterDescription\":\"%s\"}",
-                request
-        );
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
         ResponseEntity<ExternalGameResponse> responseEntity =
                 restTemplate.exchange(url, HttpMethod.POST, requestEntity, ExternalGameResponse.class);
