@@ -1,7 +1,9 @@
 package com.scriptopia.demo.service;
 
-import com.scriptopia.demo.domain.GameSession;
-import com.scriptopia.demo.domain.User;
+import com.scriptopia.demo.domain.*;
+import com.scriptopia.demo.domain.mongo.ChoiceInfoMongo;
+import com.scriptopia.demo.domain.mongo.GameSessionMongo;
+import com.scriptopia.demo.domain.mongo.InventoryItemMongo;
 import com.scriptopia.demo.dto.gamesession.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
@@ -15,6 +17,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -106,19 +111,26 @@ public class GameSessionService {
         GameBalanceUtil.applyEquippedArtifactStats(externalGame);
 
 
-
-
-        // 4. MongoDB 저장
+        // 5. MongoDB 저장
         GameSessionMongo mongoSession = new GameSessionMongo();
         mongoSession.setUserId(userId);
-        mongoSession.setSceneType("choice"); // 시작은 choice 등 기본값
+        mongoSession.setSceneType(SceneType.CHOICE); // 시작은 choice 기본값
         mongoSession.setStartedAt(LocalDateTime.now());
         mongoSession.setUpdatedAt(LocalDateTime.now());
-        mongoSession.setBackground(background);
-        mongoSession.setPlayerInfo(convertPlayerInfo(externalGame));
-        mongoSession.setInventory(convertInventory(externalGame));
-        mongoSession.setItemDef(convertItemDef(externalGame));
+        mongoSession.setBackground(request.getBackground());
         mongoSession.setProgress(0);
+
+
+        List<InventoryItemMongo> mongoInventory = externalGame.getInventory().stream()
+                .map(inv -> new InventoryItemMongo(
+                        inv.getItem_def_id(),
+                        inv.getAcquired_at(),
+                        inv.isEquipped(),
+                        inv.getSource()
+                ))
+                .toList();
+        mongoSession.setInventory(mongoInventory);
+
 
         GameSessionMongo savedMongo = gameSessionMongoRepository.save(mongoSession);
 

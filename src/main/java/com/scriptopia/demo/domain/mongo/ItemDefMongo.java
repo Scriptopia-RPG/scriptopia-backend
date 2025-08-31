@@ -3,13 +3,17 @@ package com.scriptopia.demo.domain.mongo;
 import com.scriptopia.demo.domain.Grade;
 import com.scriptopia.demo.domain.ItemCategory;
 import com.scriptopia.demo.domain.MainStat;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ItemDefMongo {
     private Long itemDefId;
     private String itemPicSrc;

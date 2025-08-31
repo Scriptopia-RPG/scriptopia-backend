@@ -1,7 +1,9 @@
 package com.scriptopia.demo.domain.mongo;
 
 import com.scriptopia.demo.domain.SceneType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,6 +14,8 @@ import java.util.List;
 @Getter
 @Setter
 @Document(collection = "game_sessions")
+@AllArgsConstructor
+@NoArgsConstructor
 public class GameSessionMongo {
 
     @Id
