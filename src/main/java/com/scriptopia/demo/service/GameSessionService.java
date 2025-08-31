@@ -187,12 +187,19 @@ public class GameSessionService {
             }
         }
 
+        long maxItemDefId = mongoItemDefs.stream()
+                .mapToLong(ItemDefMongo::getItemDefId)
+                .max()
+                .orElse(0L);
+
         // 2. 사용자 아이템 추가 (두 번째 위치)
         if (userItem != null) {
             ItemDef userItemDef = userItem.getItemDef();
 
+            long newItemDefId = maxItemDefId + 1;
+
             ItemDefMongo userItemDefMongo = new ItemDefMongo(
-                    userItemDef.getId(),
+                    newItemDefId,
                     userItemDef.getPicSrc(),
                     userItemDef.getName(),
                     userItemDef.getDescription(),
