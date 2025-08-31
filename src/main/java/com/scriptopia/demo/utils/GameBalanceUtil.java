@@ -2,7 +2,6 @@ package com.scriptopia.demo.utils;
 
 import com.scriptopia.demo.domain.Grade;
 import com.scriptopia.demo.domain.ItemType;
-import com.scriptopia.demo.domain.MainStat;
 import com.scriptopia.demo.dto.gamesession.ExternalGameResponse;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public class GameBalanceUtil {
         List<ExternalGameResponse.InventoryItem> inventory = game.getInventory();
 
         // item_def_id 기준 Map 생성
-        Map<Integer, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
+        Map<Long, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
                 .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItem_def_id, item -> item));
 
         // 착용 중인 무기 하나 찾기
@@ -72,7 +71,7 @@ public class GameBalanceUtil {
         List<ExternalGameResponse.InventoryItem> inventory = game.getInventory();
 
         // item_def_id 기준 Map 생성
-        Map<Integer, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
+        Map<Long, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
                 .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItem_def_id, item -> item));
 
         // 착용 중인 방어구 하나 찾기
@@ -114,7 +113,7 @@ public class GameBalanceUtil {
         List<ExternalGameResponse.InventoryItem> inventory = game.getInventory();
 
         // item_def_id 기준 Map 생성
-        Map<Integer, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
+        Map<Long, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
                 .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItem_def_id, item -> item));
 
         // 착용 중인 아티팩트 하나 찾기
