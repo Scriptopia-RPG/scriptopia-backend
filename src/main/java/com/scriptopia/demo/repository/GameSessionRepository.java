@@ -11,5 +11,5 @@ public interface GameSessionRepository extends JpaRepository<GameSession, Long> 
 
     List<GameSession> findAllByUser_Id(Long userId);
 
-    boolean existsByUserIdAndSceneTypeNot(Long userId, String sceneType);
+    boolean existsByUserIdAndSceneTypeNotDone(Long userId);
 }
