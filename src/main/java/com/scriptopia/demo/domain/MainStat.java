@@ -1,9 +1,14 @@
 package com.scriptopia.demo.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum MainStat {
-    STRENGTH,
-    AGILITY,
+    @JsonProperty("intelligence")
     INTELLIGENCE,
-    LUCK,
-    NONE
+    @JsonProperty("strength")
+    STRENGTH,
+    @JsonProperty("agility")
+    AGILITY,
+    @JsonProperty("luck")
+    LUCK
 }

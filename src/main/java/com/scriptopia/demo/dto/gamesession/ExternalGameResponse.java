@@ -13,12 +13,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExternalGameResponse {
-
-    private PlayerInfo player_info;
+    private PlayerInfo playerInfo;
     private List<InventoryItem> inventory;
-    private List<ItemDef> item_def;
-    private String world_view;
-    private String background_story;
+    private List<ItemDef> itemDef;
+    private String worldView;
+    private String backgroundStory;
 
     @Data
     @AllArgsConstructor
@@ -27,9 +26,9 @@ public class ExternalGameResponse {
         private String name;
         private int life;
         private int level;
-        private int experience_point;
-        private int combat_point;
-        private int health_point;
+        private int experiencePoint;
+        private int combatPoint;
+        private int healthPoint;
         private String trait;
         private int strength;
         private int agility;
@@ -42,8 +41,8 @@ public class ExternalGameResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class InventoryItem {
-        private int item_def_id;
-        private String acquired_at;
+        private int itemDefId;
+        private String acquiredAt;
         private boolean equipped;
         private String source;
     }
@@ -52,18 +51,18 @@ public class ExternalGameResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ItemDef {
-        private Long item_def_id;
-        private String item_pic_src;
+        private Long itemDefId;
+        private String itemPicSrc;
         private String name;
         private String description;
         private ItemType category;
-        private int base_stat;
-        private List<ItemEffect> item_effect;
+        private int baseStat;
+        private List<ItemEffect> itemEffect;
         private int strength;
         private int agility;
         private int intelligence;
         private int luck;
-        private MainStat main_stat;
+        private MainStat mainStat;
         private int weight;
         private Grade grade;
         private int price;
@@ -72,10 +71,10 @@ public class ExternalGameResponse {
         @AllArgsConstructor
         @NoArgsConstructor
         public static class ItemEffect {
-            private String item_effect_name;
-            private String item_effect_description;
+            private String itemEffectName;
+            private String itemEffectDescription;
             private Grade grade;
-            private int item_effect_weight;
+            private int itemEffectWeight;
         }
     }
 }

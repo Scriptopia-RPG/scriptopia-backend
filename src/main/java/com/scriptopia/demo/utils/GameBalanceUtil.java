@@ -12,18 +12,18 @@ public class GameBalanceUtil {
 
     // 착용 무기 적용 후 캐릭터 스탯 및 combat_point 계산
     public static void applyEquippedWeaponStatsAndCombatPoint(ExternalGameResponse game) {
-        ExternalGameResponse.PlayerInfo player = game.getPlayer_info();
-        List<ExternalGameResponse.ItemDef> itemDefs = game.getItem_def();
+        ExternalGameResponse.PlayerInfo player = game.getPlayerInfo();
+        List<ExternalGameResponse.ItemDef> itemDefs = game.getItemDef();
         List<ExternalGameResponse.InventoryItem> inventory = game.getInventory();
 
         // item_def_id 기준 Map 생성
         Map<Long, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
-                .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItem_def_id, item -> item));
+                .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItemDefId, item -> item));
 
         // 착용 중인 무기 하나 찾기
         ExternalGameResponse.ItemDef equippedWeapon = inventory.stream()
                 .filter(ExternalGameResponse.InventoryItem::isEquipped)
-                .map(inv -> itemDefMap.get(inv.getItem_def_id()))
+                .map(inv -> itemDefMap.get(inv.getItemDefId()))
                 .filter(item -> item != null && item.getCategory() == ItemType.WEAPON)
                 .findFirst()
                 .orElse(null);
@@ -36,11 +36,11 @@ public class GameBalanceUtil {
             player.setLuck(player.getLuck() + equippedWeapon.getLuck());
 
             // 2. combat_point 계산
-            double effectMultiplier = equippedWeapon.getItem_effect().stream()
+            double effectMultiplier = equippedWeapon.getItemEffect().stream()
                     .mapToDouble(e -> getEffectGradeMultiplier(e.getGrade()))
                     .sum();
 
-            int mainStatValue = switch (equippedWeapon.getMain_stat()) {
+            int mainStatValue = switch (equippedWeapon.getMainStat()) {
                 case STRENGTH -> player.getStrength();
                 case AGILITY -> player.getAgility();
                 case INTELLIGENCE -> player.getIntelligence();
@@ -50,9 +50,9 @@ public class GameBalanceUtil {
 
             double mainStatMultiplier = getMainStatMultiplier(mainStatValue);
 
-            int combatPoint = (int) (equippedWeapon.getBase_stat() * (1 + effectMultiplier) * mainStatMultiplier);
+            int combatPoint = (int) (equippedWeapon.getBaseStat() * (1 + effectMultiplier) * mainStatMultiplier);
 
-            player.setCombat_point(combatPoint);
+            player.setCombatPoint(combatPoint);
         } else {
             // 무기 미착용 시: 스탯 합 * 가장 높은 스탯 배율
             int totalStat = player.getStrength() + player.getAgility() + player.getIntelligence() + player.getLuck();
@@ -60,24 +60,24 @@ public class GameBalanceUtil {
                     Math.max(player.getIntelligence(), player.getLuck()));
             double mainStatMultiplier = getMainStatMultiplier(maxStat);
             int combatPoint = (int) (totalStat * mainStatMultiplier);
-            player.setCombat_point(combatPoint);
+            player.setCombatPoint(combatPoint);
         }
     }
 
     // 착용 방어구 적용 후 캐릭터 스탯 및 health_point 계산
     public static void applyEquippedArmorStatsAndHealthPoint(ExternalGameResponse game) {
-        ExternalGameResponse.PlayerInfo player = game.getPlayer_info();
-        List<ExternalGameResponse.ItemDef> itemDefs = game.getItem_def();
+        ExternalGameResponse.PlayerInfo player = game.getPlayerInfo();
+        List<ExternalGameResponse.ItemDef> itemDefs = game.getItemDef();
         List<ExternalGameResponse.InventoryItem> inventory = game.getInventory();
 
         // item_def_id 기준 Map 생성
         Map<Long, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
-                .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItem_def_id, item -> item));
+                .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItemDefId, item -> item));
 
         // 착용 중인 방어구 하나 찾기
         ExternalGameResponse.ItemDef equippedArmor = inventory.stream()
                 .filter(ExternalGameResponse.InventoryItem::isEquipped)
-                .map(inv -> itemDefMap.get(inv.getItem_def_id()))
+                .map(inv -> itemDefMap.get(inv.getItemDefId()))
                 .filter(item -> item != null && item.getCategory() == ItemType.ARMOR)
                 .findFirst()
                 .orElse(null);
@@ -90,36 +90,36 @@ public class GameBalanceUtil {
             player.setLuck(player.getLuck() + equippedArmor.getLuck());
 
             // 2. health_point 계산
-            double effectMultiplier = equippedArmor.getItem_effect().stream()
+            double effectMultiplier = equippedArmor.getItemEffect().stream()
                     .mapToDouble(e -> getEffectGradeMultiplier(e.getGrade()))
                     .sum();
 
-            int baseHealth = equippedArmor.getBase_stat();
+            int baseHealth = equippedArmor.getBaseStat();
             int healthPoint = (int) (baseHealth * (1 + effectMultiplier));
-            player.setHealth_point(healthPoint);
+            player.setHealthPoint(healthPoint);
         } else {
             // 방어구 미착용 시: 전체 스탯 합 * 3
             int totalStat = player.getStrength() + player.getAgility() + player.getIntelligence() + player.getLuck();
             int healthPoint = totalStat * 3;
-            player.setHealth_point(healthPoint);
+            player.setHealthPoint(healthPoint);
         }
     }
 
 
     // 착용 아티팩트 적용 후 캐릭터 스탯 계산 (전투력/체력 보정은 추후)
     public static void applyEquippedArtifactStats(ExternalGameResponse game) {
-        ExternalGameResponse.PlayerInfo player = game.getPlayer_info();
-        List<ExternalGameResponse.ItemDef> itemDefs = game.getItem_def();
+        ExternalGameResponse.PlayerInfo player = game.getPlayerInfo();
+        List<ExternalGameResponse.ItemDef> itemDefs = game.getItemDef();
         List<ExternalGameResponse.InventoryItem> inventory = game.getInventory();
 
         // item_def_id 기준 Map 생성
         Map<Long, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
-                .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItem_def_id, item -> item));
+                .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItemDefId, item -> item));
 
         // 착용 중인 아티팩트 하나 찾기
         ExternalGameResponse.ItemDef equippedArtifact = inventory.stream()
                 .filter(ExternalGameResponse.InventoryItem::isEquipped)
-                .map(inv -> itemDefMap.get(inv.getItem_def_id()))
+                .map(inv -> itemDefMap.get(inv.getItemDefId()))
                 .filter(item -> item != null && item.getCategory() == ItemType.ARTIFACT)
                 .findFirst()
                 .orElse(null);

@@ -4,8 +4,13 @@ import com.scriptopia.demo.dto.gamesession.GameSessionRequest;
 import com.scriptopia.demo.dto.gamesession.GameSessionResponse;
 import com.scriptopia.demo.dto.gamesession.StartGameRequest;
 import com.scriptopia.demo.dto.gamesession.StartGameResponse;
+import com.scriptopia.demo.exception.CustomException;
+import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.service.GameSessionService;
+import io.jsonwebtoken.Jwt;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -46,7 +51,9 @@ public class GameSessionController {
             @RequestBody StartGameRequest request,
             Authentication authentication) {
 
+
         Long userId = Long.valueOf(authentication.getName());
+
         StartGameResponse response = gameSessionService.startNewGame(userId, request);
         return ResponseEntity.ok(response);
     }

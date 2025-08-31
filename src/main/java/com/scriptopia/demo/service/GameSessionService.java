@@ -73,6 +73,8 @@ public class GameSessionService {
     @Transactional
     public StartGameResponse startNewGame(Long userId, StartGameRequest request) {
 
+
+
         // 1. 진행중인 게임 체크
         if (gameSessionRepository.existsByUser_Id(userId)) {
             throw new CustomException(ErrorCode.E_400_GAME_ALREADY_IN_PROGRESS);
@@ -102,11 +104,13 @@ public class GameSessionService {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
 
+
+
         // 3. 밸런스 재세팅
-        ExternalGameResponse.PlayerInfo player = externalGame.getPlayer_info();
+        ExternalGameResponse.PlayerInfo player = externalGame.getPlayerInfo();
         player.setLife(5);
         player.setLevel(1);
-        player.setExperience_point(0);
+        player.setExperiencePoint(0);
 
         // 4. 아이템 적용 및 전투력 계산
         GameBalanceUtil.applyEquippedWeaponStatsAndCombatPoint(externalGame);
@@ -127,8 +131,8 @@ public class GameSessionService {
         // 아이템 정보
         List<InventoryItemMongo> mongoInventory = externalGame.getInventory().stream()
                 .map(inv -> new InventoryItemMongo(
-                        inv.getItem_def_id(),
-                        inv.getAcquired_at(),
+                        inv.getItemDefId(),
+                        inv.getAcquiredAt(),
                         inv.isEquipped(),
                         inv.getSource()
                 ))
@@ -136,27 +140,27 @@ public class GameSessionService {
         mongoSession.setInventory(mongoInventory);
 
         // ItemDef
-        List<ItemDefMongo> mongoItemDefs = externalGame.getItem_def().stream()
+        List<ItemDefMongo> mongoItemDefs = externalGame.getItemDef().stream()
                 .map(item -> new ItemDefMongo(
-                        item.getItem_def_id(),
-                        item.getItem_pic_src(),
+                        item.getItemDefId(),
+                        item.getItemPicSrc(),
                         item.getName(),
                         item.getDescription(),
                         item.getCategory(),
-                        item.getBase_stat(),
-                        item.getItem_effect().stream()
+                        item.getBaseStat(),
+                        item.getItemEffect().stream()
                                 .map(e -> new ItemEffectMongo(
-                                        e.getItem_effect_name(),
-                                        e.getItem_effect_description(),
+                                        e.getItemEffectName(),
+                                        e.getItemEffectDescription(),
                                         e.getGrade(),
-                                        e.getItem_effect_weight()
+                                        e.getItemEffectWeight()
                                 ))
                                 .toList(),
                         item.getStrength(),
                         item.getAgility(),
                         item.getIntelligence(),
                         item.getLuck(),
-                        item.getMain_stat(),
+                        item.getMainStat(),
                         item.getWeight(),
                         item.getGrade(),
                         item.getPrice()
@@ -165,14 +169,14 @@ public class GameSessionService {
         mongoSession.setItemDef(mongoItemDefs);
 
         // 플레이어 정보
-        ExternalGameResponse.PlayerInfo p = externalGame.getPlayer_info();
+        ExternalGameResponse.PlayerInfo p = externalGame.getPlayerInfo();
         PlayerInfoMongo playerMongo = new PlayerInfoMongo(
                 p.getName(),
                 p.getLife(),
                 p.getLevel(),
-                p.getExperience_point(),
-                p.getCombat_point(),
-                p.getHealth_point(),
+                p.getExperiencePoint(),
+                p.getCombatPoint(),
+                p.getHealthPoint(),
                 p.getTrait(),
                 p.getStrength(),
                 p.getAgility(),
@@ -184,8 +188,8 @@ public class GameSessionService {
         
         // 초기 히스토리 저장
         HistoryInfoMongo history = new HistoryInfoMongo();
-        history.setWorldView(externalGame.getWorld_view());
-        history.setBackgroundStory(externalGame.getBackground_story());
+        history.setWorldView(externalGame.getWorldView());
+        history.setBackgroundStory(externalGame.getBackgroundStory());
         mongoSession.setHistoryInfo(history);
 
 
@@ -204,7 +208,6 @@ public class GameSessionService {
         mongoSession.setShopInfo(new ShopInfoMongo());
         mongoSession.setBattleInfo(new BattleInfoMongo());
         mongoSession.setRewardInfo(new RewardInfoMongo());
-        mongoSession.setHistoryInfo(new HistoryInfoMongo());
 
         GameSessionMongo savedMongo = gameSessionMongoRepository.save(mongoSession);
 
@@ -219,13 +222,13 @@ public class GameSessionService {
         gameSessionRepository.save(mysqlSession);
 
 
-        StartGameResponse response = new StartGameResponse(
+        StartGameResponse startGameResponse = new StartGameResponse(
                 "게임이 생성되었습니다.",
                 mysqlSession.getMongoId()
         );
 
         // 6. MongoDB PK 반환
-        return response;
+        return startGameResponse;
     }
 
 
