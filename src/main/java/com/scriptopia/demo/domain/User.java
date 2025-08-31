@@ -16,7 +16,7 @@ public class User {
     @Id @GeneratedValue
     private Long id;
 
-
+    @Column(nullable = false, unique = true)
     private String nickname;
 
     private Long pia;
