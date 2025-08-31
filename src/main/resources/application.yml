@@ -41,7 +41,7 @@ oauth:
     client-id: ${GOOGLE_CLIENT_ID}
     client-secret: ${GOOGLE_SECRET_KEY}
     redirect-uri: ${GOOGLE_REDIRECT_URI}
-
+    scope: email profile
 
 
 auth:
