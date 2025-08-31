@@ -2,6 +2,7 @@ package com.scriptopia.demo.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scriptopia.demo.config.OAuthProperties;
 import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.dto.localaccount.LoginResponse;
 import com.scriptopia.demo.dto.oauth.LoginStatus;
@@ -49,6 +50,7 @@ public class OAuthService {
     private final GoogleClient googleClient;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
+    private final OAuthProperties props;
 
     @Transactional
     public OAuthLoginResponse login(String provider, String code,
@@ -173,6 +175,31 @@ public class OAuthService {
                 .maxAge(Duration.ofDays(14))
                 .build();
     }
+
+    public String buildAuthorizationUrl(String provider) {
+        switch (provider.toUpperCase()) {
+            case "GOOGLE":
+                return "https://accounts.google.com/o/oauth2/v2/auth" +
+                        "?client_id=" + props.getGoogle().getClientId() +
+                        "&redirect_uri=" + props.getGoogle().getRedirectUri() +
+                        "&response_type=code" +
+                        "&scope=" + props.getGoogle().getScope();
+            case "KAKAO":
+                return "https://kauth.kakao.com/oauth/authorize" +
+                        "?client_id=" + props.getKakao().getClientId() +
+                        "&redirect_uri=" + props.getKakao().getRedirectUri() +
+                        "&response_type=code";
+            case "NAVER":
+                return "https://nid.naver.com/oauth2.0/authorize" +
+                        "?client_id=" + props.getNaver().getClientId() +
+                        "&redirect_uri=" + props.getNaver().getRedirectUri() +
+                        "&response_type=code" +
+                        "&state=" + UUID.randomUUID();
+            default:
+                throw new CustomException(ErrorCode.E_400_UNSUPPORTED_PROVIDER);
+        }
+    }
+
 
     private OAuthUserInfo fetchUserInfoFromProvider(String provider, String code) {
         switch (provider.toLowerCase()) {
