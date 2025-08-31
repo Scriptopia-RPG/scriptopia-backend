@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExternalGameData {
+public class ExternalGameResponse {
 
     private PlayerInfo player_info;
     private List<InventoryItem> inventory;
