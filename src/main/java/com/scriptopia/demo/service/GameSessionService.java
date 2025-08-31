@@ -102,11 +102,8 @@ public class GameSessionService {
 
         // 4. 아이템 적용 및 전투력 계산
         GameBalanceUtil.applyEquippedWeaponStatsAndCombatPoint(externalGame);
-
-
         GameBalanceUtil.applyEquippedArmorStatsAndHealthPoint(externalGame);
-
-
+        GameBalanceUtil.applyEquippedArtifactStats(externalGame);
 
 
 

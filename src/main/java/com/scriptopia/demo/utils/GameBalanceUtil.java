@@ -107,6 +107,34 @@ public class GameBalanceUtil {
     }
 
 
+    // 착용 아티팩트 적용 후 캐릭터 스탯 계산 (전투력/체력 보정은 추후)
+    public static void applyEquippedArtifactStats(ExternalGameResponse game) {
+        ExternalGameResponse.PlayerInfo player = game.getPlayer_info();
+        List<ExternalGameResponse.ItemDef> itemDefs = game.getItem_def();
+        List<ExternalGameResponse.InventoryItem> inventory = game.getInventory();
+
+        // item_def_id 기준 Map 생성
+        Map<Integer, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
+                .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItem_def_id, item -> item));
+
+        // 착용 중인 아티팩트 하나 찾기
+        ExternalGameResponse.ItemDef equippedArtifact = inventory.stream()
+                .filter(ExternalGameResponse.InventoryItem::isEquipped)
+                .map(inv -> itemDefMap.get(inv.getItem_def_id()))
+                .filter(item -> item != null && item.getCategory() == ItemType.ARTIFACT)
+                .findFirst()
+                .orElse(null);
+
+        if (equippedArtifact != null) {
+            // 아티팩트 스탯 합산
+            player.setStrength(player.getStrength() + equippedArtifact.getStrength());
+            player.setAgility(player.getAgility() + equippedArtifact.getAgility());
+            player.setIntelligence(player.getIntelligence() + equippedArtifact.getIntelligence());
+            player.setLuck(player.getLuck() + equippedArtifact.getLuck());
+        }
+    }
+
+
     // 아이템 효과 등급 배율
     private static double getEffectGradeMultiplier(Grade grade) {
         return switch (grade) {
