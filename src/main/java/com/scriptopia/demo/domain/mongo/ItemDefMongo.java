@@ -2,6 +2,7 @@ package com.scriptopia.demo.domain.mongo;
 
 import com.scriptopia.demo.domain.Grade;
 import com.scriptopia.demo.domain.ItemCategory;
+import com.scriptopia.demo.domain.ItemType;
 import com.scriptopia.demo.domain.MainStat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,7 @@ public class ItemDefMongo {
     private String itemPicSrc;
     private String name;
     private String description;
-    private ItemCategory category; // WEAPON, ARMOR, ARTIFACT, POTION
+    private ItemType category; // WEAPON, ARMOR, ARTIFACT, *POTION* 타입 때문에 애매함
     private Integer baseStat;
     private List<ItemEffectMongo> itemEffect;
     private Integer strength;

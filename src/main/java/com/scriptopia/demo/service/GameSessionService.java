@@ -1,12 +1,11 @@
 package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.domain.*;
-import com.scriptopia.demo.domain.mongo.ChoiceInfoMongo;
-import com.scriptopia.demo.domain.mongo.GameSessionMongo;
-import com.scriptopia.demo.domain.mongo.InventoryItemMongo;
+import com.scriptopia.demo.domain.mongo.*;
 import com.scriptopia.demo.dto.gamesession.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
+import com.scriptopia.demo.repository.GameSessionMongoRepository;
 import com.scriptopia.demo.repository.GameSessionRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.utils.GameBalanceUtil;
@@ -19,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class GameSessionService {
     private final UserRepository userRepository;
     private final RestTemplateBuilder restTemplateBuilder;
     private final RestTemplate restTemplate;
+    private final GameSessionMongoRepository gameSessionMongoRepository;
 
     public ResponseEntity<?> getGameSession(Long userid) {
         User user = userRepository.findById(userid)
@@ -68,6 +70,7 @@ public class GameSessionService {
     }
 
 
+    @Transactional
     public String startNewGame(Long userId, StartGameRequest request) {
 
         // 1. 진행중인 게임 체크
@@ -121,6 +124,7 @@ public class GameSessionService {
         mongoSession.setProgress(0);
 
 
+        // 아이템 정보
         List<InventoryItemMongo> mongoInventory = externalGame.getInventory().stream()
                 .map(inv -> new InventoryItemMongo(
                         inv.getItem_def_id(),
@@ -131,86 +135,91 @@ public class GameSessionService {
                 .toList();
         mongoSession.setInventory(mongoInventory);
 
+        // ItemDef
+        List<ItemDefMongo> mongoItemDefs = externalGame.getItem_def().stream()
+                .map(item -> new ItemDefMongo(
+                        item.getItem_def_id(),
+                        item.getItem_pic_src(),
+                        item.getName(),
+                        item.getDescription(),
+                        item.getCategory(),
+                        item.getBase_stat(),
+                        item.getItem_effect().stream()
+                                .map(e -> new ItemEffectMongo(
+                                        e.getItem_effect_name(),
+                                        e.getItem_effect_description(),
+                                        e.getGrade(),
+                                        e.getItem_effect_weight()
+                                ))
+                                .toList(),
+                        item.getStrength(),
+                        item.getAgility(),
+                        item.getIntelligence(),
+                        item.getLuck(),
+                        item.getMain_stat(),
+                        item.getWeight(),
+                        item.getGrade(),
+                        item.getPrice()
+                ))
+                .toList();
+        mongoSession.setItemDef(mongoItemDefs);
+
+        // 플레이어 정보
+        ExternalGameResponse.PlayerInfo p = externalGame.getPlayer_info();
+        PlayerInfoMongo playerMongo = new PlayerInfoMongo(
+                p.getName(),
+                p.getLife(),
+                p.getLevel(),
+                p.getExperience_point(),
+                p.getCombat_point(),
+                p.getHealth_point(),
+                p.getTrait(),
+                p.getStrength(),
+                p.getAgility(),
+                p.getIntelligence(),
+                p.getLuck(),
+                p.getGold()
+        );
+        mongoSession.setPlayerInfo(playerMongo);
+        
+        // 초기 히스토리 저장
+        HistoryInfoMongo history = new HistoryInfoMongo();
+        history.setWorldView(externalGame.getWorld_view());
+        history.setBackgroundStory(externalGame.getBackground_story());
+        mongoSession.setHistoryInfo(history);
+
+
+        int stageCount = 10; // 예: 10스테이지
+        List<Integer> stageList = new ArrayList<>();
+        Random random = new Random();
+        for (int i = 0; i < stageCount; i++) {
+            // 0: 작은 이벤트, 1: 큰 이벤트
+            stageList.add(random.nextInt(2));
+        }
+        mongoSession.setStage(stageList);
+
+        // 게임 진행 시 필요한 것들은 만들어만 두기
+        mongoSession.setChoiceInfo(new ChoiceInfoMongo());
+        mongoSession.setDoneInfo(new DoneInfoMongo());
+        mongoSession.setShopInfo(new ShopInfoMongo());
+        mongoSession.setBattleInfo(new BattleInfoMongo());
+        mongoSession.setRewardInfo(new RewardInfoMongo());
+        mongoSession.setHistoryInfo(new HistoryInfoMongo());
 
         GameSessionMongo savedMongo = gameSessionMongoRepository.save(mongoSession);
 
         // 5. MySQL GameSession에 MongoDB PK 저장
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND)
+        );
+
         GameSession mysqlSession = new GameSession();
-        mysqlSession.setUserId(userId);
+        mysqlSession.setUser(user);
         mysqlSession.setMongoId(savedMongo.getId());
-        mysqlSession.setSceneType("choice");
-        mysqlSession.setStartedAt(LocalDateTime.now());
-        mysqlSession.setUpdatedAt(LocalDateTime.now());
         gameSessionRepository.save(mysqlSession);
 
         // 6. MongoDB PK 반환
         return savedMongo.getId();
-    }
-
-    private GameSessionMongo.PlayerInfoMongo convertPlayerInfo(ExternalGameResponse external) {
-        GameSessionMongo.PlayerInfoMongo info = new GameSessionMongo.PlayerInfoMongo();
-        ExternalGameResponse.PlayerInfo p = external.getPlayer_info();
-        info.setName(p.getName());
-        info.setLife(p.getLife());
-        info.setLevel(p.getLevel());
-        info.setExperiencePoint(p.getExperience_point());
-        info.setCombatPoint(p.getCombat_point());
-        info.setHealthPoint(p.getHealth_point());
-        info.setTrait(p.getTrait());
-        info.setStrength(p.getStrength());
-        info.setAgility(p.getAgility());
-        info.setIntelligence(p.getIntelligence());
-        info.setLuck(p.getLuck());
-        info.setGold(p.getGold());
-        return info;
-    }
-
-    private java.util.List<GameSessionMongo.InventoryItemMongo> convertInventory(ExternalGameResponse external) {
-        java.util.List<GameSessionMongo.InventoryItemMongo> list = new java.util.ArrayList<>();
-        for (ExternalGameResponse.InventoryItem item : external.getInventory()) {
-            GameSessionMongo.InventoryItemMongo mongoItem = new GameSessionMongo.InventoryItemMongo();
-            mongoItem.setItemDefId(item.getItem_def_id());
-            mongoItem.setAcquiredAt(LocalDateTime.parse(item.getAcquired_at()));
-            mongoItem.setEquipped(item.isEquipped());
-            mongoItem.setSource(item.getSource());
-            list.add(mongoItem);
-        }
-        return list;
-    }
-
-    private java.util.List<GameSessionMongo.ItemDefMongo> convertItemDef(ExternalGameResponse external) {
-        java.util.List<GameSessionMongo.ItemDefMongo> list = new java.util.ArrayList<>();
-        for (ExternalGameResponse.ItemDef def : external.getItem_def()) {
-            GameSessionMongo.ItemDefMongo mongoDef = new GameSessionMongo.ItemDefMongo();
-            mongoDef.setItemDefId(def.getItem_def_id());
-            mongoDef.setItemPicSrc(def.getItem_pic_src());
-            mongoDef.setName(def.getName());
-            mongoDef.setDescription(def.getDescription());
-            mongoDef.setCategory(def.getCategory());
-            mongoDef.setBaseStat(def.getBase_stat());
-            mongoDef.setStrength(def.getStrength());
-            mongoDef.setAgility(def.getAgility());
-            mongoDef.setIntelligence(def.getIntelligence());
-            mongoDef.setLuck(def.getLuck());
-            mongoDef.setMainStat(def.getMain_stat());
-            mongoDef.setWeight(def.getWeight());
-            mongoDef.setGrade(def.getGrade());
-            mongoDef.setPrice(def.getPrice());
-
-            java.util.List<GameSessionMongo.ItemDefMongo.ItemEffectMongo> effectList = new java.util.ArrayList<>();
-            for (ExternalGameResponse.ItemDef.ItemEffect eff : def.getItem_effect()) {
-                GameSessionMongo.ItemDefMongo.ItemEffectMongo effMongo = new GameSessionMongo.ItemDefMongo.ItemEffectMongo();
-                effMongo.setItemEffectName(eff.getItem_effect_name());
-                effMongo.setItemEffectDescription(eff.getItem_effect_description());
-                effMongo.setGrade(eff.getGrade());
-                effMongo.setItemEffectWeight(eff.getItem_effect_weight());
-                effectList.add(effMongo);
-            }
-            mongoDef.setItemEffect(effectList);
-
-            list.add(mongoDef);
-        }
-        return list;
     }
 
 

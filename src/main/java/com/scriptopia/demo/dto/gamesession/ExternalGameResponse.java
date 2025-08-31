@@ -52,7 +52,7 @@ public class ExternalGameResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ItemDef {
-        private int item_def_id;
+        private Long item_def_id;
         private String item_pic_src;
         private String name;
         private String description;

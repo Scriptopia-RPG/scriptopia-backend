@@ -41,7 +41,7 @@ public class GameSessionController {
     
     // 게임 시작
     @PostMapping
-    public ResponseEntity<StartGameRequest> startNewGame(
+    public ResponseEntity<Start> startNewGame(
             @RequestBody StartGameRequest request,
             Authentication authentication) {
 
