@@ -56,4 +56,9 @@ public class GameSessionService {
 
         return ResponseEntity.ok("선택하신 게임이 삭제되었습니다.");
     }
+
+
+    startNewGame
+
+
 }

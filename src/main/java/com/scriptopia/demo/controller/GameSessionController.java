@@ -41,12 +41,13 @@ public class GameSessionController {
     
     // 게임 시작
     @PostMapping
-    public ResponseEntity<String> startNewGame(
+    public ResponseEntity<StartGameRequest> startNewGame(
             @RequestBody StartGameRequest request,
             Authentication authentication) {
 
-        gameSessionService.startNewGame(request);
-        return ResponseEntity.ok("새 게임이 시작되었습니다.");
+        Long userId = Long.valueOf(authentication.getName());
+        StartGameRequest response = gameSessionService.startNewGame(userId, request);
+        return ResponseEntity.ok(response);
     }
 
 
