@@ -27,13 +27,13 @@ public class SharedGameService {
     @Transactional
     public ResponseEntity<?> saveSharedGame(Long Id, Long historyId) {
         User user = userRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
         History history = historyRepository.findById(historyId)
-                .orElseThrow(() -> new RuntimeException("History not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
 
         if(!history.getUser().getId().equals(Id)) {
-            return ResponseEntity.status(403).body("not your history");
+            throw new CustomException(ErrorCode.E_401_NOT_EQUAL_SHARED_GAME);
         }
 
         SharedGame sharedGame = SharedGame.from(user, history);
