@@ -27,9 +27,11 @@ public class SharedGameController {
     }
 
     @DeleteMapping("/share/{gameid}")
-    public void delete(Authentication authentication, @PathVariable Long gameid) {
+    public ResponseEntity<?> delete(Authentication authentication, @PathVariable Long gameid) {
         Long userId = Long.valueOf(authentication.getName());
 
         sharedGameService.deletesharedGame(userId, gameid);
+
+        return ResponseEntity.ok("게임이 삭제되었습니다.");
     }
 }

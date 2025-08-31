@@ -44,6 +44,7 @@ public enum ErrorCode {
     E_401_MALFORMED("E401006", "JWT 형식이 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
     E_401_EXPIRED_JWT("E401007", "JWT 토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
     E_401_UNSUPPORTED_JWT("E401008", "지원하지 않는 JWT 형식입니다.", HttpStatus.UNAUTHORIZED),
+    E_401_NOT_EQUAL_SHARED_GAME("E401009", "사용자가 공유한 게임이 아닙니다.", HttpStatus.UNAUTHORIZED),
 
     //403 Forbidden
     E_403("E403000", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
