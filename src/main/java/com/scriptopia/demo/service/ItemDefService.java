@@ -59,7 +59,7 @@ public class ItemDefService {
                 effect.setItemDef(itemDef);
                 effect.setEffectGradeDef(effectGradeDef);
                 effect.setEffectName(effectDto.getEffectName());
-                effect.setEffect_description(effectDto.getEffectDescription());
+                effect.setEffectDescription(effectDto.getEffectDescription());
 
                 itemDef.getItemEffects().add(effect);
             }
@@ -93,7 +93,7 @@ public class ItemDefService {
                 .map(effect -> {
                     ItemEffectResponse eResp = new ItemEffectResponse();
                     eResp.setEffectName(effect.getEffectName());
-                    eResp.setEffectDescription(effect.getEffect_description());
+                    eResp.setEffectDescription(effect.getEffectDescription());
                     eResp.setGrade(effect.getEffectGradeDef().getGrade().name());
                     return eResp;
                 })
