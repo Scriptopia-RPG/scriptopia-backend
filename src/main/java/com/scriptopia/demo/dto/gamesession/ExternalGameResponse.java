@@ -1,5 +1,8 @@
 package com.scriptopia.demo.dto.gamesession;
 
+import com.scriptopia.demo.domain.Grade;
+import com.scriptopia.demo.domain.ItemType;
+import com.scriptopia.demo.domain.MainStat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -53,16 +56,16 @@ public class ExternalGameResponse {
         private String item_pic_src;
         private String name;
         private String description;
-        private String category;
+        private ItemType category;
         private int base_stat;
         private List<ItemEffect> item_effect;
         private int strength;
         private int agility;
         private int intelligence;
         private int luck;
-        private String main_stat;
+        private MainStat main_stat;
         private int weight;
-        private String grade;
+        private Grade grade;
         private int price;
 
         @Data
@@ -71,7 +74,7 @@ public class ExternalGameResponse {
         public static class ItemEffect {
             private String item_effect_name;
             private String item_effect_description;
-            private String grade;
+            private Grade grade;
             private int item_effect_weight;
         }
     }

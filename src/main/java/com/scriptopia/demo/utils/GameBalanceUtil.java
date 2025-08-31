@@ -1,26 +1,124 @@
 package com.scriptopia.demo.utils;
 
+import com.scriptopia.demo.domain.Grade;
+import com.scriptopia.demo.domain.ItemType;
+import com.scriptopia.demo.domain.MainStat;
 import com.scriptopia.demo.dto.gamesession.ExternalGameResponse;
-import com.scriptopia.demo.dto.gamesession.ExternalGameResponse.ItemDef;
-import com.scriptopia.demo.dto.gamesession.ExternalGameResponse.ItemDef.ItemEffect;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GameBalanceUtil {
 
-    // 효과 등급별 공격력 증가 배율
-    private static double getEffectGradeMultiplier(String grade) {
+    // 착용 무기 적용 후 캐릭터 스탯 및 combat_point 계산
+    public static void applyEquippedWeaponStatsAndCombatPoint(ExternalGameResponse game) {
+        ExternalGameResponse.PlayerInfo player = game.getPlayer_info();
+        List<ExternalGameResponse.ItemDef> itemDefs = game.getItem_def();
+        List<ExternalGameResponse.InventoryItem> inventory = game.getInventory();
+
+        // item_def_id 기준 Map 생성
+        Map<Integer, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
+                .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItem_def_id, item -> item));
+
+        // 착용 중인 무기 하나 찾기
+        ExternalGameResponse.ItemDef equippedWeapon = inventory.stream()
+                .filter(ExternalGameResponse.InventoryItem::isEquipped)
+                .map(inv -> itemDefMap.get(inv.getItem_def_id()))
+                .filter(item -> item != null && item.getCategory() == ItemType.WEAPON)
+                .findFirst()
+                .orElse(null);
+
+        if (equippedWeapon != null) {
+            // 1. 무기 스탯 합산
+            player.setStrength(player.getStrength() + equippedWeapon.getStrength());
+            player.setAgility(player.getAgility() + equippedWeapon.getAgility());
+            player.setIntelligence(player.getIntelligence() + equippedWeapon.getIntelligence());
+            player.setLuck(player.getLuck() + equippedWeapon.getLuck());
+
+            // 2. combat_point 계산
+            double effectMultiplier = equippedWeapon.getItem_effect().stream()
+                    .mapToDouble(e -> getEffectGradeMultiplier(e.getGrade()))
+                    .sum();
+
+            int mainStatValue = switch (equippedWeapon.getMain_stat()) {
+                case STRENGTH -> player.getStrength();
+                case AGILITY -> player.getAgility();
+                case INTELLIGENCE -> player.getIntelligence();
+                case LUCK -> player.getLuck();
+                default -> 0;
+            };
+
+            double mainStatMultiplier = getMainStatMultiplier(mainStatValue);
+
+            int combatPoint = (int) (equippedWeapon.getBase_stat() * (1 + effectMultiplier) * mainStatMultiplier);
+
+            player.setCombat_point(combatPoint);
+        } else {
+            // 무기 미착용 시: 스탯 합 * 가장 높은 스탯 배율
+            int totalStat = player.getStrength() + player.getAgility() + player.getIntelligence() + player.getLuck();
+            int maxStat = Math.max(Math.max(player.getStrength(), player.getAgility()),
+                    Math.max(player.getIntelligence(), player.getLuck()));
+            double mainStatMultiplier = getMainStatMultiplier(maxStat);
+            int combatPoint = (int) (totalStat * mainStatMultiplier);
+            player.setCombat_point(combatPoint);
+        }
+    }
+
+    // 착용 방어구 적용 후 캐릭터 스탯 및 health_point 계산
+    public static void applyEquippedArmorStatsAndHealthPoint(ExternalGameResponse game) {
+        ExternalGameResponse.PlayerInfo player = game.getPlayer_info();
+        List<ExternalGameResponse.ItemDef> itemDefs = game.getItem_def();
+        List<ExternalGameResponse.InventoryItem> inventory = game.getInventory();
+
+        // item_def_id 기준 Map 생성
+        Map<Integer, ExternalGameResponse.ItemDef> itemDefMap = itemDefs.stream()
+                .collect(Collectors.toMap(ExternalGameResponse.ItemDef::getItem_def_id, item -> item));
+
+        // 착용 중인 방어구 하나 찾기
+        ExternalGameResponse.ItemDef equippedArmor = inventory.stream()
+                .filter(ExternalGameResponse.InventoryItem::isEquipped)
+                .map(inv -> itemDefMap.get(inv.getItem_def_id()))
+                .filter(item -> item != null && item.getCategory() == ItemType.ARMOR)
+                .findFirst()
+                .orElse(null);
+
+        if (equippedArmor != null) {
+            // 1. 방어구 스탯 합산
+            player.setStrength(player.getStrength() + equippedArmor.getStrength());
+            player.setAgility(player.getAgility() + equippedArmor.getAgility());
+            player.setIntelligence(player.getIntelligence() + equippedArmor.getIntelligence());
+            player.setLuck(player.getLuck() + equippedArmor.getLuck());
+
+            // 2. health_point 계산
+            double effectMultiplier = equippedArmor.getItem_effect().stream()
+                    .mapToDouble(e -> getEffectGradeMultiplier(e.getGrade()))
+                    .sum();
+
+            int baseHealth = equippedArmor.getBase_stat();
+            int healthPoint = (int) (baseHealth * (1 + effectMultiplier));
+            player.setHealth_point(healthPoint);
+        } else {
+            // 방어구 미착용 시: 전체 스탯 합 * 3
+            int totalStat = player.getStrength() + player.getAgility() + player.getIntelligence() + player.getLuck();
+            int healthPoint = totalStat * 3;
+            player.setHealth_point(healthPoint);
+        }
+    }
+
+
+    // 아이템 효과 등급 배율
+    private static double getEffectGradeMultiplier(Grade grade) {
         return switch (grade) {
-            case "C" -> 0.1;
-            case "U" -> 0.15;
-            case "R" -> 0.2;
-            case "E" -> 0.25;
-            case "L" -> 0.3;
-            default -> 0.0;
+            case COMMON -> 0.1;
+            case UNCOMMON -> 0.15;
+            case RARE -> 0.2;
+            case EPIC -> 0.25;
+            case LEGENDARY -> 0.3;
         };
     }
 
-    // 주 스탯 구간별 배율
+    // 메인 스탯 값 구간 배율
     private static double getMainStatMultiplier(int statValue) {
         if (statValue <= 5) return 1.1;
         if (statValue <= 10) return 1.2;
@@ -31,42 +129,6 @@ public class GameBalanceUtil {
         if (statValue <= 35) return 1.7;
         if (statValue <= 40) return 1.8;
         if (statValue <= 45) return 1.9;
-        return 2.0;
-    }
-
-    // 캐릭터 스탯 + 장착 아이템 스탯 합산
-    public static void applyItemStatsAndCombatPoint(ExternalGameResponse game) {
-        ExternalGameResponse.PlayerInfo player = game.getPlayer_info();
-        List<ItemDef> items = game.getItem_def();
-
-        int combatPoint = 0;
-
-        for (ItemDef item : items) {
-            // 기본 스탯 합산
-            player.setStrength(player.getStrength() + item.getStrength());
-            player.setAgility(player.getAgility() + item.getAgility());
-            player.setIntelligence(player.getIntelligence() + item.getIntelligence());
-            player.setLuck(player.getLuck() + item.getLuck());
-
-            // 무기라면 combat_point 계산
-            if ("WEAPON".equals(item.getCategory())) {
-                double effectMultiplier = item.getItem_effect().stream()
-                        .mapToDouble(e -> getEffectGradeMultiplier(e.getGrade()))
-                        .sum();
-
-                int mainStatValue = switch (item.getMain_stat()) {
-                    case "strength" -> player.getStrength();
-                    case "agility" -> player.getAgility();
-                    case "intelligence" -> player.getIntelligence();
-                    case "luck" -> player.getLuck();
-                    default -> 0;
-                };
-
-                double mainStatMultiplier = getMainStatMultiplier(mainStatValue);
-                combatPoint += (int) (item.getBase_stat() * (1 + effectMultiplier) * mainStatMultiplier);
-            }
-        }
-
-        player.setCombat_point(combatPoint);
+        return 2.0; // 46 이상
     }
 }

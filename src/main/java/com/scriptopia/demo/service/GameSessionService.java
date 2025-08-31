@@ -7,6 +7,7 @@ import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.GameSessionRepository;
 import com.scriptopia.demo.repository.UserRepository;
+import com.scriptopia.demo.utils.GameBalanceUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -93,12 +94,17 @@ public class GameSessionService {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
 
-        // 3. 밸런스 재세팅 (여기서 필요한 값 수정)
-        externalGame.getPlayer_info().setLife(5);
-        externalGame.getPlayer_info().setLevel(1);
-        externalGame.getPlayer_info().setExperience_point(0);
+        // 3. 밸런스 재세팅
+        ExternalGameResponse.PlayerInfo player = externalGame.getPlayer_info();
+        player.setLife(5);
+        player.setLevel(1);
+        player.setExperience_point(0);
+
+        // 4. 아이템 적용 및 전투력 계산
+        GameBalanceUtil.applyEquippedWeaponStatsAndCombatPoint(externalGame);
 
 
+        GameBalanceUtil.applyEquippedArmorStatsAndHealthPoint(externalGame);
 
 
 
