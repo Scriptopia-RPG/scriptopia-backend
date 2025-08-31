@@ -1,5 +1,7 @@
 package com.scriptopia.demo.domain.mongo;
 
+import com.scriptopia.demo.domain.ChoiceResultType;
+import com.scriptopia.demo.domain.MainStat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class ChoiceMongo {
     private String detail;
-    private String stats; // strength, agility, intelligence, luck
+    private MainStat stats; // strength, agility, intelligence, luck
     private Integer probability;
-    private String resultType; // battle, reward, shop, none
+    private ChoiceResultType resultType; // battle, reward, shop, none
 }

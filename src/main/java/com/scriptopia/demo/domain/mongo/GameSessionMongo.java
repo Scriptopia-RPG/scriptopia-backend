@@ -1,5 +1,6 @@
 package com.scriptopia.demo.domain.mongo;
 
+import com.scriptopia.demo.domain.SceneType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -18,7 +19,7 @@ public class GameSessionMongo {
 
     private Long userId; // MySQL 사용자 ID
 
-    private String sceneType; // battle, choice, shop, done
+    private SceneType sceneType; // battle, choice, shop, done
 
     private LocalDateTime startedAt;
     private LocalDateTime updatedAt;
