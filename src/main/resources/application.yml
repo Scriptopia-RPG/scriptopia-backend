@@ -36,6 +36,7 @@ spring:
           starttls:
             enable: true
 
+reset-url: ${RESET_URL}
 
 auth:
   jwt:
