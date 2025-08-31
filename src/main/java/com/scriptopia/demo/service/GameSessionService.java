@@ -93,10 +93,17 @@ public class GameSessionService {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
 
-        // 3. 밸런스 재세팅 (여기서 필요한 값 수정 가능)
-        // 예: life, gold 등 초기화
-        externalGame.getPlayer_info().setLife(100);
-        externalGame.getPlayer_info().setGold(100);
+        // 3. 밸런스 재세팅 (여기서 필요한 값 수정)
+        externalGame.getPlayer_info().setLife(5);
+        externalGame.getPlayer_info().setLevel(1);
+        externalGame.getPlayer_info().setExperience_point(0);
+
+
+
+
+
+
+
 
         // 4. MongoDB 저장
         GameSessionMongo mongoSession = new GameSessionMongo();
