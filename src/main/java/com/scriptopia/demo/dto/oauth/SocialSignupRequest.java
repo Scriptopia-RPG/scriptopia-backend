@@ -14,4 +14,5 @@ public class SocialSignupRequest {
     private String socialId;
     private String email;
     private String nickname;
+    private String deviceId;
 }
