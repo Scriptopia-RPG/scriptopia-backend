@@ -8,6 +8,7 @@ import java.util.List;
 @Data
 public class MySharedGameResponse {
     private String thumbnailUrl;
+    private boolean recommand;
     private Long totalPlayed;
     private String title;
     private String worldView;

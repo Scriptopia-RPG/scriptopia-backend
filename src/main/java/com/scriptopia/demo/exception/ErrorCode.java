@@ -31,6 +31,7 @@ public enum ErrorCode {
     E_400_MISSING_JWT("E400018", "토큰 값이 비어있습니다.", HttpStatus.BAD_REQUEST),
     E_400_PIA_ITEM_DUPLICATE("E400019", "이미 존재하는 PIA 아이템 이름입니다.", HttpStatus.BAD_REQUEST),
     E_400_INVALID_REQUEST("E400020", "이름이나, 금액이 비어있습니다.", HttpStatus.BAD_REQUEST),
+    E_400_GAME_ALREADY_IN_PROGRESS("E400021", "진행 중인 게임이 이미 존재합니다.", HttpStatus.BAD_REQUEST),
 
 
 
@@ -44,6 +45,7 @@ public enum ErrorCode {
     E_401_MALFORMED("E401006", "JWT 형식이 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
     E_401_EXPIRED_JWT("E401007", "JWT 토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
     E_401_UNSUPPORTED_JWT("E401008", "지원하지 않는 JWT 형식입니다.", HttpStatus.UNAUTHORIZED),
+    E_401_NOT_EQUAL_SHARED_GAME("E401009", "사용자가 공유한 게임이 아닙니다.", HttpStatus.UNAUTHORIZED),
 
     //403 Forbidden
     E_403("E403000", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
@@ -73,7 +75,9 @@ public enum ErrorCode {
 
     //500 Internal Server Error
     E_500("E_500000", "예상치 못한 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-    E_500_TOKEN_HASHING_FAILED("E_500001","리프레쉬 토큰 해싱에 실패했습니다.",HttpStatus.INTERNAL_SERVER_ERROR);
+    E_500_TOKEN_HASHING_FAILED("E_500001","리프레쉬 토큰 해싱에 실패했습니다.",HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_EXTERNAL_API_ERROR("E500001", "외부 게임 API 호출에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+
 
     private final String code;
     private final String message;

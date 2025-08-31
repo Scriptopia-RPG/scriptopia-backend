@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface SharedGameRepository extends JpaRepository<SharedGame, Long> {
     List<SharedGame> findAllByUserId(Long userId);
+
 }

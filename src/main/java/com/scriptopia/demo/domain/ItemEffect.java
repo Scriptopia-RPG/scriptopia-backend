@@ -25,5 +25,5 @@ public class ItemEffect {
     private String effectName;
 
     // 아이템 효과 설명
-    private String effect_description;
+    private String effectDescription;
 }
