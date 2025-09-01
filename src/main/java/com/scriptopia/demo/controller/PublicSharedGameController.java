@@ -15,4 +15,9 @@ public class PublicSharedGameController {
     public ResponseEntity<?> getSharedGameDetail(@PathVariable Long sharedGameId) {
         return sharedGameService.getDetailedSharedGame(sharedGameId);
     }
+
+    @GetMapping("/tags")
+    public ResponseEntity<?> getSharedGameTags() {
+        return sharedGameService.getTag();
+    }
 }
