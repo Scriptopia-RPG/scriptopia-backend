@@ -36,8 +36,6 @@ public class PiaShopController {
         return ResponseEntity.ok(result);
     }
 
-
-
     @GetMapping("/user/shops/pia/items")
     public ResponseEntity<List<PiaItemResponse>> getPiaItems() {
         return ResponseEntity.ok(piaShopService.getPiaItems());
