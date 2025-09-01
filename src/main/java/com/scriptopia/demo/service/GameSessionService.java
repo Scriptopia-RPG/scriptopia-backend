@@ -28,7 +28,6 @@ public class GameSessionService {
     private final RestTemplate restTemplate;
     private final GameSessionMongoRepository gameSessionMongoRepository;
     private final UserItemRepository userItemRepository;
-    private final ItemDefRepository itemDefRepository;
 
     public ResponseEntity<?> getGameSession(Long userid) {
         User user = userRepository.findById(userid)
