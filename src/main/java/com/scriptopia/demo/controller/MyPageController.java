@@ -1,7 +1,6 @@
 package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.dto.history.HistoryPageResponse;
-import com.scriptopia.demo.dto.history.HistoryResponse;
 import com.scriptopia.demo.service.HistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-public class UserHistoryController {
+public class MyPageController {
     private final HistoryService historyService;
 
     @GetMapping("/user/my-page/history")
