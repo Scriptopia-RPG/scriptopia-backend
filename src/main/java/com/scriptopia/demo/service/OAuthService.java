@@ -15,6 +15,7 @@ import com.scriptopia.demo.repository.SocialAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.utils.GoogleClient;
 import com.scriptopia.demo.utils.JwtProvider;
+import com.scriptopia.demo.utils.NaverClient;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,6 +49,7 @@ public class OAuthService {
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService; // RefreshToken 관리 서비스
     private final GoogleClient googleClient;
+    private final NaverClient naverClient;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
     private final OAuthProperties props;
@@ -206,11 +208,11 @@ public class OAuthService {
             case "google":
                 return googleClient.getUserInfo(code);
             case "naver":
-                // return naverClient.getUserInfo(code);
+                 return naverClient.getUserInfo(code);
             case "kakao":
                 // return kakaoClient.getUserInfo(code);
             default:
-                throw new IllegalArgumentException("지원하지 않는 provider: " + provider);
+                throw new CustomException(ErrorCode.E_400_UNSUPPORTED_PROVIDER);
         }
     }
 }
