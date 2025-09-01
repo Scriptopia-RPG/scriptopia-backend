@@ -80,7 +80,13 @@ public enum ErrorCode {
     //500 Internal Server Error
     E_500("E_500000", "예상치 못한 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     E_500_TOKEN_HASHING_FAILED("E_500001","리프레쉬 토큰 해싱에 실패했습니다.",HttpStatus.INTERNAL_SERVER_ERROR),
-    E_500_EXTERNAL_API_ERROR("E500001", "외부 게임 API 호출에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+    E_500_EXTERNAL_API_ERROR("E500002", "외부 게임 API 호출에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_DATABASE_ERROR("E500003", "데이터베이스 처리 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_TOKEN_CREATION_FAILED("E500004", "인증 토큰 생성에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_TOKEN_STORAGE_FAILED("E500005", "리프레시 토큰 저장에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    //502 BAD_GATEWAY
+    E_502_OAUTH_SERVER_ERROR("E502001", "소셜 로그인 서버와의 통신에 실패했습니다.", HttpStatus.BAD_GATEWAY);
 
 
     private final String code;
