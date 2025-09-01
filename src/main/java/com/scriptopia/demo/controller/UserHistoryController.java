@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserHistoryController {
     private final HistoryService historyService;
 
-    @GetMapping("/history")
+    @GetMapping("/user/my-page/history")
     public ResponseEntity<List<HistoryPageResponse>> getHistory(@RequestParam(required = false) Long lastId,
                                                                 @RequestParam(defaultValue = "10") int size,
                                                                 Authentication authentication) {
