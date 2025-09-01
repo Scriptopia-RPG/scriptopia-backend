@@ -86,6 +86,10 @@ public class GameSessionService {
             Long itemId = Long.parseLong(request.getItemId());
             userItem = userItemRepository.findByUserIdAndItemDefId(userId, itemId)
                     .orElseThrow(() -> new CustomException(ErrorCode.E_400_ITEM_NOT_OWNED));
+
+            if (userItem.getRemainingUses() <= 0) {
+                throw new CustomException(ErrorCode.E_400_ITEM_NO_USES_LEFT);
+            }
         }
 
 
@@ -247,7 +251,7 @@ public class GameSessionService {
             }
         }
 
-// 3. MongoSession 저장
+        // 3. MongoSession 저장
         mongoSession.setInventory(mongoInventory);
         mongoSession.setItemDef(mongoItemDefs);
 
@@ -306,6 +310,10 @@ public class GameSessionService {
         mysqlSession.setMongoId(savedMongo.getId());
         gameSessionRepository.save(mysqlSession);
 
+        if (userItem != null) {
+            userItem.setRemainingUses(userItem.getRemainingUses() - 1);
+            userItemRepository.save(userItem);
+        }
 
         StartGameResponse startGameResponse = new StartGameResponse(
                 "게임이 생성되었습니다.",

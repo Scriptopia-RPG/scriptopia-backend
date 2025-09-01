@@ -35,6 +35,7 @@ public enum ErrorCode {
     E_400_INVALID_SOCIAL_LOGIN_CODE("E400022", "유효하지 않거나 만료된 인증 코드입니다.", HttpStatus.BAD_REQUEST),
     E_400_NO_EMAIL("E400023", "소셜 계정에서 이메일 정보를 제공하지 않았습니다.", HttpStatus.BAD_REQUEST),
     E_400_UNSUPPORTED_PROVIDER("E400024", "지원하지 않는 소셜 로그인 공급자입니다.", HttpStatus.BAD_REQUEST),
+    E_400_ITEM_NO_USES_LEFT("E400024", "아이템 사용 가능 횟수가 남아있지 않습니다.", HttpStatus.BAD_REQUEST),
 
 
 
@@ -86,7 +87,6 @@ public enum ErrorCode {
 
     //502 BAD_GATEWAY
     E_502_OAUTH_SERVER_ERROR("E502001", "소셜 로그인 서버와의 통신에 실패했습니다.", HttpStatus.BAD_GATEWAY);
-
 
 
     private final String code;

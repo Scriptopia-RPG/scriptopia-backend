@@ -54,6 +54,10 @@ public class AuctionService {
             throw new CustomException(ErrorCode.E_400_ITEM_NOT_TRADE_ABLE);
         }
 
+        if (userItem.getRemainingUses() <= 0){
+            throw new CustomException(ErrorCode.E_400_ITEM_NO_USES_LEFT);
+        }
+
         // 이미 경매장에 등록되어 있는지 확인
         if (auctionRepository.existsByUserItem(userItem)) {
             throw new CustomException(ErrorCode.E_400_ITEM_ALREADY_REGISTERED);
