@@ -44,5 +44,4 @@ public class OAuthController {
         return ResponseEntity.ok(result);
     }
 
-
 }
