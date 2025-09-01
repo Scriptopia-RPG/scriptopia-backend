@@ -1,5 +1,6 @@
 package com.scriptopia.demo.service;
 
+import com.scriptopia.demo.config.InitGameData;
 import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.domain.mongo.*;
 import com.scriptopia.demo.dto.gamesession.*;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +71,6 @@ public class GameSessionService {
     @Transactional
     public StartGameResponse startNewGame(Long userId, StartGameRequest request) {
 
-
         // 1. 진행중인 게임 체크
         if (gameSessionRepository.existsByUser_Id(userId)) {
             throw new CustomException(ErrorCode.E_400_GAME_ALREADY_IN_PROGRESS);
@@ -115,21 +114,9 @@ public class GameSessionService {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
 
+        InitGameData initGameData = new InitGameData(externalGame.getPlayerInfo().getStartStat(), Grade.COMMON);
 
-
-        // 3. 밸런스 재세팅
-        ExternalGameResponse.PlayerInfo player = externalGame.getPlayerInfo();
-        player.setLife(5);
-        player.setLevel(1);
-        player.setExperiencePoint(0);
-
-        // 4. 아이템 적용 및 전투력 계산
-        GameBalanceUtil.applyEquippedWeaponStatsAndCombatPoint(externalGame);
-        GameBalanceUtil.applyEquippedArmorStatsAndHealthPoint(externalGame);
-        GameBalanceUtil.applyEquippedArtifactStats(externalGame);
-
-
-        // 5. MongoDB 저장
+        // MongoDB 저장
         GameSessionMongo mongoSession = new GameSessionMongo();
         mongoSession.setUserId(userId);
         mongoSession.setSceneType(SceneType.CHOICE); // 시작은 choice 기본값
@@ -222,7 +209,7 @@ public class GameSessionService {
                     userItemDef.getAgility(),
                     userItemDef.getIntelligence(),
                     userItemDef.getLuck(),
-                    userItemDef.getMainStat(),
+                    userItemDef.getStat(),
                     1,
                     userItemDef.getItemGradeDef().getGrade(),
                     userItemDef.getPrice()
@@ -253,7 +240,6 @@ public class GameSessionService {
         // 3. MongoSession 저장
         mongoSession.setInventory(mongoInventory);
         mongoSession.setItemDef(mongoItemDefs);
-
 
 
         // 플레이어 정보
