@@ -34,7 +34,7 @@ public class AuctionController {
     }
 
 
-    @PostMapping("/user/{auctionId}/purchase")
+    @PostMapping("/user/trades/{auctionId}/purchase")
     public ResponseEntity<String> purchaseItem(
             @PathVariable String auctionId,
             Authentication authentication) {

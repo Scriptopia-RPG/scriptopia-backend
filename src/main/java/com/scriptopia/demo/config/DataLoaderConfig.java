@@ -20,14 +20,14 @@ public class DataLoaderConfig {
     @Bean
     public ApplicationRunner dataLoader() {
         return args -> {
-            // ✅ ItemGradeDef 기본 데이터
+            // ItemGradeDef 기본 데이터
             saveItemGradeIfNotExists(Grade.COMMON, 1.0, 100L);
             saveItemGradeIfNotExists(Grade.UNCOMMON, 1.0, 200L);
             saveItemGradeIfNotExists(Grade.RARE, 1.0, 500L);
             saveItemGradeIfNotExists(Grade.EPIC, 1.0, 1000L);
             saveItemGradeIfNotExists(Grade.LEGENDARY, 1.0, 2000L);
 
-            // ✅ EffectGradeDef 기본 데이터
+            // EffectGradeDef 기본 데이터
             saveEffectGradeIfNotExists(Grade.COMMON, 100L, 0.1);
             saveEffectGradeIfNotExists(Grade.UNCOMMON, 200L, 0.15);
             saveEffectGradeIfNotExists(Grade.RARE, 500L, 0.2);
