@@ -8,7 +8,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         show_sql: true
@@ -42,6 +42,17 @@ oauth:
     client-secret: ${GOOGLE_SECRET_KEY}
     redirect-uri: ${GOOGLE_REDIRECT_URI}
     scope: email profile
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID}
+    client-secret: ${KAKAO_SECRET}
+    redirect-uri: ${KAKAO_REDIRECT_URI}
+    scope: account_email profile_nickname profile_image
+  naver:
+    client-id: ${NAVER_CLIENT_ID}
+    client-secret: ${NAVER_SECRET}
+    redirect-uri: ${NAVER_REDIRECT_URI}
+    scope: name email profile_image
+
 
 
 auth:
