@@ -2,8 +2,10 @@ package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.domain.History;
 import com.scriptopia.demo.domain.SharedGame;
+import com.scriptopia.demo.domain.SharedGameScore;
 import com.scriptopia.demo.domain.User;
 import com.scriptopia.demo.dto.sharedgame.MySharedGameResponse;
+import com.scriptopia.demo.dto.sharedgame.PublicSharedGameDetailResponse;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.*;
@@ -83,5 +85,35 @@ public class SharedGameService {
         }
 
         sharedGameRepository.delete(game);
+    }
+
+    public ResponseEntity<?> getDetailedSharedGame(Long sharedId) {
+        SharedGame game = sharedGameRepository.findById(sharedId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_SHARED_GAME_NOT_FOUND));
+
+        List<String> tagName = gameTagRepository.findTagNamesBySharedGameId(game.getId());
+
+        List<SharedGameScore> score = sharedGameScoreRepository.findAllBySharedGameIdOrderByScoreDescCreatedAtDesc(game.getId());
+
+        PublicSharedGameDetailResponse dto = new PublicSharedGameDetailResponse();
+        dto.setSharedGameId(game.getId());
+        dto.setNickname(game.getUser().getNickname());
+        dto.setThumbnailUrl(game.getThumbnailUrl());
+        dto.setTotalPlayed(game.getTotalPlayed());
+        dto.setTitle(game.getTitle());
+        dto.setWorldView(game.getWorldView());
+        dto.setBackgroundStory(game.getBackgroundStory());
+        dto.setSharedAt(game.getSharedAt());
+
+        dto.setTags(tagName.stream().map(PublicSharedGameDetailResponse.TagDto::new).toList());
+        dto.setTopScores(score.stream().map(s ->{
+            PublicSharedGameDetailResponse.TopScoreDto topScoreDto = new PublicSharedGameDetailResponse.TopScoreDto();
+            topScoreDto.setNickname(s.getUser().getNickname());
+            topScoreDto.setScore(s.getScore().floatValue());
+            topScoreDto.setCreatedAt(s.getCreatedAt());
+            return topScoreDto;
+        }).toList() );
+
+        return ResponseEntity.ok(dto);
     }
 }
