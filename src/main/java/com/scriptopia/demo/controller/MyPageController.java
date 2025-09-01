@@ -1,6 +1,7 @@
 package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.dto.history.HistoryPageResponse;
+import com.scriptopia.demo.service.GameSessionService;
 import com.scriptopia.demo.service.HistoryService;
 import com.scriptopia.demo.service.SharedGameService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.List;
 public class MyPageController {
     private final HistoryService historyService;
     private final SharedGameService sharedGameService;
+    private final GameSessionService gameSessionService;
 
     @GetMapping("/user/my-page/history")
     public ResponseEntity<List<HistoryPageResponse>> getHistory(@RequestParam(required = false) Long lastId,
@@ -46,5 +48,19 @@ public class MyPageController {
         sharedGameService.deletesharedGame(userId, gameid);
 
         return ResponseEntity.ok("게임이 삭제되었습니다.");
+    }
+
+    @GetMapping("/user/my-page/game")
+    public ResponseEntity<?> loadGameSession(Authentication authentication) {
+        Long userId = Long.valueOf(authentication.getName());
+
+        return gameSessionService.getGameSession(userId);
+    }
+
+    @DeleteMapping("/user/my-page/game/{gameId}")
+    public ResponseEntity<?> deleteGameSession(Authentication authentication, @PathVariable String gameId) {
+        Long userId = Long.valueOf(authentication.getName());
+
+        return gameSessionService.deleteGameSession(userId, gameId);
     }
 }
