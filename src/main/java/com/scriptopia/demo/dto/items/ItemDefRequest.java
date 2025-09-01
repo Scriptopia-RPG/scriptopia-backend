@@ -1,8 +1,7 @@
 package com.scriptopia.demo.dto.items;
 
-import com.scriptopia.demo.domain.Grade;
 import com.scriptopia.demo.domain.ItemType;
-import com.scriptopia.demo.domain.MainStat;
+import com.scriptopia.demo.domain.Stat;
 import lombok.Data;
 
 import java.util.List;
@@ -15,7 +14,7 @@ public class ItemDefRequest {
     private String picSrc;
 
     private ItemType itemType;
-    private MainStat mainStat;
+    private Stat stat;
 
     private Integer baseStat;
     private Integer strength;

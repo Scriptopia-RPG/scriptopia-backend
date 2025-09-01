@@ -96,7 +96,7 @@ public class AuctionService {
                     request.getGrade(),
                     request.getMinPrice(),
                     request.getMaxPrice(),
-                    request.getMainStat(),
+                    request.getStat(),
                     request.getEffectGrades(),
                     pageable
             );
@@ -331,7 +331,7 @@ public class AuctionService {
                                 auction.getUserItem().getItemDef().getName(),
                                 auction.getUserItem().getItemDef().getItemGradeDef().getGrade().name(),
                                 auction.getUserItem().getItemDef().getItemType().name(),
-                                auction.getUserItem().getItemDef().getMainStat().name(),
+                                auction.getUserItem().getItemDef().getStat().name(),
                                 auction.getUserItem().getItemDef().getPicSrc()
                         )
                 )).toList();

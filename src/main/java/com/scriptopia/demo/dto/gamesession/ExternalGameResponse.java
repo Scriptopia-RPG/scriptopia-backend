@@ -1,13 +1,11 @@
 package com.scriptopia.demo.dto.gamesession;
 
 import com.scriptopia.demo.domain.Grade;
-import com.scriptopia.demo.domain.ItemType;
-import com.scriptopia.demo.domain.MainStat;
+import com.scriptopia.demo.domain.Stat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,7 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ExternalGameResponse {
     private PlayerInfo playerInfo;
-    private List<InventoryItem> inventory;
     private List<ItemDef> itemDef;
     private String worldView;
     private String backgroundStory;
@@ -25,48 +22,20 @@ public class ExternalGameResponse {
     @NoArgsConstructor
     public static class PlayerInfo {
         private String name;
-        private int life;
-        private int level;
-        private int experiencePoint;
-        private int combatPoint;
-        private int healthPoint;
+        private Stat startStat;
         private String trait;
-        private int strength;
-        private int agility;
-        private int intelligence;
-        private int luck;
-        private int gold;
-    }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class InventoryItem {
-        private Long itemDefId;
-        private LocalDateTime acquiredAt;
-        private boolean equipped;
-        private String source;
     }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ItemDef {
-        private Long itemDefId;
-        private String itemPicSrc;
         private String name;
         private String description;
-        private ItemType category;
-        private int baseStat;
         private List<ItemEffect> itemEffect;
-        private int strength;
-        private int agility;
-        private int intelligence;
-        private int luck;
-        private MainStat mainStat;
-        private int weight;
+        private Stat mainStat;
         private Grade grade;
-        private Long price;
 
         @Data
         @AllArgsConstructor
@@ -75,7 +44,6 @@ public class ExternalGameResponse {
             private String itemEffectName;
             private String itemEffectDescription;
             private Grade grade;
-            private int itemEffectWeight;
         }
     }
 }
