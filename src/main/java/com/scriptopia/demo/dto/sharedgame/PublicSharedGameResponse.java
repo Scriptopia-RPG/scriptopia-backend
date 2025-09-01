@@ -2,6 +2,9 @@ package com.scriptopia.demo.dto.sharedgame;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Data
 public class PublicSharedGameResponse {
     private Long sharedGameId;
@@ -10,5 +13,9 @@ public class PublicSharedGameResponse {
     private Long likeCount;
     private Long totalPlayCount;
     private String title;
-    private Float topScore;
+    private Long topScore;
+    private LocalDateTime sharedAt;
+
+    private List<TagDto> tags;
+
 }
