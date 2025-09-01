@@ -18,6 +18,11 @@ public class OAuthController {
 
     private final OAuthService oAuthService;
 
+    @GetMapping("/authorize")
+    public ResponseEntity<String> getAuthorizationUrl(@RequestParam("provider") String provider) {
+        return ResponseEntity.ok(oAuthService.buildAuthorizationUrl(provider));
+    }
+
     @GetMapping("/{provider}")
     public ResponseEntity<OAuthLoginResponse> login(
             @PathVariable("provider") String provider,
@@ -39,8 +44,5 @@ public class OAuthController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/authorize")
-    public ResponseEntity<String> getAuthorizationUrl(@RequestParam("provider") String provider) {
-        return ResponseEntity.ok(oAuthService.buildAuthorizationUrl(provider));
-    }
+
 }
