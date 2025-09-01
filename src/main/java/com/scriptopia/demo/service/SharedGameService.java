@@ -1,11 +1,9 @@
 package com.scriptopia.demo.service;
 
-import com.scriptopia.demo.domain.History;
-import com.scriptopia.demo.domain.SharedGame;
-import com.scriptopia.demo.domain.SharedGameScore;
-import com.scriptopia.demo.domain.User;
+import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.dto.sharedgame.MySharedGameResponse;
 import com.scriptopia.demo.dto.sharedgame.PublicSharedGameDetailResponse;
+import com.scriptopia.demo.dto.sharedgame.PublicTagDefResponse;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.*;
@@ -25,6 +23,7 @@ public class SharedGameService {
     private final SharedGameScoreRepository sharedGameScoreRepository;
     private final SharedGameFavoriteRepository sharedGameFavoriteRepository;
     private final GameTagRepository gameTagRepository;
+    private final TagDefRepository tagDefRepository;
 
     @Transactional
     public ResponseEntity<?> saveSharedGame(Long Id, Long historyId) {
@@ -115,5 +114,15 @@ public class SharedGameService {
         }).toList() );
 
         return ResponseEntity.ok(dto);
+    }
+
+    public ResponseEntity<?> getTag() {
+        List<TagDef> tag = tagDefRepository.findAll();
+
+        List<PublicTagDefResponse> dtoList = tag.stream()
+                .map(t -> new PublicTagDefResponse(t.getId(), t.getTagName()))
+                .toList();
+
+        return ResponseEntity.ok(dtoList);
     }
 }
