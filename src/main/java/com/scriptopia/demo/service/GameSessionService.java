@@ -87,7 +87,9 @@ public class GameSessionService {
             userItem = userItemRepository.findByUserIdAndItemDefId(userId, itemId)
                     .orElseThrow(() -> new CustomException(ErrorCode.E_400_ITEM_NOT_OWNED));
 
-
+            if (userItem.getRemainingUses() <= 0) {
+                throw new CustomException(ErrorCode.E_400_ITEM_NO_USES_LEFT);
+            }
         }
 
 
@@ -308,6 +310,10 @@ public class GameSessionService {
         mysqlSession.setMongoId(savedMongo.getId());
         gameSessionRepository.save(mysqlSession);
 
+        if (userItem != null) {
+            userItem.setRemainingUses(userItem.getRemainingUses() - 1);
+            userItemRepository.save(userItem);
+        }
 
         StartGameResponse startGameResponse = new StartGameResponse(
                 "게임이 생성되었습니다.",
