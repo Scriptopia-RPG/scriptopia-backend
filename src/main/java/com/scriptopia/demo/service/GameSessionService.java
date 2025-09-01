@@ -86,6 +86,8 @@ public class GameSessionService {
             Long itemId = Long.parseLong(request.getItemId());
             userItem = userItemRepository.findByUserIdAndItemDefId(userId, itemId)
                     .orElseThrow(() -> new CustomException(ErrorCode.E_400_ITEM_NOT_OWNED));
+
+
         }
 
 
@@ -247,7 +249,7 @@ public class GameSessionService {
             }
         }
 
-// 3. MongoSession 저장
+        // 3. MongoSession 저장
         mongoSession.setInventory(mongoInventory);
         mongoSession.setItemDef(mongoItemDefs);
 
