@@ -1,13 +1,13 @@
 package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.domain.*;
-import com.scriptopia.demo.dto.sharedgame.MySharedGameResponse;
-import com.scriptopia.demo.dto.sharedgame.PublicSharedGameDetailResponse;
-import com.scriptopia.demo.dto.sharedgame.PublicTagDefResponse;
+import com.scriptopia.demo.dto.sharedgame.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,5 +124,50 @@ public class SharedGameService {
                 .toList();
 
         return ResponseEntity.ok(dtoList);
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(Long userId, Long lastId, int size,
+                                                                                     List<Long> tagIds, String q) {
+
+        PageRequest pr = PageRequest.of(0, size);
+        Page<SharedGame> page;
+
+        boolean hasQ = q != null && q.isBlank();
+        boolean hasTags = tagIds != null && !tagIds.isEmpty();
+
+        if(hasQ) {
+            page = sharedGameRepository.pageSearchOnly(lastId, q.trim(), pr);
+        }
+        else if(hasTags) {
+            page = sharedGameRepository.pageByAllTagsOnly(lastId, tagIds, tagIds.size(), pr);
+        }
+        else {
+            page = sharedGameRepository.pageAll(lastId, pr);
+        }
+
+        var items = page.getContent().stream().map(g -> {
+            var dto = new PublicSharedGameResponse();
+            dto.setSharedGameId(g.getId());
+            dto.setThumbnailUrl(g.getThumbnailUrl());
+            dto.setTitle(g.getTitle());
+            dto.setTopScore(sharedGameScoreRepository.maxScoreBySharedGameId(g.getId()));
+            dto.setSharedAt(g.getSharedAt());
+
+            dto.setTotalPlayCount(sharedGameScoreRepository.countBySharedGameId(g.getId()));
+            dto.setLikeCount(sharedGameFavoriteRepository.countBySharedGameId(g.getId()));
+
+            if(userId != null) {
+                dto.setLiked(sharedGameFavoriteRepository.existsByUserIdAndSharedGameId(userId, g.getId()));
+            }
+
+            List<TagDto> tags = gameTagRepository.findTagDtosBySharedGameId(g.getId());
+            dto.setTags(tags);
+
+            return dto;
+        }).toList();
+
+        Long nextCursor = items.isEmpty() ? null : items.get(items.size() - 1).getSharedGameId();
+        return ResponseEntity.ok(new CursorPage<>(items, nextCursor, page.hasNext()));
     }
 }
