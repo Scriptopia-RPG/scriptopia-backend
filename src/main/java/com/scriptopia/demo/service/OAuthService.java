@@ -15,6 +15,7 @@ import com.scriptopia.demo.repository.SocialAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.utils.GoogleClient;
 import com.scriptopia.demo.utils.JwtProvider;
+import com.scriptopia.demo.utils.KakaoClient;
 import com.scriptopia.demo.utils.NaverClient;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class OAuthService {
 
-
     private static final String RT_COOKIE = "RT";
     private static final boolean COOKIE_SECURE = true;
     private static final String COOKIE_SAMESITE = "None";
@@ -50,6 +50,7 @@ public class OAuthService {
     private final RefreshTokenService refreshTokenService; // RefreshToken 관리 서비스
     private final GoogleClient googleClient;
     private final NaverClient naverClient;
+    private final KakaoClient kakaoClient;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
     private final OAuthProperties props;
@@ -210,7 +211,7 @@ public class OAuthService {
             case "naver":
                  return naverClient.getUserInfo(code);
             case "kakao":
-                // return kakaoClient.getUserInfo(code);
+                 return kakaoClient.getUserInfo(code);
             default:
                 throw new CustomException(ErrorCode.E_400_UNSUPPORTED_PROVIDER);
         }
