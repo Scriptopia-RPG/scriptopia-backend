@@ -36,7 +36,7 @@ public class ItemDef {
     private Integer luck;
 
     @Enumerated(EnumType.STRING)
-    private MainStat mainStat;
+    private Stat stat;
 
     private LocalDateTime createdAt;
 

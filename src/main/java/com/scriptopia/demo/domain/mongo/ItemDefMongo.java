@@ -1,9 +1,8 @@
 package com.scriptopia.demo.domain.mongo;
 
 import com.scriptopia.demo.domain.Grade;
-import com.scriptopia.demo.domain.ItemCategory;
 import com.scriptopia.demo.domain.ItemType;
-import com.scriptopia.demo.domain.MainStat;
+import com.scriptopia.demo.domain.Stat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,8 +26,7 @@ public class ItemDefMongo {
     private Integer agility;
     private Integer intelligence;
     private Integer luck;
-    private MainStat mainStat; // strength, agility, intelligence, luck
-    private Integer weight;
+    private Stat mainStat; // strength, agility, intelligence, luck
     private Grade grade; // COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
     private Long price;
 }

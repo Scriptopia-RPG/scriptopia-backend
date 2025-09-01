@@ -13,13 +13,12 @@ public class PlayerInfoMongo {
     private String name;
     private Integer life;
     private Integer level;
+    private Integer healthPoint; // 난수
     private Integer experiencePoint;
-    private Integer combatPoint;
-    private Integer healthPoint;
     private String trait;
-    private Integer strength;
-    private Integer agility;
-    private Integer intelligence;
-    private Integer luck;
-    private Integer gold;
+    private Integer strength; // 난수
+    private Integer agility; // 난수
+    private Integer intelligence;  // 난수
+    private Integer luck; // 난수
+    private Integer gold; // 난수
 }
