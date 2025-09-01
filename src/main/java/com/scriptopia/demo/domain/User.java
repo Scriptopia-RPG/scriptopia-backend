@@ -16,7 +16,7 @@ public class User {
     @Id @GeneratedValue
     private Long id;
 
-
+    @Column(nullable = false, unique = true)
     private String nickname;
 
     private Long pia;
@@ -29,6 +29,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    private LoginType loginType;
 
     // 거래 관련 도메인 메소드
     public void addPia(Long amount) {

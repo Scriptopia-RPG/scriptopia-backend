@@ -32,6 +32,9 @@ public enum ErrorCode {
     E_400_PIA_ITEM_DUPLICATE("E400019", "이미 존재하는 PIA 아이템 이름입니다.", HttpStatus.BAD_REQUEST),
     E_400_INVALID_REQUEST("E400020", "이름이나, 금액이 비어있습니다.", HttpStatus.BAD_REQUEST),
     E_400_GAME_ALREADY_IN_PROGRESS("E400021", "진행 중인 게임이 이미 존재합니다.", HttpStatus.BAD_REQUEST),
+    E_400_INVALID_SOCIAL_LOGIN_CODE("E400022", "유효하지 않거나 만료된 인증 코드입니다.", HttpStatus.BAD_REQUEST),
+    E_400_NO_EMAIL("E400023", "소셜 계정에서 이메일 정보를 제공하지 않았습니다.", HttpStatus.BAD_REQUEST),
+    E_400_UNSUPPORTED_PROVIDER("E400024", "지원하지 않는 소셜 로그인 공급자입니다.", HttpStatus.BAD_REQUEST),
 
 
 
@@ -76,7 +79,14 @@ public enum ErrorCode {
     //500 Internal Server Error
     E_500("E_500000", "예상치 못한 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     E_500_TOKEN_HASHING_FAILED("E_500001","리프레쉬 토큰 해싱에 실패했습니다.",HttpStatus.INTERNAL_SERVER_ERROR),
-    E_500_EXTERNAL_API_ERROR("E500001", "외부 게임 API 호출에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+    E_500_EXTERNAL_API_ERROR("E500002", "외부 게임 API 호출에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_DATABASE_ERROR("E500003", "데이터베이스 처리 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_TOKEN_CREATION_FAILED("E500004", "인증 토큰 생성에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_TOKEN_STORAGE_FAILED("E500005", "리프레시 토큰 저장에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    //502 BAD_GATEWAY
+    E_502_OAUTH_SERVER_ERROR("E502001", "소셜 로그인 서버와의 통신에 실패했습니다.", HttpStatus.BAD_GATEWAY);
+
 
 
     private final String code;
