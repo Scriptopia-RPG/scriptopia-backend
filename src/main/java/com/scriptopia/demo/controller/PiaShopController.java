@@ -18,7 +18,7 @@ public class PiaShopController {
     private final PiaShopService piaShopService;
 
     // admin → public 으로 테스트용 변경했음 나중에 수정 바람
-    @PostMapping("/public/items/pia")
+    @PostMapping("/public/shops/items/pia")
     public ResponseEntity<String> createPiaItem(@RequestBody PiaItemRequest request) {
         piaShopService.createPiaItem(request);
         return ResponseEntity.ok("PIA 아이템이 등록되었습니다.");
@@ -26,7 +26,7 @@ public class PiaShopController {
 
 
     // admin → public 으로 테스트용 변경했음 나중에 수정 바람
-    @PutMapping("/public/items/pia/{itemId}")
+    @PutMapping("/public/shops/items/pia/{itemId}")
     public ResponseEntity<String> updatePiaItem(
             @PathVariable String itemId,
             @RequestBody PiaItemUpdateRequest requestDto) {
@@ -35,8 +35,6 @@ public class PiaShopController {
         String result = piaShopService.updatePiaItem(itemId, requestDto);
         return ResponseEntity.ok(result);
     }
-
-
 
     @GetMapping("/user/shops/pia/items")
     public ResponseEntity<List<PiaItemResponse>> getPiaItems() {

@@ -15,15 +15,6 @@ public class AuctionController {
     private final AuctionService auctionService;
 
 
-    @PostMapping("/user/trades")
-    public ResponseEntity<String> createAuction(@RequestBody AuctionRequest dto,
-                                                Authentication authentication ){
-
-        Long userId = Long.valueOf(authentication.getName());
-        return ResponseEntity.ok(auctionService.createAuction(dto, userId));
-    }
-
-
     @GetMapping("/public/trades")
     public ResponseEntity<TradeResponse> getTrades(
             @RequestBody TradeFilterRequest requestDto) {
@@ -33,8 +24,7 @@ public class AuctionController {
 
     }
 
-
-    @PostMapping("/user/{auctionId}/purchase")
+    @PostMapping("/user/trades/{auctionId}/purchase")
     public ResponseEntity<String> purchaseItem(
             @PathVariable String auctionId,
             Authentication authentication) {
@@ -45,17 +35,34 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
-    @PatchMapping("/user/trades/{settlementId}/confirm")
-    public ResponseEntity<String> confirmItem(
-            @PathVariable String settlementId,
+    @GetMapping("/user/trades/me")
+    public ResponseEntity<MySaleItemResponse> mySaleItems(
+            @RequestBody MySaleItemRequest requestDto,
             Authentication authentication) {
 
 
         Long userId = Long.valueOf(authentication.getName());
-        String result = auctionService.confirmItem(settlementId, userId);
+        MySaleItemResponse result = auctionService.getMySaleItems(userId, requestDto);
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/user/trades")
+    public ResponseEntity<String> createAuction(@RequestBody AuctionRequest dto,
+                                                Authentication authentication ){
+
+        Long userId = Long.valueOf(authentication.getName());
+        return ResponseEntity.ok(auctionService.createAuction(dto, userId));
+    }
+
+    @DeleteMapping("/user/trades/{auctionId}")
+    public ResponseEntity<String> cancelMySaleItem(
+            @PathVariable String auctionId,
+            Authentication authentication) {
+
+        Long userId = Long.valueOf(authentication.getName());
+        String result = auctionService.cancelMySaleItem(userId, auctionId);
+        return ResponseEntity.ok(result);
+    }
 
 
     @GetMapping("/user/trades/me/history")
@@ -69,29 +76,15 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
-
-    @GetMapping("/user/trades/me")
-    public ResponseEntity<MySaleItemResponse> mySaleItems(
-            @RequestBody MySaleItemRequest requestDto,
+    @PatchMapping("/user/trades/{settlementId}/confirm")
+    public ResponseEntity<String> confirmItem(
+            @PathVariable String settlementId,
             Authentication authentication) {
 
 
         Long userId = Long.valueOf(authentication.getName());
-        MySaleItemResponse result = auctionService.getMySaleItems(userId, requestDto);
+        String result = auctionService.confirmItem(settlementId, userId);
         return ResponseEntity.ok(result);
     }
-
-
-
-    @DeleteMapping("/user/trades/{auctionId}")
-    public ResponseEntity<String> cancelMySaleItem(
-            @PathVariable String auctionId,
-            Authentication authentication) {
-
-        Long userId = Long.valueOf(authentication.getName());
-        String result = auctionService.cancelMySaleItem(userId, auctionId);
-        return ResponseEntity.ok(result);
-    }
-
 
 }
