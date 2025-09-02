@@ -32,7 +32,7 @@ public class GameSessionMongo {
 
     private PlayerInfoMongo playerInfo;
     private NpcInfoMongo npcInfo;
-    private List<InventoryItemMongo> inventory;
+    private List<InventoryMongo> inventory;
     private List<String> createdItems;
 
     private ChoiceInfoMongo choiceInfo;

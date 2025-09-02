@@ -1,5 +1,7 @@
 package com.scriptopia.demo.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scriptopia.demo.dto.gamesession.StartGameRequest;
 import com.scriptopia.demo.dto.gamesession.StartGameResponse;
 import com.scriptopia.demo.service.GameSessionService;
@@ -36,8 +38,7 @@ public class GameSessionController {
     @PostMapping
     public ResponseEntity<StartGameResponse> startNewGame(
             @RequestBody StartGameRequest request,
-            Authentication authentication) {
-
+            Authentication authentication) throws JsonProcessingException {
 
         Long userId = Long.valueOf(authentication.getName());
 

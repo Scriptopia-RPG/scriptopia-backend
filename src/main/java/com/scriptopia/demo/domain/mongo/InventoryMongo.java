@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class InventoryItemMongo {
+public class InventoryMongo {
     @Id
     private String id;
 

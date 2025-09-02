@@ -18,5 +18,5 @@ public class PlayerInfoMongo {
     private Integer agility; // 난수
     private Integer intelligence;  // 난수
     private Integer luck; // 난수
-    private Integer gold; // 난수
+    private Long gold; // 난수
 }

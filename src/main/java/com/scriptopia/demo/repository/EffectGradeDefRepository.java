@@ -2,9 +2,10 @@ package com.scriptopia.demo.repository;
 
 import com.scriptopia.demo.domain.EffectGradeDef;
 import com.scriptopia.demo.domain.Grade;
-import io.lettuce.core.dynamic.annotation.Param;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 

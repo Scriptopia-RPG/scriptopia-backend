@@ -1,5 +1,8 @@
 package com.scriptopia.demo.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum Grade {
     COMMON(30, 137),
     UNCOMMON(35, 177),
@@ -13,14 +16,6 @@ public enum Grade {
     Grade(int attackPower, int defensePower) {
         this.attackPower = attackPower;
         this.defensePower = defensePower;
-    }
-
-    public int getAttackPower() {
-        return attackPower;
-    }
-
-    public int getDefensePower() {
-        return defensePower;
     }
 
 }
