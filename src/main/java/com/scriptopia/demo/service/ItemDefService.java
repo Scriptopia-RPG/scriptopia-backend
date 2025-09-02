@@ -39,7 +39,7 @@ public class ItemDefService {
         itemDef.setDescription(dto.getDescription());
         itemDef.setPicSrc(dto.getPicSrc());
         itemDef.setItemType(dto.getItemType());
-        itemDef.setMainStat(dto.getMainStat());
+        itemDef.setStat(dto.getStat());
         itemDef.setBaseStat(dto.getBaseStat());
         itemDef.setStrength(dto.getStrength());
         itemDef.setAgility(dto.getAgility());
@@ -80,7 +80,7 @@ public class ItemDefService {
         response.setDescription(itemDef.getDescription());
         response.setPicSrc(itemDef.getPicSrc());
         response.setItemType(itemDef.getItemType().name());
-        response.setMainStat(itemDef.getMainStat().name());
+        response.setMainStat(itemDef.getStat().name());
         response.setBaseStat(itemDef.getBaseStat());
         response.setStrength(itemDef.getStrength());
         response.setAgility(itemDef.getAgility());

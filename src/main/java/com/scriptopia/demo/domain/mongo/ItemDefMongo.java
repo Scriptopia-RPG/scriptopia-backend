@@ -1,22 +1,21 @@
 package com.scriptopia.demo.domain.mongo;
 
 import com.scriptopia.demo.domain.Grade;
-import com.scriptopia.demo.domain.ItemCategory;
 import com.scriptopia.demo.domain.ItemType;
-import com.scriptopia.demo.domain.MainStat;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.scriptopia.demo.domain.Stat;
+import jakarta.persistence.Id;
+import lombok.*;
 
 import java.util.List;
 
-@Getter
-@Setter
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemDefMongo {
-    private Long itemDefId;
+    @Id
+    private String id;
+
     private String itemPicSrc;
     private String name;
     private String description;
@@ -27,8 +26,8 @@ public class ItemDefMongo {
     private Integer agility;
     private Integer intelligence;
     private Integer luck;
-    private MainStat mainStat; // strength, agility, intelligence, luck
-    private Integer weight;
+    private Stat mainStat; // strength, agility, intelligence, luck
     private Grade grade; // COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
     private Long price;
+
 }

@@ -39,7 +39,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
       AND (:grade IS NULL OR id.itemGradeDef.grade = :grade)
       AND (:minPrice IS NULL OR a.price >= :minPrice)
       AND (:maxPrice IS NULL OR a.price <= :maxPrice)
-      AND (:mainStat IS NULL OR id.mainStat = :mainStat)
+      AND (:stat IS NULL OR id.stat = :stat)
       AND (
             :effectGrades IS NULL 
             OR EXISTS (
@@ -54,7 +54,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
             @Param("grade") Grade grade,
             @Param("minPrice") Long minPrice,
             @Param("maxPrice") Long maxPrice,
-            @Param("mainStat") MainStat mainStat,
+            @Param("stat") Stat stat,
             @Param("effectGrades") List<Grade> effectGrades,
             Pageable pageable
     );
