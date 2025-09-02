@@ -2,14 +2,11 @@ package com.scriptopia.demo.domain.mongo;
 
 import com.scriptopia.demo.domain.ChoiceResultType;
 import com.scriptopia.demo.domain.Stat;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 
-@Getter
-@Setter
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChoiceMongo {

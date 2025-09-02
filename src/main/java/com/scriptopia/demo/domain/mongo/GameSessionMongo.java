@@ -1,19 +1,16 @@
 package com.scriptopia.demo.domain.mongo;
 
 import com.scriptopia.demo.domain.SceneType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @Document(collection = "game_sessions")
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class GameSessionMongo {
@@ -29,12 +26,14 @@ public class GameSessionMongo {
     private LocalDateTime updatedAt;
 
     private String background;
+    private String location;
     private Integer progress;
     private List<Integer> stage;
 
     private PlayerInfoMongo playerInfo;
+    private NpcInfoMongo npcInfo;
     private List<InventoryItemMongo> inventory;
-    private List<ItemDefMongo> itemDef;
+    private List<String> createdItems;
 
     private ChoiceInfoMongo choiceInfo;
     private DoneInfoMongo doneInfo;

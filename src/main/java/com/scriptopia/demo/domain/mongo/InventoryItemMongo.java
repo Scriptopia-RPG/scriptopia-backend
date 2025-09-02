@@ -1,15 +1,19 @@
 package com.scriptopia.demo.domain.mongo;
 
+import jakarta.persistence.Id;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class InventoryItemMongo {
-    private Long itemDefId;
+    @Id
+    private String id;
+
+    private String ItemDefId;
     private LocalDateTime acquiredAt;
     private Boolean equipped;
     private String source;
