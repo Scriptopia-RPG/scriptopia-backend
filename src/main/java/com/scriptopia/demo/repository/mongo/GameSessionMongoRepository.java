@@ -1,4 +1,4 @@
-package com.scriptopia.demo.repository;
+package com.scriptopia.demo.repository.mongo;
 
 import com.scriptopia.demo.domain.mongo.GameSessionMongo;
 import org.springframework.data.mongodb.repository.MongoRepository;
