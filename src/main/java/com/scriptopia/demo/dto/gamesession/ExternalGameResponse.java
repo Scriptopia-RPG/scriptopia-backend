@@ -13,9 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 public class ExternalGameResponse {
     private PlayerInfo playerInfo;
-    private List<ItemDef> itemDef;
+    private ItemDef itemDef;
     private String worldView;
     private String backgroundStory;
+    private String location;
 
     @Data
     @AllArgsConstructor
@@ -33,7 +34,7 @@ public class ExternalGameResponse {
     public static class ItemDef {
         private String name;
         private String description;
-        private List<ItemEffect> itemEffect;
+        private ItemEffect itemEffect;
         private Stat mainStat;
         private Grade grade;
 
