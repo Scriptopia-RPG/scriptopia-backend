@@ -1,14 +1,13 @@
-package com.scriptopia.demo.config;
+package com.scriptopia.demo.utils;
 
-import com.scriptopia.demo.domain.EffectGradeDef;
 import com.scriptopia.demo.domain.Grade;
+import com.scriptopia.demo.domain.ItemDef;
 import com.scriptopia.demo.domain.ItemType;
 import com.scriptopia.demo.domain.Stat;
 import com.scriptopia.demo.repository.EffectGradeDefRepository;
+import com.scriptopia.demo.repository.ItemDefRepository;
 import com.scriptopia.demo.repository.ItemGradeDefRepository;
-import com.scriptopia.demo.utils.GameBalanceUtil;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.security.SecureRandom;
 
@@ -22,23 +21,22 @@ public class InitGameData {
     static final int PLAYER_BASE_STAT = 5;
 
     //PlayerInfo
-    private int life;
-    private int healthPoint;
-    private int playerStr;
-    private int playerAgi;
-    private int playerInt;
-    private int playerLuk;
-    private int gold;
+    private Integer life;
+    private Integer healthPoint;
+    private Integer playerStr;
+    private Integer playerAgi;
+    private Integer playerInt;
+    private Integer playerLuk;
+    private Long gold;
 
     //ItemDef
     private ItemType category;
-    private int baseStat;
-    private int itemEffectWeight;
-    private int itemStr;
-    private int itemAgi;
-    private int itemInt;
-    private int itemLuk;
-    private int itemPrice;
+    private Integer baseStat;
+    private Integer itemStr;
+    private Integer itemAgi;
+    private Integer itemInt;
+    private Integer itemLuk;
+    private Long itemPrice;
 
     public InitGameData(Stat playerStat, Grade grade) {
         this.life = 5;
@@ -51,9 +49,13 @@ public class InitGameData {
         this.playerAgi = (playerStat.equals(Stat.AGILITY)) ? PLAYER_BASE_STAT + mainStat : PLAYER_BASE_STAT + subStat;
         this.playerInt = (playerStat.equals(Stat.INTELLIGENCE)) ? PLAYER_BASE_STAT + mainStat : PLAYER_BASE_STAT + subStat;
         this.playerLuk = (playerStat.equals(Stat.LUCK)) ? PLAYER_BASE_STAT + mainStat : PLAYER_BASE_STAT + subStat;
-        this.gold = secureRandom.nextInt(50) + 50;
+        this.gold = secureRandom.nextLong(50) + 50;
 
         this.category = ItemType.WEAPON;
+
+        int attackRate = secureRandom.nextInt(21) - 10;
+        this.baseStat = (int) Math.floor(Grade.COMMON.getAttackPower() * (1 + attackRate / 100.0));
+
 
         int[] stats = GameBalanceUtil.initItemStat(grade);
         this.itemStr = stats[0];
@@ -61,9 +63,9 @@ public class InitGameData {
         this.itemInt = stats[2];
         this.itemLuk = stats[3];
 
-        int rate = secureRandom.nextInt(21) - 10;
-        int gradePrice = itemGradeDefRepository.findPriceByGrade(grade);
-        int effectPrice = (int) Math.floor(effectGradeDefRepository.findPriceByGrade(grade) * (1 + rate / 100.0));
+        int priceRate = secureRandom.nextInt(21) - 10;
+        Long gradePrice = (long) itemGradeDefRepository.findPriceByGrade(grade);
+        Long effectPrice = (long) Math.floor(effectGradeDefRepository.findPriceByGrade(grade) * (1 + priceRate / 100.0));
 
         this.itemPrice = gradePrice + effectPrice;
 
