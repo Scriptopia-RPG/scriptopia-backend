@@ -37,7 +37,6 @@ public enum Grade {
                 return grade;
             }
         }
-
         return LEGENDARY;
     }
 
