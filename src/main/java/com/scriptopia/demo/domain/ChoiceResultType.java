@@ -1,14 +1,17 @@
 package com.scriptopia.demo.domain;
 
+import lombok.Getter;
+
 import java.security.SecureRandom;
 
+@Getter
 public enum ChoiceResultType {
     BATTLE(40),
     CHOICE(30),
     SHOP(10),
     NONE(50);
 
-    private int nextEventType;
+    private final int nextEventType;
 
     private static final SecureRandom random = new SecureRandom();
 
@@ -22,7 +25,8 @@ public enum ChoiceResultType {
         int cumulative = 0;
 
         for(ChoiceResultType type : values()) {
-            if(rand == type.nextEventType) {
+            cumulative += type.getNextEventType();
+            if(rand <= cumulative ) {
                 return type;
             }
         }
