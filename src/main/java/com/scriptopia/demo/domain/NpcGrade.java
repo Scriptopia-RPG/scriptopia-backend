@@ -32,6 +32,16 @@ public enum NpcGrade {
         this.attack = attack;
     }
 
+
+    public static NpcGrade getByGradeNumber(int gradeNumber) {
+        for (NpcGrade grade : NpcGrade.values()) {
+            if (grade.getGradeNumber() == gradeNumber) {
+                return grade;
+            }
+        }
+        return null;
+    }
+
     // ±10% 랜덤 방어력
     public int getRandomDefense() {
         int delta = (int)(defense * 0.1);
