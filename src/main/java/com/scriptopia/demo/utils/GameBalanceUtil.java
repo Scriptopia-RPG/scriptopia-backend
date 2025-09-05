@@ -1,13 +1,8 @@
 package com.scriptopia.demo.utils;
 
 import com.scriptopia.demo.domain.Grade;
-import com.scriptopia.demo.domain.ItemType;
-import com.scriptopia.demo.dto.gamesession.ExternalGameResponse;
 
 import java.security.SecureRandom;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class GameBalanceUtil {
     static SecureRandom secureRandom = new SecureRandom();

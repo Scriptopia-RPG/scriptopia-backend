@@ -16,8 +16,8 @@ public class ItemController {
 
 
     @PostMapping
-    public ResponseEntity<ItemDefResponse> createItem() {
-        ItemDefResponse savedItem = itemDefService.createItem();
+    public ResponseEntity<ItemDefResponse> createItem(@RequestBody ItemDefRequest request) {
+        ItemDefResponse savedItem = itemDefService.createItem(request);
         return ResponseEntity.ok(savedItem);
     }
 

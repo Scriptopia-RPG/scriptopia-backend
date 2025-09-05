@@ -25,6 +25,7 @@ public enum Grade {
     private static final SecureRandom random = new SecureRandom();
 
     /**
+     * 아이템, 아이템 효과
      * Grade 중 하나를 랜덤으로 반환
      */
     public static Grade getRandomGradeByProbability() {
@@ -38,6 +39,23 @@ public enum Grade {
             }
         }
         return LEGENDARY;
+    }
+
+    /**
+     * 아이템 등급에 따른 기본 성능을 리턴
+     * 기본 공격력에 +- 10%
+     */
+    public static int getRandomBaseStatWeapon(Grade grade) {
+        int base = grade.getAttackPower();
+        int delta = (int) (base * 0.1);
+        return base - delta + random.nextInt(2 * delta + 1);
+    }
+
+    // ±10% 랜덤 방어력
+    public static int getRandomBaseStatArmor(Grade grade) {
+        int base = grade.getDefensePower();
+        int delta = (int) (base * 0.1);
+        return base - delta + random.nextInt(2 * delta + 1);
     }
 
 

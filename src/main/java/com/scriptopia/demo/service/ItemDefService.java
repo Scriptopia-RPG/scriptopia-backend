@@ -1,9 +1,6 @@
 package com.scriptopia.demo.service;
 
-import com.scriptopia.demo.domain.EffectGradeDef;
-import com.scriptopia.demo.domain.ItemDef;
-import com.scriptopia.demo.domain.ItemEffect;
-import com.scriptopia.demo.domain.ItemGradeDef;
+import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.dto.develop.ItemDefResponse;
 import com.scriptopia.demo.dto.develop.ItemEffectResponse;
 import com.scriptopia.demo.dto.items.*;
@@ -28,79 +25,36 @@ public class ItemDefService {
     private final EffectGradeDefRepository effectGradeDefRepository;
 
     @Transactional
-    public ItemDefResponse createItem(ItemDefRequest dto) {
-        // ItemGradeDef 조회
-        ItemGradeDef gradeDef = itemGradeDefRepository.findById(dto.getItemGradeDefId())
-                .orElseThrow(() -> new IllegalArgumentException("ItemGradeDef not found"));
+    public ItemDefResponse createItem(ItemDefRequest request) {
+        /**
+         * 1. 카테고리
+         * 2. 등급
+         * 3. 메인 스탯
+         * 4. 베이스 스탯 (공격력, 체력)
+         * 5. 아이템 이펙트( 최대 등급 3개)
+         * 6. 추가 스탯
+         */
 
-        // ItemDef 생성
-        ItemDef itemDef = new ItemDef();
-        itemDef.setName(dto.getName());
-        itemDef.setDescription(dto.getDescription());
-        itemDef.setPicSrc(dto.getPicSrc());
-        itemDef.setItemType(dto.getItemType());
-        itemDef.setStat(dto.getStat());
-        itemDef.setBaseStat(dto.getBaseStat());
-        itemDef.setStrength(dto.getStrength());
-        itemDef.setAgility(dto.getAgility());
-        itemDef.setIntelligence(dto.getIntelligence());
-        itemDef.setLuck(dto.getLuck());
-        itemDef.setPrice(dto.getPrice());
-        itemDef.setItemGradeDef(gradeDef);
-        itemDef.setCreatedAt(LocalDateTime.now());
 
-        // ItemEffect 생성
-        if (dto.getEffects() != null) {
-            for (ItemEffectRequest effectDto : dto.getEffects()) {
-                EffectGradeDef effectGradeDef = effectGradeDefRepository.findById(effectDto.getGrade().ordinal() + 1L)
-                        .orElseThrow(() -> new IllegalArgumentException("EffectGradeDef not found"));
+        ItemFastApiRequest fastRequest = ItemFastApiRequest.builder()
+                .worldView(request.getWorldView())
+                .location(request.getLocation())
+                .category(ItemType.getRandomItemType())
+                .baseStat()
+                .mainStat(Stat.getRandomMainStat())
+                .grade(Grade.RARE)
+                .itemEffect(List.of(Grade.COMMON, Grade.UNCOMMON))
+                .strength(10)
+                .agility(5)
+                .intelligence(3)
+                .luck(2)
+                .price(1000L)
+                .playerTrait("용맹함")
+                .previousStory("고대의 유산에서 발견됨")
+                .build();
 
-                ItemEffect effect = new ItemEffect();
-                effect.setItemDef(itemDef);
-                effect.setEffectGradeDef(effectGradeDef);
-                effect.setEffectName(effectDto.getEffectName());
-                effect.setEffectDescription(effectDto.getEffectDescription());
 
-                itemDef.getItemEffects().add(effect);
-            }
-        }
-
-        // ItemDef 저장 (cascade로 ItemEffect도 같이 저장)
-        itemDefRepository.save(itemDef);
-
-        // DTO 변환 후 반환
-        return toResponse(itemDef);
     }
 
-    // DTO 변환
-    private ItemDefResponse toResponse(ItemDef itemDef) {
-        ItemDefResponse response = new ItemDefResponse();
-        response.setId(itemDef.getId());
-        response.setName(itemDef.getName());
-        response.setDescription(itemDef.getDescription());
-        response.setPicSrc(itemDef.getPicSrc());
-        response.setItemType(itemDef.getItemType().name());
-        response.setMainStat(itemDef.getStat().name());
-        response.setBaseStat(itemDef.getBaseStat());
-        response.setStrength(itemDef.getStrength());
-        response.setAgility(itemDef.getAgility());
-        response.setIntelligence(itemDef.getIntelligence());
-        response.setLuck(itemDef.getLuck());
-        response.setPrice(itemDef.getPrice());
-        response.setCreatedAt(itemDef.getCreatedAt());
 
-        List<ItemEffectResponse> effects = itemDef.getItemEffects().stream()
-                .map(effect -> {
-                    ItemEffectResponse eResp = new ItemEffectResponse();
-                    eResp.setEffectName(effect.getEffectName());
-                    eResp.setEffectDescription(effect.getEffectDescription());
-                    eResp.setGrade(effect.getEffectGradeDef().getGrade().name());
-                    return eResp;
-                })
-                .collect(Collectors.toList());
-
-        response.setEffects(effects);
-
-        return response;
-    }
 }
