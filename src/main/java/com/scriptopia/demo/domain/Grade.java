@@ -2,6 +2,8 @@ package com.scriptopia.demo.domain;
 
 import lombok.Getter;
 
+import java.security.SecureRandom;
+
 @Getter
 public enum Grade {
     COMMON(30, 137),
@@ -17,5 +19,16 @@ public enum Grade {
         this.attackPower = attackPower;
         this.defensePower = defensePower;
     }
+
+    private static final SecureRandom random = new SecureRandom();
+
+    /**
+     * Grade 중 하나를 랜덤으로 반환
+     */
+    public static Grade getRandomGrade() {
+        Grade[] values = Grade.values();
+        return values[random.nextInt(values.length)];
+    }
+
 
 }
