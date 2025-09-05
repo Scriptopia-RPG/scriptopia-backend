@@ -34,7 +34,6 @@ public class GameSessionService {
     private final ItemGradeDefRepository itemGradeDefRepository;
     private final EffectGradeDefRepository effectGradeDefRepository;
     private final UserRepository userRepository;
-    private final RestTemplate restTemplate;
     private final GameSessionMongoRepository gameSessionMongoRepository;
     private final UserItemRepository userItemRepository;
 
@@ -122,7 +121,7 @@ public class GameSessionService {
                 .bodyToMono(ExternalGameResponse.class)
                 .block(); //
 
-// 응답 검증
+        // 응답 검증
         if (externalGame == null) {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
@@ -132,7 +131,6 @@ public class GameSessionService {
                 Grade.COMMON,
                 itemGradeDefRepository,
                 effectGradeDefRepository
-
         );
 
         // GameSession Data
