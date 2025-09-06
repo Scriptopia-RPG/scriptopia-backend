@@ -16,16 +16,12 @@ public interface GameTagRepository extends JpaRepository<GameTag, Long> {
             "where gt.sharedGame.id = :sharedGameId")
     List<String> findTagNamesBySharedGameId(@Param("sharedGameId") Long sharedGameId);
 
-    @Query("select new com.scriptopia.demo.dto.TagDef.TagDefCreateRequest(gt.tagDef.tagName) " +
-            "from GameTag gt where gt.sharedGame.id = :sharedGameId")
-    List<TagDefCreateRequest> findTagsBySharedGameId(@Param("sharedGameId") Long sharedGameId);
-
     @Query("""
     select new com.scriptopia.demo.dto.sharedgame.TagDto(td.id, td.tagName)
     from GameTag gt
     join gt.tagDef td
     where gt.sharedGame.id = :sharedGameId
     order by td.tagName asc
-""")
+    """)
     List<TagDto> findTagDtosBySharedGameId(@Param("sharedGameId") Long sharedGameId);
 }

@@ -11,7 +11,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface SharedGameRepository extends JpaRepository<SharedGame, Long> {
-    List<SharedGame> findAllByUserId(Long userId);
+    @Query("select sg from SharedGame sg where sg.user.id = :userId")
+    List<SharedGame> findAllByUserid(@Param("userId") Long userId);
 
     // 기본(전체)
     @Query("""

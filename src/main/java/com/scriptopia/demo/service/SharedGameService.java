@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -45,30 +46,34 @@ public class SharedGameService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
-        List<SharedGame> games = sharedGameRepository.findAllByUserId(user.getId());
+        List<SharedGame> games = sharedGameRepository.findAllByUserid(user.getId());
 
-        List<MySharedGameResponse> responses = games.stream().map(game -> {
+        List<MySharedGameResponse> dtos = new ArrayList<>();
+
+        for(SharedGame game : games) {
             MySharedGameResponse dto = new MySharedGameResponse();
             dto.setThumbnailUrl(game.getThumbnailUrl());
             dto.setTotalPlayed(sharedGameScoreRepository.countBySharedGameId(game.getId()));
             dto.setTitle(game.getTitle());
             dto.setWorldView(game.getWorldView());
-            dto.setBackgroundStory(game.getBackgroundStory());
             dto.setSharedAt(game.getSharedAt());
+            dto.setBackgroundStory(game.getBackgroundStory());
 
-            boolean liked = sharedGameFavoriteRepository.existsByUserIdAndSharedGameId(user.getId(), game.getId());
+            boolean liked = sharedGameFavoriteRepository.existsLikeSharedGame(user.getId(), game.getId());
             dto.setRecommand(liked);
 
-            List<String> names = gameTagRepository.findTagNamesBySharedGameId(game.getId());
-            dto.setTags(
-                    names.stream()
-                            .map(MySharedGameResponse.TagDto::new)
-                            .toList()
-            );
-            return dto;
-                }).toList();
+            List<String> tagdto = gameTagRepository.findTagNamesBySharedGameId(game.getId());
+            List<MySharedGameResponse.TagDto> tags = new ArrayList<>();
 
-        return ResponseEntity.ok(responses);
+            for(String tagName : tagdto) {
+                tags.add(new MySharedGameResponse.TagDto(tagName));
+            }
+
+            dto.setTags(tags);
+            dtos.add(dto);
+        }
+
+        return ResponseEntity.ok(dtos);
     }
 
     @Transactional
@@ -104,14 +109,24 @@ public class SharedGameService {
         dto.setBackgroundStory(game.getBackgroundStory());
         dto.setSharedAt(game.getSharedAt());
 
-        dto.setTags(tagName.stream().map(PublicSharedGameDetailResponse.TagDto::new).toList());
-        dto.setTopScores(score.stream().map(s ->{
-            PublicSharedGameDetailResponse.TopScoreDto topScoreDto = new PublicSharedGameDetailResponse.TopScoreDto();
-            topScoreDto.setNickname(s.getUser().getNickname());
-            topScoreDto.setScore(s.getScore().floatValue());
-            topScoreDto.setCreatedAt(s.getCreatedAt());
-            return topScoreDto;
-        }).toList() );
+        List<PublicSharedGameDetailResponse.TagDto> tagarray = new ArrayList<>();
+        List<PublicSharedGameDetailResponse.TopScoreDto> topscorearray = new ArrayList<>();
+
+        for(var tagNames : tagName) {
+            tagarray.add(new PublicSharedGameDetailResponse.TagDto(tagNames));
+        }
+
+        dto.setTags(tagarray);
+
+        for(var topScoreInfo : score) {
+            PublicSharedGameDetailResponse.TopScoreDto topscore = new PublicSharedGameDetailResponse.TopScoreDto();
+            topscore.setNickname(topScoreInfo.getUser().getNickname());
+            topscore.setScore(topScoreInfo.getScore());
+            topscore.setCreatedAt(topScoreInfo.getCreatedAt());
+            topscorearray.add(topscore);
+        }
+
+        dto.setTopScores(topscorearray);
 
         return ResponseEntity.ok(dto);
     }
