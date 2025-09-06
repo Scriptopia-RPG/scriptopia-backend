@@ -1,12 +1,21 @@
 package com.scriptopia.demo.utils;
 
 import com.scriptopia.demo.domain.Grade;
+import com.scriptopia.demo.repository.EffectGradeDefRepository;
+import com.scriptopia.demo.repository.ItemGradeDefRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
+import java.util.List;
 
+@Component
+@RequiredArgsConstructor
 public class GameBalanceUtil {
-    static SecureRandom secureRandom = new SecureRandom();
 
+    private final ItemGradeDefRepository itemGradeDefRepository;
+    private final EffectGradeDefRepository effectGradeDefRepository;
+    static SecureRandom secureRandom = new SecureRandom();
 
     /**
      * @param grade
@@ -34,5 +43,32 @@ public class GameBalanceUtil {
     }
 
 
+    /**
+     * @param itemGradePrice
+     * @param effectGradeList
+     * @return Long
+     */
+    public static Long getItemPriceByGrade(Long itemGradePrice, List<Long> effectGradeList) {
+        return getRandomItemPriceByGrade(itemGradePrice) + getRandomItemPriceByGrade(effectGradeList);
+    }
 
+
+    public static Long getRandomItemPriceByGrade(Long itemGradePrice) {
+        int priceRate = secureRandom.nextInt(21) - 10;
+
+        Long itemPrice = 0L;
+        itemPrice += (long) Math.floor(itemGradePrice * (1 + priceRate / 100.0));
+        return itemPrice;
+    }
+
+    public static Long getRandomItemPriceByGrade(List<Long> effectGradeList) {
+        int priceRate = secureRandom.nextInt(21) - 10;
+
+        Long effectPrice = 0L;
+        for (Long grade : effectGradeList) {
+            effectPrice += (long) Math.floor(grade * (1 + priceRate / 100.0));
+        }
+
+        return effectPrice;
+    }
 }

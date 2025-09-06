@@ -77,11 +77,16 @@ public class InitGameData {
         this.itemInt = stats[2];
         this.itemLuk = stats[3];
 
-        int priceRate = secureRandom.nextInt(21) - 10;
-        Long gradePrice = (long) itemGradeDefRepository.findPriceByGrade(grade);
-        Long effectPrice = (long) Math.floor(effectGradeDefRepository.findPriceByGrade(grade) * (1 + priceRate / 100.0));
 
-        this.itemPrice = gradePrice + effectPrice;
+
+        List<Long> itemEffectList = new ArrayList<>();
+        for (int i=0; i<=3; i+=1){
+            Grade effectGrade = Grade.getRandomGradeByProbability();
+            itemEffectList.add(effectGradeDefRepository.findPriceByGrade(effectGrade));
+        }
+        Long gradePrice = itemGradeDefRepository.findPriceByGrade(grade);
+
+        this.itemPrice = GameBalanceUtil.getItemPriceByGrade(gradePrice , itemEffectList);
 
     }
 
