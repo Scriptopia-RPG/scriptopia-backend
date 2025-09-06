@@ -16,9 +16,7 @@ public class ItemDefRequest {
 
     private String worldView;
     private String location;
-    private ItemType category;
     private String playerTrait;
     private String previousStory;
-
 
 }
