@@ -13,7 +13,8 @@ import java.util.List;
 @Setter
 public class ItemDef {
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,7 +37,7 @@ public class ItemDef {
     private Integer luck;
 
     @Enumerated(EnumType.STRING)
-    private Stat stat;
+    private Stat mainStat;
 
     private LocalDateTime createdAt;
 
