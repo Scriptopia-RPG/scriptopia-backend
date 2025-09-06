@@ -14,7 +14,6 @@ public interface EffectGradeDefRepository extends JpaRepository<EffectGradeDef, 
     Optional<EffectGradeDef> findByGrade(Grade grade);
 
     @Query("SELECT egd.price FROM EffectGradeDef egd WHERE egd.grade = :grade")
-    Long findPriceByGrade(@Param("grade") Grade grade);
+    Optional<Long> findPriceByGrade(@Param("grade") Grade grade);
 
-    Long findPriceByGrade(EffectProbability effectGrade);
 }

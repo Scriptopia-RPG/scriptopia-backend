@@ -4,8 +4,6 @@ import com.scriptopia.demo.adapter.EffectAdapter;
 import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.domain.mongo.ItemDefMongo;
 import com.scriptopia.demo.domain.mongo.ItemEffectMongo;
-import com.scriptopia.demo.dto.develop.ItemDefResponse;
-import com.scriptopia.demo.dto.develop.ItemEffectResponse;
 import com.scriptopia.demo.dto.items.*;
 import com.scriptopia.demo.repository.EffectGradeDefRepository;
 import com.scriptopia.demo.repository.ItemDefRepository;
@@ -21,7 +19,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +54,7 @@ public class ItemDefService {
             EffectProbability effectGrade = EffectProbability.getRandomEffectGradeByWeaponGrade(itemGrade);
             if (effectGrade != null) {
                 effectGrades.add(effectGrade);
-                effectGradesList.add(effectGradeDefRepository.findPriceByGrade(effectGrade));
+                effectGradesList.add(effectGradeDefRepository.findPriceByGrade(EffectAdapter.toGrade(effectGrade)).get());
             }
         }
 
@@ -101,8 +98,6 @@ public class ItemDefService {
                 .bodyToMono(ItemFastApiResponse.class)
                 .block(); // 블로킹 호출 (간단 테스트용)
 
-        System.out.println(response );
-
 
         List<ItemEffectMongo> mongoEffects = new ArrayList<>();
         List<ItemFastApiResponse.ItemEffect> apiEffects = response.getItemEffect();
@@ -117,9 +112,6 @@ public class ItemDefService {
                     .itemEffectDescription(apiEffect.getItemEffectDescription())
                     .build());
         }
-
-        System.out.println("mongoEffects = " + mongoEffects );
-
 
         ItemDefMongo itemDefMongo = ItemDefMongo.builder()
                 .itemPicSrc("test link")
