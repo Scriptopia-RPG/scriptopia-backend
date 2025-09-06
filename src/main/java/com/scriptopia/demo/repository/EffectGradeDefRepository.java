@@ -1,6 +1,7 @@
 package com.scriptopia.demo.repository;
 
 import com.scriptopia.demo.domain.EffectGradeDef;
+import com.scriptopia.demo.domain.EffectProbability;
 import com.scriptopia.demo.domain.Grade;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,5 +14,7 @@ public interface EffectGradeDefRepository extends JpaRepository<EffectGradeDef, 
     Optional<EffectGradeDef> findByGrade(Grade grade);
 
     @Query("SELECT egd.price FROM EffectGradeDef egd WHERE egd.grade = :grade")
-    Integer findPriceByGrade(@Param("grade") Grade grade);
+    Long findPriceByGrade(@Param("grade") Grade grade);
+
+    Long findPriceByEffectGrade(EffectProbability effectGrade);
 }
