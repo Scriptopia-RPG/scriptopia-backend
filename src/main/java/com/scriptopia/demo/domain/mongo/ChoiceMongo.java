@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 public class ChoiceMongo {
     private String detail;
-    private Stat stats; // strength, agility, intelligence, luck
+    private Stat stats; // STRENGTH, AGILITY, INTELLIGENCE, LUCK
     private Integer probability;
-    private ChoiceResultType resultType; // battle, reward, shop, none
+    private ChoiceResultType resultType; // BATTLE, SHOP, CHOICE, NONE
 }

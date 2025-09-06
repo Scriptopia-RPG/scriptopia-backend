@@ -1,21 +1,31 @@
 package com.scriptopia.demo.dto.items;
 
+import com.scriptopia.demo.domain.EffectProbability;
 import com.scriptopia.demo.domain.Grade;
 import com.scriptopia.demo.domain.ItemType;
 import com.scriptopia.demo.domain.Stat;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+
 @Data
 @Builder
-public class ItemDefRequest {
+public class ItemFastApiRequest {
 
     private String worldView;
     private String location;
+    private ItemType category;
+    private int baseStat;
+    private Stat mainStat;
+    private Grade grade;
+    private List<EffectProbability> itemEffect;
+    private int strength;
+    private int agility;
+    private int intelligence;
+    private int luck;
+    private Long price;
     private String playerTrait;
     private String previousStory;
 

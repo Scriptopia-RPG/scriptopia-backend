@@ -1,7 +1,7 @@
 package com.scriptopia.demo.controller;
 
-import com.scriptopia.demo.dto.develop.ItemDefResponse;
 import com.scriptopia.demo.dto.items.ItemDefRequest;
+import com.scriptopia.demo.dto.items.ItemFastApiResponse;
 import com.scriptopia.demo.service.ItemDefService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +14,10 @@ public class ItemController {
 
     private final ItemDefService itemDefService;
 
+
     @PostMapping
-    public ResponseEntity<ItemDefResponse> createItem(@RequestBody ItemDefRequest dto) {
-        ItemDefResponse savedItem = itemDefService.createItem(dto);
+    public ResponseEntity<ItemFastApiResponse> createItem(@RequestBody ItemDefRequest request) {
+        ItemFastApiResponse savedItem = itemDefService.createItem(request);
         return ResponseEntity.ok(savedItem);
     }
 

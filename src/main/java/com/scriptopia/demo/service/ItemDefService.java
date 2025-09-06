@@ -1,22 +1,24 @@
 package com.scriptopia.demo.service;
 
-import com.scriptopia.demo.domain.EffectGradeDef;
-import com.scriptopia.demo.domain.ItemDef;
-import com.scriptopia.demo.domain.ItemEffect;
-import com.scriptopia.demo.domain.ItemGradeDef;
-import com.scriptopia.demo.dto.develop.ItemDefResponse;
-import com.scriptopia.demo.dto.develop.ItemEffectResponse;
+import com.scriptopia.demo.adapter.EffectAdapter;
+import com.scriptopia.demo.domain.*;
+import com.scriptopia.demo.domain.mongo.ItemDefMongo;
+import com.scriptopia.demo.domain.mongo.ItemEffectMongo;
 import com.scriptopia.demo.dto.items.*;
 import com.scriptopia.demo.repository.EffectGradeDefRepository;
 import com.scriptopia.demo.repository.ItemDefRepository;
 import com.scriptopia.demo.repository.ItemGradeDefRepository;
+import com.scriptopia.demo.repository.mongo.ItemDefMongoRepository;
+import com.scriptopia.demo.utils.GameBalanceUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,81 +28,141 @@ public class ItemDefService {
     private final ItemDefRepository itemDefRepository;
     private final ItemGradeDefRepository itemGradeDefRepository;
     private final EffectGradeDefRepository effectGradeDefRepository;
+    private final ItemDefMongoRepository itemDefMongoRepository;
 
-    @Transactional
-    public ItemDefResponse createItem(ItemDefRequest dto) {
-        // ItemGradeDef 조회
-        ItemGradeDef gradeDef = itemGradeDefRepository.findById(dto.getItemGradeDefId())
-                .orElseThrow(() -> new IllegalArgumentException("ItemGradeDef not found"));
 
-        // ItemDef 생성
-        ItemDef itemDef = new ItemDef();
-        itemDef.setName(dto.getName());
-        itemDef.setDescription(dto.getDescription());
-        itemDef.setPicSrc(dto.getPicSrc());
-        itemDef.setItemType(dto.getItemType());
-        itemDef.setStat(dto.getStat());
-        itemDef.setBaseStat(dto.getBaseStat());
-        itemDef.setStrength(dto.getStrength());
-        itemDef.setAgility(dto.getAgility());
-        itemDef.setIntelligence(dto.getIntelligence());
-        itemDef.setLuck(dto.getLuck());
-        itemDef.setPrice(dto.getPrice());
-        itemDef.setItemGradeDef(gradeDef);
-        itemDef.setCreatedAt(LocalDateTime.now());
+    @Transactional(readOnly = false)
+    public ItemFastApiResponse createItem(ItemDefRequest request) {
+        /**
+         * 1. 카테고리
+         * 2. 등급
+         * 3. 메인 스탯
+         * 4. 베이스 스탯 (공격력, 체력)
+         * 5. 아이템 이펙트( 최대 등급 3개)
+         * 6. 추가 스탯
+         */
+        ItemType itemCategory = ItemType.getRandomItemType();
+        Grade itemGrade = Grade.getRandomGradeByProbability();
+        int baseStat = Grade.getRandomBaseStat(itemCategory, itemGrade);
+        Stat mainStat = Stat.getRandomMainStat();
+        int[] additionalStats = GameBalanceUtil.getRandomItemStatsByGrade(itemGrade); // strength, agility, intelligence, luck
 
-        // ItemEffect 생성
-        if (dto.getEffects() != null) {
-            for (ItemEffectRequest effectDto : dto.getEffects()) {
-                EffectGradeDef effectGradeDef = effectGradeDefRepository.findById(effectDto.getGrade().ordinal() + 1L)
-                        .orElseThrow(() -> new IllegalArgumentException("EffectGradeDef not found"));
 
-                ItemEffect effect = new ItemEffect();
-                effect.setItemDef(itemDef);
-                effect.setEffectGradeDef(effectGradeDef);
-                effect.setEffectName(effectDto.getEffectName());
-                effect.setEffectDescription(effectDto.getEffectDescription());
-
-                itemDef.getItemEffects().add(effect);
+        List<EffectProbability> effectGrades = new ArrayList<>();
+        List<Long> effectGradesList = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            EffectProbability effectGrade = EffectProbability.getRandomEffectGradeByWeaponGrade(itemGrade);
+            if (effectGrade != null) {
+                effectGrades.add(effectGrade);
+                effectGradesList.add(effectGradeDefRepository.findPriceByGrade(EffectAdapter.toGrade(effectGrade)).get());
             }
         }
 
-        // ItemDef 저장 (cascade로 ItemEffect도 같이 저장)
-        itemDefRepository.save(itemDef);
+        Long gradeGradePrice = itemGradeDefRepository.findPriceByGrade(itemGrade);
+        Long itemPrice = GameBalanceUtil.getItemPriceByGrade(gradeGradePrice, effectGradesList);
 
-        // DTO 변환 후 반환
-        return toResponse(itemDef);
-    }
 
-    // DTO 변환
-    private ItemDefResponse toResponse(ItemDef itemDef) {
-        ItemDefResponse response = new ItemDefResponse();
-        response.setId(itemDef.getId());
-        response.setName(itemDef.getName());
-        response.setDescription(itemDef.getDescription());
-        response.setPicSrc(itemDef.getPicSrc());
-        response.setItemType(itemDef.getItemType().name());
-        response.setMainStat(itemDef.getStat().name());
-        response.setBaseStat(itemDef.getBaseStat());
-        response.setStrength(itemDef.getStrength());
-        response.setAgility(itemDef.getAgility());
-        response.setIntelligence(itemDef.getIntelligence());
-        response.setLuck(itemDef.getLuck());
-        response.setPrice(itemDef.getPrice());
-        response.setCreatedAt(itemDef.getCreatedAt());
 
-        List<ItemEffectResponse> effects = itemDef.getItemEffects().stream()
-                .map(effect -> {
-                    ItemEffectResponse eResp = new ItemEffectResponse();
-                    eResp.setEffectName(effect.getEffectName());
-                    eResp.setEffectDescription(effect.getEffectDescription());
-                    eResp.setGrade(effect.getEffectGradeDef().getGrade().name());
-                    return eResp;
-                })
-                .collect(Collectors.toList());
 
-        response.setEffects(effects);
+
+        ItemFastApiRequest fastRequest = ItemFastApiRequest.builder()
+                .worldView(request.getWorldView())
+                .location(request.getLocation())
+                .category(itemCategory)
+                .baseStat(baseStat)
+                .mainStat(mainStat)
+                .grade(itemGrade)
+                .itemEffect(effectGrades)
+                .strength(additionalStats[0])
+                .agility(additionalStats[1])
+                .intelligence(additionalStats[2])
+                .luck(additionalStats[3])
+                .price(itemPrice)
+                .playerTrait(request.getPlayerTrait())
+                .previousStory(request.getPreviousStory())
+                .build();
+
+
+        // 추후 config 에서 통합관리
+        WebClient client = WebClient.builder()
+                .baseUrl("http://localhost:8000") // FastAPI 서버 주소
+                .build();
+
+
+        ItemFastApiResponse response = client.post()
+                .uri("/games/item") // FastAPI 엔드포인트
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(fastRequest) // 생성한 ItemFastApiRequest 객체
+                .retrieve()
+                .bodyToMono(ItemFastApiResponse.class)
+                .block(); // 블로킹 호출 (간단 테스트용)
+
+
+        List<ItemEffectMongo> mongoEffects = new ArrayList<>();
+        List<ItemFastApiResponse.ItemEffect> apiEffects = response.getItemEffect();
+
+        for (int i = 0; i < apiEffects.size(); i++) {
+            ItemFastApiResponse.ItemEffect apiEffect = apiEffects.get(i);
+            EffectProbability effectGrade = i < effectGrades.size() ? effectGrades.get(i) : null;
+
+            mongoEffects.add(ItemEffectMongo.builder()
+                    .grade(effectGrade != null ? EffectAdapter.toGrade(effectGrade) : Grade.COMMON)
+                    .itemEffectName(apiEffect.getItemEffectName())
+                    .itemEffectDescription(apiEffect.getItemEffectDescription())
+                    .build());
+        }
+
+        ItemDefMongo itemDefMongo = ItemDefMongo.builder()
+                .itemPicSrc("test link")
+                .name(response.getItemName())
+                .description(response.getItemDescription())
+                .category(itemCategory)
+                .baseStat(baseStat)
+                .itemEffect(mongoEffects)
+                .strength(additionalStats[0])
+                .agility(additionalStats[1])
+                .intelligence(additionalStats[2])
+                .luck(additionalStats[3])
+                .mainStat(mainStat)
+                .grade(itemGrade)
+                .price(itemPrice)
+                .build();
+
+        itemDefMongoRepository.save(itemDefMongo);
+
+        ItemDef itemDefRdb = new ItemDef();
+        itemDefRdb.setName(itemDefMongo.getName());
+        itemDefRdb.setDescription(itemDefMongo.getDescription());
+        itemDefRdb.setItemGradeDef(itemGradeDefRepository.findByGrade(itemGrade).get());
+        itemDefRdb.setPicSrc(itemDefMongo.getItemPicSrc());
+        itemDefRdb.setItemType(itemDefMongo.getCategory());
+        itemDefRdb.setBaseStat(itemDefMongo.getBaseStat());
+        itemDefRdb.setStrength(itemDefMongo.getStrength());
+        itemDefRdb.setAgility(itemDefMongo.getAgility());
+        itemDefRdb.setIntelligence(itemDefMongo.getIntelligence());
+        itemDefRdb.setLuck(itemDefMongo.getLuck());
+        itemDefRdb.setMainStat(itemDefMongo.getMainStat());
+        itemDefRdb.setPrice(itemDefMongo.getPrice());
+        itemDefRdb.setCreatedAt(LocalDateTime.now());
+
+        List<ItemEffect> rdbEffects = new ArrayList<>();
+        for (ItemEffectMongo effectMongo : itemDefMongo.getItemEffect()) {
+            ItemEffect effect = new ItemEffect();
+            effect.setItemDef(itemDefRdb);
+            effect.setEffectName(effectMongo.getItemEffectName());
+            effect.setEffectDescription(effectMongo.getItemEffectDescription());
+            effect.setEffectGradeDef(effectGradeDefRepository.findByGrade(effectMongo.getGrade()).get());
+            rdbEffects.add(effect);
+        }
+        itemDefRdb.setItemEffects(rdbEffects);
+
+        itemDefRepository.save(itemDefRdb);
 
         return response;
+
     }
+
+
+
 }

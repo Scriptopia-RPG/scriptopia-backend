@@ -17,14 +17,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +31,6 @@ public class GameSessionService {
     private final ItemGradeDefRepository itemGradeDefRepository;
     private final EffectGradeDefRepository effectGradeDefRepository;
     private final UserRepository userRepository;
-    private final RestTemplate restTemplate;
     private final GameSessionMongoRepository gameSessionMongoRepository;
     private final UserItemRepository userItemRepository;
 
@@ -122,7 +118,7 @@ public class GameSessionService {
                 .bodyToMono(ExternalGameResponse.class)
                 .block(); //
 
-// 응답 검증
+        // 응답 검증
         if (externalGame == null) {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
@@ -132,8 +128,9 @@ public class GameSessionService {
                 Grade.COMMON,
                 itemGradeDefRepository,
                 effectGradeDefRepository
-
         );
+
+        System.out.println("------------- 여기도 옸습니다22  " + initGameData);
 
         // GameSession Data
         GameSessionMongo mongoSession = new GameSessionMongo();
