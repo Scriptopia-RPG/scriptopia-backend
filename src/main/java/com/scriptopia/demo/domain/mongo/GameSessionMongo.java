@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Document(collection = "game_sessions")
+@Document(collection = "gameSessions")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

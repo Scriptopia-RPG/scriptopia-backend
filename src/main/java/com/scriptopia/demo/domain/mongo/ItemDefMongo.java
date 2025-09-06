@@ -3,11 +3,13 @@ package com.scriptopia.demo.domain.mongo;
 import com.scriptopia.demo.domain.Grade;
 import com.scriptopia.demo.domain.ItemType;
 import com.scriptopia.demo.domain.Stat;
-import jakarta.persistence.Id;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
+@Document(collection = "itemDefMongo")
 @Data
 @Builder
 @AllArgsConstructor
