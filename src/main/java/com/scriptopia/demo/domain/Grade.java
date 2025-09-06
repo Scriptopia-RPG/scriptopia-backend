@@ -42,9 +42,18 @@ public enum Grade {
     }
 
     /**
-     * 아이템 등급에 따른 기본 성능을 리턴
+     * 아이템 종류, 등급에 따른 기본 성능을 리턴
      * 기본 공격력에 +- 10%
      */
+    public static int getRandomBaseStat(ItemType itemType, Grade grade) {
+        if (itemType == ItemType.WEAPON){
+            return getRandomBaseStatWeapon(grade);
+        }
+        return getRandomBaseStatArmor(grade);
+    }
+
+    
+    // ±10% 랜덤 공격력
     public static int getRandomBaseStatWeapon(Grade grade) {
         int base = grade.getAttackPower();
         int delta = (int) (base * 0.1);
