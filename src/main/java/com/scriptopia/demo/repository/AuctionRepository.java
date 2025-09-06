@@ -39,7 +39,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
       AND (:grade IS NULL OR id.itemGradeDef.grade = :grade)
       AND (:minPrice IS NULL OR a.price >= :minPrice)
       AND (:maxPrice IS NULL OR a.price <= :maxPrice)
-      AND (:stat IS NULL OR id.stat = :stat)
+      AND (:stat IS NULL OR id.mainStat = :stat)
       AND (
             :effectGrades IS NULL 
             OR EXISTS (
