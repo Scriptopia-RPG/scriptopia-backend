@@ -34,9 +34,20 @@ public class GameSessionService {
     private final ItemGradeDefRepository itemGradeDefRepository;
     private final EffectGradeDefRepository effectGradeDefRepository;
     private final UserRepository userRepository;
-    private final RestTemplate restTemplate;
     private final GameSessionMongoRepository gameSessionMongoRepository;
     private final UserItemRepository userItemRepository;
+
+    public boolean duplcatedGameSession(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+
+        boolean game = gameSessionRepository.existsByUserId(user.getId());
+
+        if(game) {
+            return true;
+        }
+        else return false;
+    }
 
     public ResponseEntity<?> getGameSession(Long userid) {
         User user = userRepository.findById(userid)
@@ -53,11 +64,15 @@ public class GameSessionService {
     public ResponseEntity<?> saveGameSession(Long userId, String sessionId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+        boolean game = gameSessionRepository.existsByUserId(user.getId());
 
-        GameSession gameSession = new GameSession();
-        gameSession.setUser(user);
-        gameSession.setMongoId(sessionId);
-        return ResponseEntity.ok(gameSessionRepository.save(gameSession));
+        if(!game) {
+            GameSession gameSession = new GameSession();
+            gameSession.setUser(user);
+            gameSession.setMongoId(sessionId);
+            return ResponseEntity.ok(gameSessionRepository.save(gameSession));
+        }
+        else throw new CustomException(ErrorCode.E_404_Duplicated_Game_Session);
     }
 
     @Transactional
