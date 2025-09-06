@@ -33,7 +33,7 @@ public class PublicSharedGameDetailResponse {
     @Data
     public static class TopScoreDto {
         private String nickname;
-        private Float score;
+        private Long score;
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         private LocalDateTime createdAt;
     }

@@ -48,7 +48,6 @@ public class SharedGameFavoriteService {
         // 태그 이름들
         var tagNames = gameTagRepository.findTagNamesBySharedGameId(sharedGameId);
 
-        // DTO 구성
         var dto = new SharedGameFavoriteResponse();
         dto.setSharedGameId(sharedGameId);
         dto.setThumbnailUrl(game.getThumbnailUrl());
@@ -57,7 +56,7 @@ public class SharedGameFavoriteService {
         dto.setTotalPlayCount(playCount);
         dto.setTitle(game.getTitle());
         dto.setTags(tagNames.isEmpty() ? null : tagNames.toArray(new String[0]));
-        dto.setTopScore(maxScore == null ? null : maxScore.floatValue());
+        dto.setTopScore(maxScore);
 
         return ResponseEntity.ok(dto);
     }

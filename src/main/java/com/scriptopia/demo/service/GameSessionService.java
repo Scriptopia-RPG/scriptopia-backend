@@ -34,30 +34,42 @@ public class GameSessionService {
     private final GameSessionMongoRepository gameSessionMongoRepository;
     private final UserItemRepository userItemRepository;
 
+    public boolean duplcatedGameSession(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+
+        boolean game = gameSessionRepository.existsByUserId(user.getId());
+
+        if(game) {
+            return true;
+        }
+        else return false;
+    }
+
     public ResponseEntity<?> getGameSession(Long userid) {
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
-        var sessions = gameSessionRepository.findAllByUser_Id(user.getId());
-        var dtos = sessions.stream().map(s -> {
-            var dto = new GameSessionResponse();
-            dto.setId(s.getId());
-            dto.setSessionId(s.getMongoId());
-            return dto;
-        }).toList();
 
-        return ResponseEntity.ok(dtos);
+        GameSession sessions = gameSessionRepository.findByMongoId(user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND));
+
+        return ResponseEntity.ok(sessions);
     }
 
     @Transactional
     public ResponseEntity<?> saveGameSession(Long userId, String sessionId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+        boolean game = gameSessionRepository.existsByUserId(user.getId());
 
-        GameSession gameSession = new GameSession();
-        gameSession.setUser(user);
-        gameSession.setMongoId(sessionId);
-        return ResponseEntity.ok(gameSessionRepository.save(gameSession));
+        if(!game) {
+            GameSession gameSession = new GameSession();
+            gameSession.setUser(user);
+            gameSession.setMongoId(sessionId);
+            return ResponseEntity.ok(gameSessionRepository.save(gameSession));
+        }
+        else throw new CustomException(ErrorCode.E_404_Duplicated_Game_Session);
     }
 
     @Transactional
