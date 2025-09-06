@@ -11,9 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class DataLoaderConfig {
 
-    private final ItemGradeDefRepository itemGradeDefRepository;
-    private final EffectGradeDefRepository effectGradeDefRepository;
-
     @Bean
     public ApplicationRunner dataLoader() {
         return args -> {
