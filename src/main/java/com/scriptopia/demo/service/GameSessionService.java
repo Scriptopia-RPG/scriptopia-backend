@@ -130,6 +130,8 @@ public class GameSessionService {
                 effectGradeDefRepository
         );
 
+        System.out.println("------------- 여기도 옸습니다22  " + initGameData);
+
         // GameSession Data
         GameSessionMongo mongoSession = new GameSessionMongo();
         mongoSession.setUserId(userId);
