@@ -1,6 +1,5 @@
 package com.scriptopia.demo.controller;
 
-import com.scriptopia.demo.dto.develop.ItemDefResponse;
 import com.scriptopia.demo.dto.items.ItemDefRequest;
 import com.scriptopia.demo.dto.items.ItemFastApiResponse;
 import com.scriptopia.demo.service.ItemDefService;
