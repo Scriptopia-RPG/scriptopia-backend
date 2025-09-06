@@ -1,8 +1,6 @@
 package com.scriptopia.demo.utils;
 
-import com.scriptopia.demo.domain.Grade;
-import com.scriptopia.demo.domain.ItemType;
-import com.scriptopia.demo.domain.Stat;
+import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.repository.EffectGradeDefRepository;
 import com.scriptopia.demo.repository.ItemGradeDefRepository;
 import lombok.*;
@@ -80,10 +78,7 @@ public class InitGameData {
 
 
         List<Long> itemEffectList = new ArrayList<>();
-        for (int i=0; i<=3; i+=1){
-            Grade effectGrade = Grade.getRandomGradeByProbability();
-            itemEffectList.add(effectGradeDefRepository.findPriceByGrade(effectGrade));
-        }
+        itemEffectList.add(effectGradeDefRepository.findPriceByEffectGrade(EffectProbability.COMMON));
         Long gradePrice = itemGradeDefRepository.findPriceByGrade(grade);
 
         this.itemPrice = GameBalanceUtil.getItemPriceByGrade(gradePrice , itemEffectList);

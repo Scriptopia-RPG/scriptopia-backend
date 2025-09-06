@@ -37,7 +37,7 @@ public enum EffectProbability {
      * @param weaponGrade
      * @return
      */
-    public EffectProbability getRandomEffectGradeByWeaponGrade(Grade weaponGrade) {
+    public static EffectProbability getRandomEffectGradeByWeaponGrade(Grade weaponGrade) {
         EffectProbability prob = null;
 
         switch (weaponGrade) {
