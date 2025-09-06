@@ -42,15 +42,11 @@ public class GameSessionService {
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
-        var sessions = gameSessionRepository.findAllByUser_Id(user.getId());
-        var dtos = sessions.stream().map(s -> {
-            var dto = new GameSessionResponse();
-            dto.setId(s.getId());
-            dto.setSessionId(s.getMongoId());
-            return dto;
-        }).toList();
 
-        return ResponseEntity.ok(dtos);
+        GameSession sessions = gameSessionRepository.findByMongoId(user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND));
+
+        return ResponseEntity.ok(sessions);
     }
 
     @Transactional
