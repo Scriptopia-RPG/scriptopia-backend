@@ -21,6 +21,5 @@ public class ItemDefResponse {
     private Integer luck;
     private Long price;
     private LocalDateTime createdAt;
-
     private List<ItemEffectResponse> effects;
 }
