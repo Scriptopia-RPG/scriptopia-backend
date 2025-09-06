@@ -76,9 +76,8 @@ public class InitGameData {
         this.itemLuk = stats[3];
 
 
-
         List<Long> itemEffectList = new ArrayList<>();
-        itemEffectList.add(effectGradeDefRepository.findPriceByEffectGrade(EffectProbability.COMMON));
+        itemEffectList.add(effectGradeDefRepository.findPriceByGrade(EffectProbability.COMMON));
         Long gradePrice = itemGradeDefRepository.findPriceByGrade(grade);
 
         this.itemPrice = GameBalanceUtil.getItemPriceByGrade(gradePrice , itemEffectList);
