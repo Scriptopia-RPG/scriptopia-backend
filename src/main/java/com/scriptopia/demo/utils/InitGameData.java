@@ -70,7 +70,8 @@ public class InitGameData {
         this.baseStat = (int) Math.floor(Grade.COMMON.getAttackPower() * (1 + attackRate / 100.0));
 
 
-        int[] stats = GameBalanceUtil.initItemStat(grade);
+        // 배열 생성 (0: STR, 1: AGI, 2: INT, 3: LUCK)
+        int[] stats = GameBalanceUtil.getRandomItemStatsByGrade(grade);
         this.itemStr = stats[0];
         this.itemAgi = stats[1];
         this.itemInt = stats[2];

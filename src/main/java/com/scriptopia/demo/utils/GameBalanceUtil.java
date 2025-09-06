@@ -7,24 +7,11 @@ import java.security.SecureRandom;
 public class GameBalanceUtil {
     static SecureRandom secureRandom = new SecureRandom();
 
-    public static int[] initItemStat(Grade grade) {
-        int[] stats = new int[4]; // str,agi,int,luk
-        int itemBaseStat = 0;
 
-        switch (grade) {
-            case COMMON -> itemBaseStat = secureRandom.nextInt(4);
-            case UNCOMMON -> itemBaseStat = secureRandom.nextInt(4) + 1;
-            case RARE -> itemBaseStat = secureRandom.nextInt(4) + 2;
-            case EPIC -> itemBaseStat = secureRandom.nextInt(4) + 4;
-            case LEGENDARY -> itemBaseStat = secureRandom.nextInt(4) + 5;
-        }
-
-        for(int i = 0; i < itemBaseStat; i++){
-            stats[secureRandom.nextInt(4)] += 1;
-        }
-        return stats;
-    }
-
+    /**
+     * @param grade
+     * @return (0: STR, 1: AGI, 2: INT, 3: LUCK)
+     */
     public static int[] getRandomItemStatsByGrade(Grade grade) {
         int min = 0, max = 0;
         switch (grade) {
@@ -35,13 +22,10 @@ public class GameBalanceUtil {
             case LEGENDARY -> { min = 5; max = 8; }
         }
 
-        // 총합 랜덤 결정
         int totalPoints = secureRandom.nextInt(max - min + 1) + min;
 
-        // 배열 생성 (0: STR, 1: AGI, 2: INT, 3: LUCK)
         int[] stats = new int[4];
 
-        // 랜덤 분배
         for (int i = 0; i < totalPoints; i++) {
             stats[secureRandom.nextInt(4)]++;
         }
