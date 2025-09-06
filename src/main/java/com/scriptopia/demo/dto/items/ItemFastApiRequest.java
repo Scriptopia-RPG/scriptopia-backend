@@ -1,5 +1,6 @@
 package com.scriptopia.demo.dto.items;
 
+import com.scriptopia.demo.domain.EffectProbability;
 import com.scriptopia.demo.domain.Grade;
 import com.scriptopia.demo.domain.ItemType;
 import com.scriptopia.demo.domain.Stat;
@@ -19,7 +20,7 @@ public class ItemFastApiRequest {
     private int baseStat;
     private Stat mainStat;
     private Grade grade;
-    private List<Grade> itemEffect;
+    private List<EffectProbability> itemEffect;
     private int strength;
     private int agility;
     private int intelligence;
