@@ -21,18 +21,18 @@ public class DataLoaderConfig {
     public ApplicationRunner dataLoader() {
         return args -> {
             // ItemGradeDef 기본 데이터
-            saveItemGradeIfNotExists(Grade.COMMON, 1.0, 100L);
-            saveItemGradeIfNotExists(Grade.UNCOMMON, 1.0, 200L);
-            saveItemGradeIfNotExists(Grade.RARE, 1.0, 500L);
-            saveItemGradeIfNotExists(Grade.EPIC, 1.0, 1000L);
-            saveItemGradeIfNotExists(Grade.LEGENDARY, 1.0, 2000L);
+            saveItemGradeIfNotExists(Grade.COMMON, 1.0, 100);
+            saveItemGradeIfNotExists(Grade.UNCOMMON, 1.0, 150L);
+            saveItemGradeIfNotExists(Grade.RARE, 1.0, 200L);
+            saveItemGradeIfNotExists(Grade.EPIC, 1.0, 250L);
+            saveItemGradeIfNotExists(Grade.LEGENDARY, 1.0, 300L);
 
             // EffectGradeDef 기본 데이터
-            saveEffectGradeIfNotExists(Grade.COMMON, 100L, 0.1);
-            saveEffectGradeIfNotExists(Grade.UNCOMMON, 200L, 0.15);
-            saveEffectGradeIfNotExists(Grade.RARE, 500L, 0.2);
-            saveEffectGradeIfNotExists(Grade.EPIC, 1000L, 0.25);
-            saveEffectGradeIfNotExists(Grade.LEGENDARY, 2000L, 0.3);
+            saveEffectGradeIfNotExists(Grade.COMMON, 10L, 0.1);
+            saveEffectGradeIfNotExists(Grade.UNCOMMON, 20L, 0.15);
+            saveEffectGradeIfNotExists(Grade.RARE, 50L, 0.2);
+            saveEffectGradeIfNotExists(Grade.EPIC, 80L, 0.25);
+            saveEffectGradeIfNotExists(Grade.LEGENDARY, 100L, 0.3);
         };
     }
 
