@@ -14,7 +14,7 @@ public interface ItemGradeDefRepository extends JpaRepository<ItemGradeDef, Long
     Optional<ItemGradeDef> findByGrade(Grade grade);
 
     @Query("SELECT igm.price FROM ItemGradeDef igm WHERE igm.grade = :grade")
-    Integer findPriceByGrade(@Param("grade") Grade grade);
+    Long findPriceByGrade(@Param("grade") Grade grade);
 
 
 }
