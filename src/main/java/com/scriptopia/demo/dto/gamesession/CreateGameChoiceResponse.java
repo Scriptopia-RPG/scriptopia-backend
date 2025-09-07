@@ -19,6 +19,7 @@ public class CreateGameChoiceResponse {
     @NoArgsConstructor
     public static class ChoiceInfo {
         private String story;
+        private String title;
         private List<ChoiceOption> choice;
     }
 
@@ -27,7 +28,6 @@ public class CreateGameChoiceResponse {
     @NoArgsConstructor
     public static class ChoiceOption {
         private String detail;
-        private String stats;
     }
 
     @Data

@@ -1,6 +1,7 @@
 package com.scriptopia.demo.dto.gamesession;
 
 import com.scriptopia.demo.domain.ChoiceEventType;
+import com.scriptopia.demo.domain.Stat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ public class CreateGameChoiceRequest {
     private String currentStory;
     private String location;
     private String currentChoice;
+    private List<Stat> choiceStat;
     private ChoiceEventType eventType;
     private Integer npcRank;
     private PlayerInfo playerInfo;
