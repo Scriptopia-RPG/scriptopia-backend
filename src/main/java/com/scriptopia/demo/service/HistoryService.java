@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -128,12 +129,20 @@ public class HistoryService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<List<HistoryPageResponse>> fetchMyHisotry(Long userId, Long lastId, int size) {
+    public ResponseEntity<List<HistoryPageResponse>> fetchMyHistory(Long userId, UUID lastId, int size) {
         PageRequest pr = PageRequest.of(0, size);
         Page<History> page;
 
-        if(lastId == null) page = historyRepository.findByUserIdOrderByIdDesc(userId, pr);
-        else page = historyRepository.findByUserIdAndIdLessThanOrderByIdDesc(userId, lastId, pr);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+
+        if(lastId == null) page = historyRepository.findByUserIdOrderByIdDesc(user.getId(), pr);
+        else {
+            Long lastIds = historyRepository.findByUserIdAndUuid(user.getId(), lastId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.E_404_PAGE_NOT_FOUND));
+
+            page = historyRepository.findByUserIdAndIdLessThanOrderByIdDesc(user.getId(), lastIds, pr);
+        }
 
         return ResponseEntity.ok(page.getContent().stream().map(HistoryPageResponse::from).toList());
     }
