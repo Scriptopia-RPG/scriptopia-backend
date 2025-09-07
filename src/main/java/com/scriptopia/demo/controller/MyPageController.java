@@ -23,12 +23,12 @@ public class MyPageController {
     계정관리 : 내 히스토리 조회 -> 무한스크롤
      */
     @GetMapping("/my-page/history")
-    public ResponseEntity<List<HistoryPageResponse>> getHistory(@RequestParam(required = false) Long lastId,
+    public ResponseEntity<List<HistoryPageResponse>> getHistory(@RequestParam(required = false) UUID lastId,
                                                                 @RequestParam(defaultValue = "10") int size,
                                                                 Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
-        return historyService.fetchMyHisotry(userId, lastId, size);
+        return historyService.fetchMyHistory(userId, lastId, size);
     }
 
     /*
