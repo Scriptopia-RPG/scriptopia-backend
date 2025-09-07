@@ -2,6 +2,7 @@ package com.scriptopia.demo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scriptopia.demo.dto.gamesession.GameChoiceRequest;
 import com.scriptopia.demo.dto.gamesession.StartGameRequest;
 import com.scriptopia.demo.dto.gamesession.StartGameResponse;
 import com.scriptopia.demo.service.GameSessionService;
@@ -45,7 +46,6 @@ public class GameSessionController {
         StartGameResponse response = gameSessionService.startNewGame(userId, request);
         return ResponseEntity.ok(response);
     }
-
 
     /**
      * 현재는 userId, sessionId를 통해 저장하는데
