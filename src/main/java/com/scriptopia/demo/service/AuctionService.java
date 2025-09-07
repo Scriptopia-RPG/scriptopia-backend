@@ -142,7 +142,7 @@ public class AuctionService {
                                         AuctionItemResponse.ItemEffectDto effDto = new AuctionItemResponse.ItemEffectDto();
                                         effDto.setEffectName(e.getEffectName());
                                         effDto.setEffectDescription(e.getEffectDescription());
-                                        effDto.setGrade(e.getEffectGradeDef().getGrade().name());
+                                        effDto.setEffectProbability(e.getEffectGradeDef().getEffectProbability());
                                         return effDto;
                                     })
                                     .toList();

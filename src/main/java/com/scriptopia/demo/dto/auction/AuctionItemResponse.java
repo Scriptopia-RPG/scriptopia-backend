@@ -1,5 +1,6 @@
 package com.scriptopia.demo.dto.auction;
 
+import com.scriptopia.demo.domain.EffectProbability;
 import com.scriptopia.demo.domain.TradeStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -55,6 +56,6 @@ public class AuctionItemResponse {
     public static class ItemEffectDto {
         private String effectName;
         private String effectDescription;
-        private String grade;
+        private EffectProbability effectProbability;
     }
 }

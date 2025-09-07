@@ -45,7 +45,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
             OR EXISTS (
                 SELECT 1 FROM ItemEffect ie2 
                 WHERE ie2.itemDef = id 
-                AND ie2.effectGradeDef.grade IN :effectGrades
+                AND ie2.effectGradeDef.effectProbability IN :effectGrades
             )
       )
 """)
@@ -65,7 +65,4 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
             TradeStatus tradeStatus,
             Pageable pageable
     );
-
-
-
 }
