@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scriptopia.demo.config.OAuthProperties;
 import com.scriptopia.demo.domain.*;
-import com.scriptopia.demo.dto.localaccount.LoginResponse;
 import com.scriptopia.demo.dto.oauth.LoginStatus;
 import com.scriptopia.demo.dto.oauth.OAuthLoginResponse;
 import com.scriptopia.demo.dto.oauth.OAuthUserInfo;
@@ -13,22 +12,22 @@ import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.SocialAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
-import com.scriptopia.demo.utils.GoogleClient;
+import com.scriptopia.demo.utils.client.GoogleClient;
 import com.scriptopia.demo.utils.JwtProvider;
-import com.scriptopia.demo.utils.KakaoClient;
-import com.scriptopia.demo.utils.NaverClient;
+import com.scriptopia.demo.utils.client.KakaoClient;
+import com.scriptopia.demo.utils.client.NaverClient;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -186,7 +185,7 @@ public class OAuthService {
                         "?client_id=" + props.getGoogle().getClientId() +
                         "&redirect_uri=" + props.getGoogle().getRedirectUri() +
                         "&response_type=code" +
-                        "&scope=" + props.getGoogle().getScope();
+                        "&scope=" + URLEncoder.encode(props.getGoogle().getScope(), StandardCharsets.UTF_8);
             case "KAKAO":
                 return "https://kauth.kakao.com/oauth/authorize" +
                         "?client_id=" + props.getKakao().getClientId() +

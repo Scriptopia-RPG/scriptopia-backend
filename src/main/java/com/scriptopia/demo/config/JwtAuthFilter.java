@@ -35,9 +35,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
 
-
-        System.out.println(">>> JwtAuthFilter 실행됨, path=" + req.getServletPath());
-
         String authHeader = req.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             setErrorResponse(res, ErrorCode.E_400_MISSING_JWT);

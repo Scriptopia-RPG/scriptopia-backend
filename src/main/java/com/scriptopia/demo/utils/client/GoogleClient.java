@@ -1,5 +1,6 @@
-package com.scriptopia.demo.utils;
+package com.scriptopia.demo.utils.client;
 
+import com.scriptopia.demo.config.OAuthProperties;
 import com.scriptopia.demo.domain.Provider;
 import com.scriptopia.demo.dto.oauth.OAuthUserInfo;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GoogleClient {
 
-    @Value("${oauth.google.client-id}")
-    private String clientId;
-
-    @Value("${oauth.google.client-secret}")
-    private String clientSecret;
-
-    @Value("${oauth.google.redirect-uri}")
-    private String redirectUri;
-
+    private final OAuthProperties props;
     private final RestTemplate restTemplate = new RestTemplate();
 
     public OAuthUserInfo getUserInfo(String code) {
@@ -35,9 +28,9 @@ public class GoogleClient {
 
         Map<String, String> params = new HashMap<>();
         params.put("code", code);
-        params.put("client_id", clientId);
-        params.put("client_secret", clientSecret);
-        params.put("redirect_uri", redirectUri);
+        params.put("client_id", props.getGoogle().getClientId());
+        params.put("client_secret", props.getGoogle().getClientSecret());
+        params.put("redirect_uri", props.getGoogle().getRedirectUri());
         params.put("grant_type", "authorization_code");
 
         ResponseEntity<Map> tokenResponse =

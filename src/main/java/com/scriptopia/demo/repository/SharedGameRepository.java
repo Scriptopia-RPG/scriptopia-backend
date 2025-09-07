@@ -10,13 +10,14 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface SharedGameRepository extends JpaRepository<SharedGame, Long> {
     @Query("select sg from SharedGame sg where sg.user.id = :userId")
     List<SharedGame> findAllByUserid(@Param("userId") Long userId);
 
-    @Query("select sg.id from SharedGame sg where sg.uuid = :uuid")
-    Long findByUuid(@Param("uuid") String uuid);
+    @Query("select sg from SharedGame sg where sg.uuid = :uuid")
+    Optional<SharedGame> findByUuid(@Param("uuid") UUID uuid);
 
     // 기본(전체)
     @Query("""
