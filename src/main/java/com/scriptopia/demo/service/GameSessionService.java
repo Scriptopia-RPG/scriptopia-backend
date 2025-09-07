@@ -173,7 +173,7 @@ public class GameSessionService {
                 ItemEffectMongo.builder()
                 .itemEffectName(itemEffect.getItemEffectName())
                 .itemEffectDescription(itemEffect.getItemEffectDescription())
-                .grade(Grade.COMMON)
+                .effectProbability(EffectProbability.COMMON)
                 .build()
         );
 
