@@ -1,5 +1,7 @@
 package com.scriptopia.demo.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scriptopia.demo.dto.exception.ErrorResponse;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.utils.JwtProvider;
@@ -12,6 +14,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -22,7 +25,7 @@ import java.io.IOException;
 import java.security.SignatureException;
 import java.util.stream.Collectors;
 
-@Component
+
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -32,15 +35,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
 
-        String uri = req.getRequestURI();
-        if (uri.startsWith("/api/v1/public")) {
-            chain.doFilter(req, res);
-            return;
-        }
+
+        System.out.println(">>> JwtAuthFilter 실행됨, path=" + req.getServletPath());
 
         String authHeader = req.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new CustomException(ErrorCode.E_400_MISSING_JWT);
+            setErrorResponse(res, ErrorCode.E_400_MISSING_JWT);
+            return;
         }
 
             String token = authHeader.substring(7);
@@ -56,18 +57,34 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            } catch (ExpiredJwtException e) {
-                throw new CustomException(ErrorCode.E_401_EXPIRED_JWT);
-            } catch (MalformedJwtException e) {
-                throw new CustomException(ErrorCode.E_401_MALFORMED);
-            } catch (UnsupportedJwtException e) {
-                throw new CustomException(ErrorCode.E_401_UNSUPPORTED_JWT);
+
             } catch (IllegalArgumentException e) {
-                throw new CustomException(ErrorCode.E_400_MISSING_JWT);
+                setErrorResponse(res,ErrorCode.E_400_MISSING_JWT);
+                return;
+            } catch (ExpiredJwtException e) {
+                setErrorResponse(res,ErrorCode.E_401_EXPIRED_JWT);
+                return;
+            } catch (MalformedJwtException e) {
+                setErrorResponse(res,ErrorCode.E_401_MALFORMED);
+                return;
+            } catch (UnsupportedJwtException e) {
+                setErrorResponse(res,ErrorCode.E_401_UNSUPPORTED_JWT);
+                return;
             } catch (JwtException e) {
-                throw new CustomException(ErrorCode.E_401_INVALID_SIGNATURE);
+                setErrorResponse(res,ErrorCode.E_401_INVALID_SIGNATURE);
+                return;
             }
 
             chain.doFilter(req, res);
+    }
+
+
+
+
+    private void setErrorResponse(HttpServletResponse res, ErrorCode code) throws IOException {
+        res.setStatus(code.getStatus().value());
+        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        res.setCharacterEncoding("UTF-8");
+        new ObjectMapper().writeValue(res.getOutputStream(), new ErrorResponse(code));
     }
 }
