@@ -151,6 +151,7 @@ public class GameSessionService {
         mongoSession.setSceneType(SceneType.CHOICE); // 시작은 choice 기본값
         mongoSession.setStartedAt(LocalDateTime.now());
         mongoSession.setUpdatedAt(LocalDateTime.now());
+        mongoSession.setPreChoice(null);
         mongoSession.setBackground(externalGame.getBackgroundStory());
         mongoSession.setLocation(externalGame.getLocation());
         mongoSession.setProgress(0);
@@ -279,25 +280,54 @@ public class GameSessionService {
 
 
     @Transactional
-    public GameSessionMongo createChoice(Long userId){
+    public CreateGameChoiceRequest mapToCreateGameChoiceRequest(Long userId) {
 
+        // 1. MySQL에서 게임 세션 확인
         if (!gameSessionRepository.existsByUserId(userId)) {
             throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
         }
 
+
         GameSession gameSession = gameSessionRepository.findByMongoId(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
 
+
         String gameId = gameSession.getMongoId();
-
-        /**
-         * 1. mongoDB에서 정보를 가져오기 gameId를 통해 정보를 가져옴
-         */
-
         GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
 
 
-        return gameSessionMongo;
+        // 3. DTO로 매핑
+        CreateGameChoiceRequest response = new CreateGameChoiceRequest();
+        response.setWorldView(gameSessionMongo.getHistoryInfo().getWorldView());
+
+        //
+        response.setCurrentStory(gameSessionMongo.getHistoryInfo().getBackgroundStory());
+        response.setCurrentChoice(null); // 초기값
+
+
+        response.setLocation(gameSessionMongo.getLocation());
+        response.setEventType(ChoiceEventType.getChoiceEventType());
+        response.setNpcRank(NpcGrade);
+
+        // playerInfo 매핑
+        CreateGameChoiceRequest.PlayerInfo playerInfo = new CreateGameChoiceRequest.PlayerInfo();
+        playerInfo.setName(gameSessionMongo.getPlayerInfo().getName());
+        playerInfo.setTrait(gameSessionMongo.getPlayerInfo().getTrait());
+        response.setPlayerInfo(playerInfo);
+
+        // itemInfo 매핑
+        List<CreateGameChoiceRequest.ItemInfo> itemInfoList = gameSessionMongo.getInventory().stream()
+                .map(inv -> {
+                    CreateGameChoiceRequest.ItemInfo itemInfo = new CreateGameChoiceRequest.ItemInfo();
+                    ItemDefMongo itemDef = itemDefMongoRepository.findById(inv.getItemDefId())
+                            .orElseThrow(() -> new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND));
+                    itemInfo.setName(itemDef.getName());
+                    itemInfo.setDescription(itemDef.getDescription());
+                    return itemInfo;
+                }).toList();
+        response.setItemInfo(itemInfoList);
+
+        return response;
     }
 }

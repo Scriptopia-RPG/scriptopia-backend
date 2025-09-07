@@ -2,6 +2,9 @@ package com.scriptopia.demo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scriptopia.demo.domain.mongo.GameSessionMongo;
+import com.scriptopia.demo.domain.mongo.ItemDefMongo;
+import com.scriptopia.demo.dto.gamesession.CreateGameChoiceRequest;
 import com.scriptopia.demo.dto.gamesession.GameChoiceRequest;
 import com.scriptopia.demo.dto.gamesession.StartGameRequest;
 import com.scriptopia.demo.dto.gamesession.StartGameResponse;
@@ -44,6 +47,19 @@ public class GameSessionController {
         Long userId = Long.valueOf(authentication.getName());
 
         StartGameResponse response = gameSessionService.startNewGame(userId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 테스트 중
+     */
+    @PostMapping("/test")
+    public ResponseEntity<CreateGameChoiceRequest> testGame(
+            Authentication authentication) throws JsonProcessingException {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        CreateGameChoiceRequest response = gameSessionService.mapToCreateGameChoiceRequest(userId);
         return ResponseEntity.ok(response);
     }
 
