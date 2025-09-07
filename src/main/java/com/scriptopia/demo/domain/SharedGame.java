@@ -23,7 +23,7 @@ public class SharedGame {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @Column(nullable = false, unique = true, columnDefinition = "BINARY(16)")
+    @Column(nullable = false, unique = true)
     private UUID uuid;
 
     private String thumbnailUrl;
