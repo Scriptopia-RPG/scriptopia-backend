@@ -9,23 +9,33 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/public/games/shared")
+@RequestMapping("/games/shared")
 @RequiredArgsConstructor
 public class PublicSharedGameController {
     private final SharedGameService sharedGameService;
 
-    @GetMapping("/{sharedGameId}")
-    public ResponseEntity<?> getSharedGameDetail(@PathVariable Long sharedGameId) {
-        return sharedGameService.getDetailedSharedGame(sharedGameId);
+    /*
+    게임공유 : 공유된 게임 상세 조회
+     */
+    @GetMapping("/{uuid}")
+    public ResponseEntity<?> getSharedGameDetail(@PathVariable UUID uuid) {
+        return sharedGameService.getDetailedSharedGame(uuid);
     }
 
+    /*
+    게임공유 : 공유된 게임 태그 조회
+     */
     @GetMapping("/tags")
     public ResponseEntity<?> getSharedGameTags() {
         return sharedGameService.getTag();
     }
 
+    /*
+    게임공유 : 공유된 게임 목록 조회
+     */
     @GetMapping
     public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(Authentication authentication,
                                                                                      @RequestParam(required = false) Long lastId,
