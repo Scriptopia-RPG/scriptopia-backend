@@ -66,7 +66,7 @@ public enum ErrorCode {
     E_404_GAME_SESSION_NOT_FOUND("E404006", "게임을 불러올 수 없습니다.", HttpStatus.NOT_FOUND),
     E_404_STORED_GAME_NOT_FOUND("E404007", "저장된 게임이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     E_404_Duplicated_Game_Session("E404008", "이미 저장된 게임이 존재합니다.", HttpStatus.NOT_FOUND),
-    E_404_Game_Session_NOT_FOUND("E404008", "이미 저장된 게임이 존재합니다.", HttpStatus.NOT_FOUND),
+    E_404_Game_Session_NOT_FOUND("E404009", "저장된 게임이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
 
 
 
