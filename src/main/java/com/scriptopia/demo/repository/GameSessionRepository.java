@@ -16,4 +16,7 @@ public interface GameSessionRepository extends JpaRepository<GameSession, Long> 
 
     @Query("select case when (Count(g) > 0) then true else false end from GameSession g join g.user u where u.id = :userId")
     boolean existsByUserId(@Param("userId") Long userId);
+
+    boolean existsByMongoId(String mongoId);
+
 }
