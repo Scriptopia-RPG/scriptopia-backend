@@ -2,14 +2,13 @@ package com.scriptopia.demo.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scriptopia.demo.dto.exception.ErrorResponse;
-import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.utils.JwtProvider;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -20,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.scriptopia.demo.exception.ErrorCode.E_403;
@@ -37,11 +35,6 @@ public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
 
-//    @Bean
-//    public  JwtAuthFilter jwtAuthFilter(){
-//        return new JwtAuthFilter(jwtProvider);
-//    }
-
     @Bean
     @Order(1)
     public SecurityFilterChain authChain(HttpSecurity http) throws Exception {
@@ -51,6 +44,12 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
                 .csrf(AbstractHttpConfigurer::disable);
+
+        http.addFilterBefore((request, response, chain) -> {
+            System.out.println("[SecurityChain-1]");
+            chain.doFilter(request, response);
+        }, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
@@ -63,6 +62,30 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
                 .csrf(AbstractHttpConfigurer::disable);
+
+        http.addFilterBefore((request, response, chain) -> {
+            System.out.println("[SecurityChain-2]");
+            chain.doFilter(request, response);
+        }, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(3)
+    public SecurityFilterChain publicTradesChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/trades") // 공개 체인: GET /trades 만
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/trades").permitAll()
+                )
+                .csrf(AbstractHttpConfigurer::disable);
+
+        http.addFilterBefore((request, response, chain) -> {
+            System.out.println("[SecurityChain-3]");
+            chain.doFilter(request, response);
+        }, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
@@ -71,6 +94,14 @@ public class SecurityConfig {
     @Bean
     @Order(99) // public 체인보다 뒤에서 동작
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+
+        http.addFilterBefore((request, response, chain) -> {
+            System.out.println("[SecurityChain-99]");
+            chain.doFilter(request, response);
+        }, UsernamePasswordAuthenticationFilter.class);
+
+
         http
                 .securityMatcher("/**")
                 .csrf(AbstractHttpConfigurer::disable)

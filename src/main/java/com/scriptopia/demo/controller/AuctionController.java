@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/trades")
 public class AuctionController {
 
     private final AuctionService auctionService;
 
 
-    @GetMapping("/public/trades")
+    @GetMapping("/trades")
     public ResponseEntity<TradeResponse> getTrades(
             @RequestBody TradeFilterRequest requestDto) {
 
@@ -24,7 +25,7 @@ public class AuctionController {
 
     }
 
-    @PostMapping("/user/trades/{auctionId}/purchase")
+    @PostMapping("/trades/{auctionId}/purchase")
     public ResponseEntity<String> purchaseItem(
             @PathVariable String auctionId,
             Authentication authentication) {
@@ -35,7 +36,7 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/user/trades/me")
+    @GetMapping("/trades/me")
     public ResponseEntity<MySaleItemResponse> mySaleItems(
             @RequestBody MySaleItemRequest requestDto,
             Authentication authentication) {
@@ -46,7 +47,7 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/user/trades")
+    @PostMapping("/trades")
     public ResponseEntity<String> createAuction(@RequestBody AuctionRequest dto,
                                                 Authentication authentication ){
 
@@ -54,7 +55,7 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.createAuction(dto, userId));
     }
 
-    @DeleteMapping("/user/trades/{auctionId}")
+    @DeleteMapping("/trades/{auctionId}")
     public ResponseEntity<String> cancelMySaleItem(
             @PathVariable String auctionId,
             Authentication authentication) {
@@ -65,7 +66,7 @@ public class AuctionController {
     }
 
 
-    @GetMapping("/user/trades/me/history")
+    @GetMapping("/trades/me/history")
     public ResponseEntity<SettlementHistoryResponse> settlementHistory(
             @RequestBody SettlementHistoryRequest requestDto,
             Authentication authentication) {
@@ -76,7 +77,7 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
-    @PatchMapping("/user/trades/{settlementId}/confirm")
+    @PatchMapping("/trades/{settlementId}/confirm")
     public ResponseEntity<String> confirmItem(
             @PathVariable String settlementId,
             Authentication authentication) {
