@@ -44,7 +44,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain publicChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain authChain(HttpSecurity http) throws Exception {
 
         http.securityMatcher("/auth/**")
                 .authorizeHttpRequests(auth -> auth
@@ -53,6 +53,20 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
+
+    @Bean
+    @Order(2)
+    public SecurityFilterChain oAuthChain(HttpSecurity http) throws Exception {
+
+        http.securityMatcher("/oauth/**")
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                )
+                .csrf(AbstractHttpConfigurer::disable);
+        return http.build();
+    }
+
+
 
     @Bean
     @Order(99) // public 체인보다 뒤에서 동작

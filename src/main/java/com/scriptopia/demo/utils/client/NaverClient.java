@@ -1,4 +1,4 @@
-package com.scriptopia.demo.utils;
+package com.scriptopia.demo.utils.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scriptopia.demo.config.OAuthProperties;
