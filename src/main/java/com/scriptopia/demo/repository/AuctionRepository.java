@@ -41,10 +41,10 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
       AND (:maxPrice IS NULL OR a.price <= :maxPrice)
       AND (:stat IS NULL OR id.mainStat = :stat)
       AND (
-            :effectGrades IS NULL 
+            :effectGrades IS NULL
             OR EXISTS (
-                SELECT 1 FROM ItemEffect ie2 
-                WHERE ie2.itemDef = id 
+                SELECT 1 FROM ItemEffect ie2
+                WHERE ie2.itemDef = id
                 AND ie2.effectGradeDef.effectProbability IN :effectGrades
             )
       )
