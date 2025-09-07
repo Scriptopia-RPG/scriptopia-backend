@@ -19,12 +19,11 @@ import java.time.Duration;
 import java.util.List;
 
 @RestController
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final LocalAccountService localAccountService;
-    private final JwtProvider jwt;
     private final RefreshTokenService refreshTokenService;
-    private final JwtProperties props;
 
     private static final String RT_COOKIE = "RT";
     private static final boolean COOKIE_SECURE = true;
@@ -32,7 +31,7 @@ public class AuthController {
 
 
 
-    @PostMapping("/user/auth/logout")
+    @PostMapping("/logout")
     public ResponseEntity<?> logout(
             @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
             HttpServletResponse response
@@ -45,7 +44,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/public/auth/login")
+    @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @RequestBody @Valid LoginRequest req,
             HttpServletRequest request,
@@ -55,7 +54,7 @@ public class AuthController {
         return ResponseEntity.ok(localAccountService.login(req, request, response));
     }
 
-    @PostMapping("/public/auth/register")
+    @PostMapping("/register")
     public ResponseEntity<?> register(
             @RequestBody @Valid RegisterRequest request
     ) {
@@ -63,7 +62,7 @@ public class AuthController {
         return ResponseEntity.ok("회원가입에 성공했습니다.");
     }
 
-    @PostMapping("/public/auth/email/verify")
+    @PostMapping("/email/verify")
     public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
 
         localAccountService.verifyEmail(request);
@@ -72,13 +71,13 @@ public class AuthController {
     }
 
 
-    @PostMapping("/public/auth/email/code/send")
+    @PostMapping("/email/code/send")
     public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest request) {
         localAccountService.sendVerificationCode(request.getEmail());
         return ResponseEntity.ok("인증 코드가 이메일로 발송되었습니다.");
     }
 
-    @PostMapping("/public/auth/email/code/verify")
+    @PostMapping("/email/code/verify")
     public ResponseEntity<String> verifyCode(@RequestBody @Valid VerifyCodeRequest request) {
         localAccountService.verifyCode(request.getEmail(), request.getCode());
         return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
@@ -86,7 +85,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/public/auth/password/reset-link/send")
+    @PostMapping("/password/reset/send")
     public ResponseEntity<?> sendResetMail(@Valid @RequestBody SendCodeRequest request){
 
         localAccountService.sendResetPasswordMail(request.getEmail());
@@ -95,7 +94,7 @@ public class AuthController {
     }
 
 
-    @PatchMapping("public/auth/password/reset")
+    @PatchMapping("/password/reset")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         localAccountService.resetPassword(request.getToken(), request.getNewPassword());
 
@@ -103,7 +102,7 @@ public class AuthController {
     }
 
 
-    @PatchMapping("/user/auth/password/change")
+    @PatchMapping("/password/change")
     public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest request,
                                                  Authentication authentication) {
 
@@ -114,39 +113,6 @@ public class AuthController {
         return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
 
-
-    // 쿠키 기반 리프레시
-    @PostMapping("/user/auth/token/refresh")
-    public ResponseEntity<RefreshResponse> refresh(
-            @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
-            @RequestParam(required = false) String deviceId
-    ) {
-        if (refreshToken == null || refreshToken.isBlank()) {
-            return ResponseEntity.status(401).build();
-        }
-        Long userId = jwt.getUserId(refreshToken);
-        List<String> roles = localAccountService.getRoles(userId);
-
-        var pair = refreshTokenService.rotate(refreshToken, deviceId, roles);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, refreshCookie(pair.refreshToken()).toString())
-                .body(new RefreshResponse(pair.accessToken(), props.accessExpSeconds()));
-    }
-
-
-
-
-
-    private ResponseCookie refreshCookie(String value) {
-        return ResponseCookie.from(RT_COOKIE, value)
-                .httpOnly(true)
-                .secure(COOKIE_SECURE)
-                .sameSite(COOKIE_SAMESITE)
-                .path("/")
-                .maxAge(Duration.ofDays(14))
-                .build();
-    }
 
 
 }
