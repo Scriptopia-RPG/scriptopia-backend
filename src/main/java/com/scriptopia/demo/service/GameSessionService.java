@@ -151,7 +151,7 @@ public class GameSessionService {
         mongoSession.setSceneType(SceneType.CHOICE); // 시작은 choice 기본값
         mongoSession.setStartedAt(LocalDateTime.now());
         mongoSession.setUpdatedAt(LocalDateTime.now());
-        mongoSession.setBackground(request.getBackground());
+        mongoSession.setBackground(externalGame.getBackgroundStory());
         mongoSession.setLocation(externalGame.getLocation());
         mongoSession.setProgress(0);
         mongoSession.setStage(initGameData.getStages());
@@ -279,25 +279,25 @@ public class GameSessionService {
 
 
     @Transactional
-    public void createChoice(Long userId, String gameId){
+    public GameSessionMongo createChoice(Long userId){
 
-        if (gameSessionRepository.existsByUserId(userId)){
+        if (!gameSessionRepository.existsByUserId(userId)) {
             throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
         }
 
-        if (gameSessionRepository.existsByMongoId(gameId)){
-            throw new CustomException(ErrorCode.E_404_Game_Session_NOT_FOUND);
-        }
+        GameSession gameSession = gameSessionRepository.findByMongoId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
 
+        String gameId = gameSession.getMongoId();
 
         /**
          * 1. mongoDB에서 정보를 가져오기 gameId를 통해 정보를 가져옴
-         * 2. background
-         *
          */
 
+        GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
 
 
-
+        return gameSessionMongo;
     }
 }
