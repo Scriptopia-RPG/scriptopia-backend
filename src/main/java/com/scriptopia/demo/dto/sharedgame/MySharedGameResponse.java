@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 public class MySharedGameResponse {
+    private String uuid;
     private String thumbnailUrl;
     private boolean recommand;
     private Long totalPlayed;

@@ -52,10 +52,10 @@ public class GameSessionController {
      * 인증 관리 부분 끝나면 header에 token 꺼내오고 requestparameter session_id로 저장하게 수정
      */
     @PostMapping("/{gameId}/history")
-    public ResponseEntity<?> addHistory(@PathVariable String sid, Authentication authentication) {
+    public ResponseEntity<?> addHistory(@PathVariable String gameId, Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
-        return historyService.createHistory(userId, sid);
+        return historyService.createHistory(userId, gameId);
     }
 
     /** 개발용: 로컬 MongoDB에 더미 세션 한 건 심어서 테스트용 ObjectId 반환 */

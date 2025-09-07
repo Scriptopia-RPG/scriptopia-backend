@@ -26,7 +26,7 @@ public class PublicSharedGameController {
         return sharedGameService.getTag();
     }
 
-    @GetMapping("/check")
+    @GetMapping
     public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(Authentication authentication,
                                                                                      @RequestParam(required = false) Long lastId,
                                                                                      @RequestParam(defaultValue = "20") int size,

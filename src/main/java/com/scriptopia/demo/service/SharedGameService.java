@@ -52,6 +52,7 @@ public class SharedGameService {
 
         for(SharedGame game : games) {
             MySharedGameResponse dto = new MySharedGameResponse();
+            dto.setUuid(game.getUuid().toString());
             dto.setThumbnailUrl(game.getThumbnailUrl());
             dto.setTotalPlayed(sharedGameScoreRepository.countBySharedGameId(game.getId()));
             dto.setTitle(game.getTitle());
