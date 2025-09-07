@@ -23,9 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthController {
     private final LocalAccountService localAccountService;
-    private final JwtProvider jwt;
     private final RefreshTokenService refreshTokenService;
-    private final JwtProperties props;
 
     private static final String RT_COOKIE = "RT";
     private static final boolean COOKIE_SECURE = true;
@@ -87,7 +85,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/password/reset-link/send")
+    @PostMapping("/password/reset/send")
     public ResponseEntity<?> sendResetMail(@Valid @RequestBody SendCodeRequest request){
 
         localAccountService.sendResetPasswordMail(request.getEmail());
@@ -115,39 +113,6 @@ public class AuthController {
         return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
 
-
-    // 쿠키 기반 리프레시
-    @PostMapping("/token/refresh")
-    public ResponseEntity<RefreshResponse> refresh(
-            @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
-            @RequestParam(required = false) String deviceId
-    ) {
-        if (refreshToken == null || refreshToken.isBlank()) {
-            return ResponseEntity.status(401).build();
-        }
-        Long userId = jwt.getUserId(refreshToken);
-        List<String> roles = localAccountService.getRoles(userId);
-
-        var pair = refreshTokenService.rotate(refreshToken, deviceId, roles);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, refreshCookie(pair.refreshToken()).toString())
-                .body(new RefreshResponse(pair.accessToken(), props.accessExpSeconds()));
-    }
-
-
-
-
-
-    private ResponseCookie refreshCookie(String value) {
-        return ResponseCookie.from(RT_COOKIE, value)
-                .httpOnly(true)
-                .secure(COOKIE_SECURE)
-                .sameSite(COOKIE_SAMESITE)
-                .path("/")
-                .maxAge(Duration.ofDays(14))
-                .build();
-    }
 
 
 }

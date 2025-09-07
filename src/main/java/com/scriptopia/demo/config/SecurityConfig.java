@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scriptopia.demo.dto.exception.ErrorResponse;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
+import com.scriptopia.demo.utils.JwtProvider;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,15 +35,34 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private final JwtAuthFilter jwtAuthFilter;
+    private final JwtProvider jwtProvider;
+
+//    @Bean
+//    public  JwtAuthFilter jwtAuthFilter(){
+//        return new JwtAuthFilter(jwtProvider);
+//    }
 
     @Bean
+    @Order(1)
+    public SecurityFilterChain publicChain(HttpSecurity http) throws Exception {
+
+        http.securityMatcher("/auth/**")
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                )
+                .csrf(AbstractHttpConfigurer::disable);
+        return http.build();
+    }
+
+    @Bean
+    @Order(99) // public 체인보다 뒤에서 동작
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .securityMatcher("/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(req -> {
                     var c = new CorsConfiguration();
-                    c.setAllowedOrigins(List.of("http://localhost:3000")); // 현재는 로컬로 해놓고 나중에 바꿔야 댐
+                    c.setAllowedOrigins(List.of("http://localhost:3000"));
                     c.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
                     c.setAllowedHeaders(List.of("Authorization","Content-Type"));
                     c.setAllowCredentials(true);
@@ -50,21 +71,21 @@ public class SecurityConfig {
                 }))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/password, /auth/token").authenticated()
-                        .requestMatchers("/auth/**","").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().authenticated() // 나머지 전부 인증 필요
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) -> {
                             res.setStatus(ErrorCode.E_401.getStatus().value());
                             res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                            new ObjectMapper().writeValue(res.getOutputStream(),new ErrorResponse(ErrorCode.E_401));
+                            new ObjectMapper().writeValue(res.getOutputStream(),
+                                    new ErrorResponse(ErrorCode.E_401));
                         })
                         .accessDeniedHandler((req, res, e) -> {
-                            res.setStatus(ErrorCode.E_403.getStatus().value());
+                            res.setStatus(E_403.getStatus().value());
                             res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                            new ObjectMapper().writeValue(res.getOutputStream(),new ErrorResponse(ErrorCode.E_403));
+                            new ObjectMapper().writeValue(res.getOutputStream(),
+                                    new ErrorResponse(E_403));
                         })
                 );
         return http.build();
