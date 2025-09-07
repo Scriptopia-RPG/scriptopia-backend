@@ -26,6 +26,7 @@ public class GameSessionMongo {
     private LocalDateTime updatedAt;
 
     private String background;
+    private String preChoice;
     private String location;
     private Integer progress;
     private List<Integer> stage;

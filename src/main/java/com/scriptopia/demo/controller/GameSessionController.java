@@ -2,8 +2,9 @@ package com.scriptopia.demo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.scriptopia.demo.dto.gamesession.StartGameRequest;
-import com.scriptopia.demo.dto.gamesession.StartGameResponse;
+import com.scriptopia.demo.domain.mongo.GameSessionMongo;
+import com.scriptopia.demo.domain.mongo.ItemDefMongo;
+import com.scriptopia.demo.dto.gamesession.*;
 import com.scriptopia.demo.service.GameSessionService;
 import com.scriptopia.demo.service.HistoryService;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,18 @@ public class GameSessionController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 테스트 중
+     */
+    @PostMapping("/test")
+    public ResponseEntity<GameSessionMongo> testGame(
+            Authentication authentication) throws JsonProcessingException {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        GameSessionMongo response = gameSessionService.mapToCreateGameChoiceRequest(userId);
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * 현재는 userId, sessionId를 통해 저장하는데

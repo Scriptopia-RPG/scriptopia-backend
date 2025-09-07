@@ -39,7 +39,6 @@ public enum ErrorCode {
     E_400_EMPTY_FILE("E400026", "파일이 비어있습니다.", HttpStatus.BAD_REQUEST),
 
 
-
     //401 Unauthorized
     E_401("401000", "인증되지 않은 요청입니다. (토큰 없음, 만료, 잘못됨)",HttpStatus.UNAUTHORIZED),
     E_401_INVALID_CREDENTIALS("E401001","이메일 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
@@ -67,7 +66,11 @@ public enum ErrorCode {
     E_404_GAME_SESSION_NOT_FOUND("E404006", "게임을 불러올 수 없습니다.", HttpStatus.NOT_FOUND),
     E_404_STORED_GAME_NOT_FOUND("E404007", "저장된 게임이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     E_404_Duplicated_Game_Session("E404008", "이미 저장된 게임이 존재합니다.", HttpStatus.NOT_FOUND),
-    E_404_PAGE_NOT_FOUND("E404009", "페이지 번호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    E_404_ITEM_NOT_FOUND("E404009", "아이템이 없습니다.", HttpStatus.NOT_FOUND),
+    E_404_PAGE_NOT_FOUND("E404010", "페이지가 없습니다.", HttpStatus.NOT_FOUND),
+
+
+
 
 
     //409 Conflict
