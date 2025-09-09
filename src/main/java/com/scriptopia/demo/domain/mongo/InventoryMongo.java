@@ -17,4 +17,8 @@ public class InventoryMongo {
     private LocalDateTime acquiredAt;
     private Boolean equipped;
     private String source;
+
+    public boolean isEquipped() {
+        return this.equipped;
+    }
 }
