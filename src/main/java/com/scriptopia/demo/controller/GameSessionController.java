@@ -50,13 +50,26 @@ public class GameSessionController {
     /**
      * 테스트 중
      */
-    @PostMapping("/test")
-    public ResponseEntity<GameSessionMongo> testGame(
+    @PostMapping("/testC")
+    public ResponseEntity<GameSessionMongo> testCoGame(
             Authentication authentication) throws JsonProcessingException {
 
         Long userId = Long.valueOf(authentication.getName());
 
         GameSessionMongo response = gameSessionService.mapToCreateGameChoiceRequest(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 테스트 중
+     */
+    @PostMapping("/test")
+    public ResponseEntity<CreateGameBattleResponse> testGame(
+            Authentication authentication) throws JsonProcessingException {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        CreateGameBattleResponse response = gameSessionService.mapToCreateGameBattleRequest(userId);
         return ResponseEntity.ok(response);
     }
 

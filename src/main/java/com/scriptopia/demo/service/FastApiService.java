@@ -33,7 +33,7 @@ public class FastApiService {
     }
 
     // 전투 호출 (확장용)
-    public CreateGameBattleResponse battle(Object request) {
+    public CreateGameBattleResponse battle(CreateGameBattleRequest request) {
         return fastApiWebClient.post()
                 .uri(FastApiEndpoint.BATTLE.getPath())
                 .bodyValue(request)

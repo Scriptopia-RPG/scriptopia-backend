@@ -1,12 +1,12 @@
 package com.scriptopia.demo.dto.gamesession;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CreateGameBattleResponse {
     private BattleInfoDto battleInfo;
 

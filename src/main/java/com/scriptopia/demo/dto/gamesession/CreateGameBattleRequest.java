@@ -30,7 +30,7 @@ public class CreateGameBattleRequest {
     private String npcWeapon;
     private String npcWeaponDescription;
 
-    private int battleResult;
+    private Integer battleResult;
     private List<List<Integer>> hpLog;
 
     @Data

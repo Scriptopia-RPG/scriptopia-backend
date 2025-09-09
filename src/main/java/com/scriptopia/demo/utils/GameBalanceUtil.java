@@ -1,19 +1,19 @@
 package com.scriptopia.demo.utils;
 
+import com.scriptopia.demo.domain.EffectProbability;
 import com.scriptopia.demo.domain.Grade;
 import com.scriptopia.demo.domain.Stat;
 import com.scriptopia.demo.domain.mongo.ItemDefMongo;
+import com.scriptopia.demo.domain.mongo.ItemEffectMongo;
 import com.scriptopia.demo.domain.mongo.PlayerInfoMongo;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
+import com.scriptopia.demo.repository.EffectGradeDefRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -185,13 +185,7 @@ public class GameBalanceUtil {
         return secureRandom.nextDouble() * 100 < finalRate;
     }
 
-    /**
-     * @param player
-     * @param weapon
-     * @param artifact
-     * @return PlayerCombatPoint
-     */
-    public static int getBattlePlayerCombatPoint(PlayerInfoMongo player, ItemDefMongo weapon, ItemDefMongo artifact) {
+    public static int getPlayerWeaponDmg(PlayerInfoMongo player, ItemDefMongo weapon) {
         int baseCombatPoint = 22; // 맨손일 때
 
         if (weapon == null) {
@@ -217,6 +211,40 @@ public class GameBalanceUtil {
     }
 
 
+    /**
+     * @param player
+     * @param weapon
+     * @return PlayerCombatPoint
+     */
+    public static int getBattlePlayerCombatPoint(
+            PlayerInfoMongo player,
+            ItemDefMongo weapon,
+            EffectGradeDefRepository effectGradeDefRepository
+    ) {
+        int combatPoint = getPlayerWeaponDmg(player, weapon);
+
+        if (weapon == null) {
+            return combatPoint;
+        }
+
+        double totalMultiplier = 1.0;
+
+        for (ItemEffectMongo effect : weapon.getItemEffect()) {
+            EffectProbability prob = effect.getEffectProbability();
+            var defOpt = effectGradeDefRepository.findByEffectProbability(prob);
+            if (defOpt.isPresent()) {
+                totalMultiplier += defOpt.get().getWeight(); // 여기서는 문제 없음
+            }
+        }
+
+        // 최종 계산
+        combatPoint = (int) Math.round(combatPoint * totalMultiplier);
+
+        return combatPoint;
+    }
+
+
+
     public static int simulateBattle(int playerCombatPoint, int npcCombatPoint){
         int maxNum = playerCombatPoint + npcCombatPoint;
         int num = secureRandom.nextInt(maxNum) + 1;
@@ -229,47 +257,32 @@ public class GameBalanceUtil {
         List<List<Integer>> hpLog = new ArrayList<>();
 
         int npcHp = getNpcHealthPoint(npcRank);
+        int playerCurrentHp = playerHp;
+        int npcCurrentHp = npcHp;
         int maxTurns = 10;
-        boolean playerVictory = playerWin == 1;
 
-        int prevPlayerHp = playerHp;
-        int prevNpcHp = npcHp;
+        hpLog.add(Arrays.asList(playerCurrentHp, npcCurrentHp));
 
-        for (int turn = 0; turn < maxTurns; turn++) {
-            if (playerHp <= 0 || npcHp <= 0) break;
 
-            // 랜덤 데미지 ±10%
-            int actualPlayerDmg = (int) Math.round(playerDmg * (0.9 + secureRandom.nextDouble() * 0.2));
-            int actualNpcDmg = (int) Math.round(npcDmg * (0.9 + secureRandom.nextDouble() * 0.2));
+        for (int turn = 1; turn <= maxTurns; turn++) {
+            // 공격
+            npcCurrentHp -= playerDmg;
+            playerCurrentHp -= npcDmg;
 
-            npcHp -= actualPlayerDmg;
-            playerHp -= actualNpcDmg;
+            // 최소 0으로
+            if (npcCurrentHp < 0) npcCurrentHp = 0;
+            if (playerCurrentHp < 0) playerCurrentHp = 0;
 
-            // 승리 쪽이 턴 중 0 이하가 되면 이전 HP 범위에서 랜덤 회복
-            if (playerVictory && playerHp <= 0) {
-                playerHp = secureRandom.nextInt(prevPlayerHp) + 1;
-            } else if (!playerVictory && npcHp <= 0) {
-                npcHp = secureRandom.nextInt(prevNpcHp) + 1;
-            }
+            hpLog.add(Arrays.asList(playerCurrentHp, npcCurrentHp));
 
-            hpLog.add(List.of(Math.max(playerHp, 0), Math.max(npcHp, 0)));
-
-            prevPlayerHp = playerHp;
-            prevNpcHp = npcHp;
+            // 승패 체크
+            if (playerWin == 1 && npcCurrentHp == 0) break;
+            if (playerWin == 0 && playerCurrentHp == 0) break;
         }
-
-        // 마지막 턴에 승리 쪽 HP 최소 1로 보정
-        if (playerVictory) {
-            npcHp = 0;
-            playerHp = Math.max(playerHp, 1);
-        } else {
-            playerHp = 0;
-            npcHp = Math.max(npcHp, 1);
-        }
-        hpLog.add(List.of(playerHp, npcHp));
 
         return hpLog;
     }
+
 
 
     public static int getNpcCombatPoint(int npcRank) {

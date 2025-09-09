@@ -34,7 +34,6 @@ public class GameSessionService {
     private final UserRepository userRepository;
     private final GameSessionMongoRepository gameSessionMongoRepository;
     private final UserItemRepository userItemRepository;
-    private final FastApiClient fastApiClient;
     private final FastApiService fastApiService;
 
 
@@ -435,18 +434,24 @@ public class GameSessionService {
 
 
     @Transactional
-    public CreateGameBattleResponse mapToCreateGameBattleRequest(Stat plyerStat, Long userId) {
+    public CreateGameBattleResponse mapToCreateGameBattleRequest(Long userId) {
         if (!gameSessionRepository.existsByUserId(userId)) {
             throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
         }
 
 
-        GameSessionMongo gameSession = gameSessionMongoRepository.findById(userId.toString())
+        GameSession gameSession = gameSessionRepository.findByMongoId(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+
+        String gameId = gameSession.getMongoId();
+        GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
 
         // 장착된 플레이어 아이템
         List<ItemDefMongo> equippedItems = new ArrayList<>();
-        for (InventoryMongo inv : gameSession.getInventory()) {
+        for (InventoryMongo inv : gameSessionMongo.getInventory()) {
             if (inv.isEquipped()) {
                 ItemDefMongo item = itemDefMongoRepository.findById(inv.getItemDefId())
                         .orElseThrow(() -> new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND));
@@ -468,41 +473,43 @@ public class GameSessionService {
         }
 
         int playerDmg = (weapon == null) ? 22 : weapon.getBaseStat();
-        int playerHp = (weapon == null) ? gameSession.getPlayerInfo().getHealthPoint() : armor.getBaseStat();
+        int playerHp = (armor == null) ? gameSessionMongo.getPlayerInfo().getHealthPoint() : armor.getBaseStat();
 
-        int npcRank = gameSession.getNpcInfo().getRank();
-        int playerCombatPoint = GameBalanceUtil.getBattlePlayerCombatPoint(gameSession.getPlayerInfo(), weapon, artifact);
+        int npcRank = gameSessionMongo.getNpcInfo().getRank();
+        int playerWeaponDmg = GameBalanceUtil.getPlayerWeaponDmg(gameSessionMongo.getPlayerInfo(), weapon);
+        int playerCombatPoint = GameBalanceUtil.getBattlePlayerCombatPoint(gameSessionMongo.getPlayerInfo(), weapon, effectGradeDefRepository);
         int npcCombatPoint = GameBalanceUtil.getNpcCombatPoint(npcRank);
-        int playerWin = GameBalanceUtil.simulateBattle(playerCombatPoint,npcCombatPoint);
+        Integer playerWin = GameBalanceUtil.simulateBattle(playerCombatPoint,npcCombatPoint);
 
 
-        List<List<Integer>> BattleLog = GameBalanceUtil.getBattleLog(playerWin, playerDmg, playerHp, playerCombatPoint, npcRank);
+        List<List<Integer>> battleLog = GameBalanceUtil.getBattleLog(playerWin, playerDmg, playerHp, playerCombatPoint, npcRank);
 
 
         // Builder 패턴으로 CreateGameBattleRequest 구성
         CreateGameBattleRequest fastApiRequest = CreateGameBattleRequest.builder()
-                .turnCount(BattleLog.size())
-                .worldView(gameSession.getHistoryInfo().getWorldView())
-                .location(gameSession.getLocation())
-                .playerName(gameSession.getPlayerInfo().getName())
-                .playerTrait(gameSession.getPlayerInfo().getTrait())
-                .playerDmg(gameSession.getPlayerInfo().getStrength())
+                .turnCount(battleLog.size())
+                .worldView(gameSessionMongo.getHistoryInfo().getWorldView())
+                .location(gameSessionMongo.getLocation())
+                .playerName(gameSessionMongo.getPlayerInfo().getName())
+                .playerTrait(gameSessionMongo.getPlayerInfo().getTrait())
+                .playerDmg(playerWeaponDmg)
                 .playerWeapon(weapon != null ? mapToItemEffect(weapon) : null)
                 .playerArmor(armor != null ? mapToItemEffect(armor) : null)
                 .playerArtifact(artifact != null ? mapToItemEffect(artifact) : null)
-                .npcName(gameSession.getNpcInfo().getName())
-                .npcTrait(gameSession.getNpcInfo().getTrait())
-                .npcDmg(gameSession.getNpcInfo().getStrength())
-                .npcWeapon(gameSession.getNpcInfo().getNpcWeaponName())
-                .npcWeaponDescription(gameSession.getNpcInfo().getNpcWeaponDescription())
+                .npcName(gameSessionMongo.getNpcInfo().getName())
+                .npcTrait(gameSessionMongo.getNpcInfo().getTrait())
+                .npcDmg(gameSessionMongo.getNpcInfo().getStrength())
+                .npcWeapon(gameSessionMongo.getNpcInfo().getNpcWeaponName())
+                .npcWeaponDescription(gameSessionMongo.getNpcInfo().getNpcWeaponDescription())
                 .battleResult(playerWin)
-                .hpLog( BattleLog )
+                .hpLog( battleLog )
                 .build();
 
 
-
-
         CreateGameBattleResponse fastApiResponse = fastApiService.battle(fastApiRequest);
+        System.out.println("fastApiRequest = " + fastApiRequest);
+        System.out.println("전투로그 = " + battleLog + "   턴 = " + battleLog.size());
+
 
         if (fastApiResponse == null) {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
