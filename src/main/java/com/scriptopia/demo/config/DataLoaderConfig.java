@@ -14,7 +14,7 @@ import java.util.Map;
 public class DataLoaderConfig {
 
     private final EffectGradeDefRepository effectGradeDefRepository;
-    private final ItemGradeDefRepository itemGradeDefRepository; // 추가
+    private final ItemGradeDefRepository itemGradeDefRepository;
 
     @Bean
     public ApplicationRunner dataLoader() {
@@ -28,15 +28,33 @@ public class DataLoaderConfig {
                     EffectProbability.LEGENDARY, 100L
             );
 
+            Map<EffectProbability, Double> effectAtkMultiplierMap = Map.of(
+                    EffectProbability.COMMON, 0.10,   // C
+                    EffectProbability.UNCOMMON, 0.15, // U
+                    EffectProbability.RARE, 0.20,     // R
+                    EffectProbability.EPIC, 0.25,     // E
+                    EffectProbability.LEGENDARY, 0.30 // L
+            );
+
             for (EffectProbability prob : EffectProbability.values()) {
                 if (prob == null) continue;
-                if (effectGradeDefRepository.findByEffectProbability(prob).isEmpty()) {
-                    EffectGradeDef def = new EffectGradeDef();
-                    def.setEffectProbability(prob);
-                    def.setPrice(effectPriceMap.get(prob));
-                    def.setWeight(1.0);
-                    effectGradeDefRepository.save(def);
-                }
+
+                effectGradeDefRepository.findByEffectProbability(prob).ifPresentOrElse(
+                        def -> {
+                            // 이미 있으면 업데이트
+                            def.setPrice(effectPriceMap.get(prob));
+                            def.setWeight(effectAtkMultiplierMap.get(prob));
+                            effectGradeDefRepository.save(def);
+                        },
+                        () -> {
+                            // 없으면 새로 생성
+                            EffectGradeDef def = new EffectGradeDef();
+                            def.setEffectProbability(prob);
+                            def.setPrice(effectPriceMap.get(prob));
+                            def.setWeight(effectAtkMultiplierMap.get(prob));
+                            effectGradeDefRepository.save(def);
+                        }
+                );
             }
 
             // ItemGradeDef 초기화
@@ -50,13 +68,21 @@ public class DataLoaderConfig {
 
             for (Grade grade : Grade.values()) {
                 if (grade == null) continue;
-                if (itemGradeDefRepository.findByGrade(grade).isEmpty()) {
-                    ItemGradeDef def = new ItemGradeDef();
-                    def.setGrade(grade);
-                    def.setPrice(itemGradePriceMap.get(grade));
-                    def.setWeight(1.0);
-                    itemGradeDefRepository.save(def);
-                }
+
+                itemGradeDefRepository.findByGrade(grade).ifPresentOrElse(
+                        def -> {
+                            def.setPrice(itemGradePriceMap.get(grade));
+                            def.setWeight(1.0);
+                            itemGradeDefRepository.save(def);
+                        },
+                        () -> {
+                            ItemGradeDef def = new ItemGradeDef();
+                            def.setGrade(grade);
+                            def.setPrice(itemGradePriceMap.get(grade));
+                            def.setWeight(1.0);
+                            itemGradeDefRepository.save(def);
+                        }
+                );
             }
         };
     }
