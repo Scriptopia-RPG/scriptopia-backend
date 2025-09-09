@@ -37,7 +37,7 @@ public enum ErrorCode {
     E_400_UNSUPPORTED_PROVIDER("E400024", "지원하지 않는 소셜 로그인 공급자입니다.", HttpStatus.BAD_REQUEST),
     E_400_ITEM_NO_USES_LEFT("E400025", "아이템 사용 가능 횟수가 남아있지 않습니다.", HttpStatus.BAD_REQUEST),
     E_400_EMPTY_FILE("E400026", "파일이 비어있습니다.", HttpStatus.BAD_REQUEST),
-    E_400_INVALID_NPC_RANK("E400100", "잘못된 NPC 랭크입니다.", HttpStatus.BAD_REQUEST),
+    E_400_INVALID_NPC_RANK("E400027", "잘못된 NPC 랭크입니다.", HttpStatus.BAD_REQUEST),
 
 
     //401 Unauthorized
