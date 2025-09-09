@@ -24,7 +24,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -430,6 +429,9 @@ public class GameSessionService {
 
         HistoryInfoMongo historyInfoMongo = gameSessionMongo.getHistoryInfo();
 
+        /**
+         *  이 부분 저장하는 것은 해당 DONE 이 나올 때 요약을 사용해야 함 **여기가 아님**
+         */
         if (currentEventStage > 0) {
             switch (currentEventStage) {
                 case 1:
