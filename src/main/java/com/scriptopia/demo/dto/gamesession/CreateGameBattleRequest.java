@@ -17,32 +17,38 @@ public class CreateGameBattleRequest {
     private String worldView;
     private String location;
 
-    private Player player;
-    private Npc npc;
+    private String playerName;
+    private String playerTrait;
+    private int playerDmg;
+    private Item playerWeapon;
+    private Item playerArmor;
+    private Item playerArtifact;
 
+    private String npcName;
+    private String npcTrait;
+    private int npcDmg;
+    private String npcWeapon;
+    private String npcWeaponDescription;
+
+    private int battleResult;
     private List<List<Integer>> hpLog;
 
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Player {
+    public static class Item {
         private String name;
-        private String trait;
-        private int dmg;
-        private String weapon;
-        private String armor;
-        private String artifact;
-    }
+        private String description;
+        private List<ItemEffect> effects;
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Npc {
-        private String name;
-        private String trait;
-        private int dmg;
-        private String weapon;
+        @Data
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class ItemEffect {
+            private String name;
+            private String description;
+        }
     }
 }
