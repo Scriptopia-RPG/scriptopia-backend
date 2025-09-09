@@ -1,6 +1,7 @@
 package com.scriptopia.demo.service;
 
 import com.mongodb.client.MongoClient;
+import com.scriptopia.demo.config.fastapi.FastApiClient;
 import com.scriptopia.demo.repository.mongo.GameSessionMongoRepository;
 import com.scriptopia.demo.repository.mongo.ItemDefMongoRepository;
 import com.scriptopia.demo.utils.GameBalanceUtil;
@@ -17,7 +18,6 @@ import com.scriptopia.demo.dto.gamesession.ExternalGameResponse.ItemDef;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
-import org.springframework.security.web.access.WebInvocationPrivilegeEvaluator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -36,8 +36,9 @@ public class GameSessionService {
     private final UserRepository userRepository;
     private final GameSessionMongoRepository gameSessionMongoRepository;
     private final UserItemRepository userItemRepository;
-    private final MongoClient mongo;
-    private final WebInvocationPrivilegeEvaluator privilegeEvaluator;
+    private final FastApiClient fastApiClient;
+    private final FastApiService fastApiService;
+
 
     public boolean duplcatedGameSession(Long userId) {
         User user = userRepository.findById(userId)
@@ -120,22 +121,8 @@ public class GameSessionService {
         );
 
 
-        // WebClient 인스턴스 생성
-        WebClient client = WebClient.builder()
-                .baseUrl("http://localhost:8000")
-                .build();
+        ExternalGameResponse externalGame = fastApiService.initGame(createGameRequest);
 
-        // FastAPI 호출(테스트용 추후 변경 가능)
-        ExternalGameResponse externalGame = client.post()
-                .uri("/games/init")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(createGameRequest) //
-                .retrieve()
-                .bodyToMono(ExternalGameResponse.class)
-                .block(); //
-
-        // 응답 검증
         if (externalGame == null) {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
@@ -368,22 +355,8 @@ public class GameSessionService {
         fastApiRequest.setItemInfo(itemInfoList);
 
 
-        // WebClient 인스턴스 생성
-        WebClient client = WebClient.builder()
-                .baseUrl("http://localhost:8000")
-                .build();
+        CreateGameChoiceResponse createGameChoiceResponse = fastApiService.makeChoice(fastApiRequest);
 
-        // FastAPI 호출(테스트용 추후 변경 가능)
-        CreateGameChoiceResponse createGameChoiceResponse = client.post()
-                .uri("/games/choice")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(fastApiRequest) //
-                .retrieve()
-                .bodyToMono(CreateGameChoiceResponse.class)
-                .block(); //
-
-        // 응답 검증
         if (createGameChoiceResponse == null) {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
@@ -410,6 +383,7 @@ public class GameSessionService {
 
             gameSessionMongo.setNpcInfo(npcInfoMongo);
         }
+
 
         List<ChoiceMongo> choiceList = new ArrayList<>();
         for (int i = 0; i < createGameChoiceResponse.getChoiceInfo().getChoice().size(); i++) {
@@ -460,4 +434,7 @@ public class GameSessionService {
 
         return gameSessionMongo;
     }
+
+
+
 }
