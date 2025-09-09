@@ -3,6 +3,7 @@ package com.scriptopia.demo.service;
 import com.mongodb.client.MongoClient;
 import com.scriptopia.demo.repository.mongo.GameSessionMongoRepository;
 import com.scriptopia.demo.repository.mongo.ItemDefMongoRepository;
+import com.scriptopia.demo.utils.GameBalanceUtil;
 import com.scriptopia.demo.utils.InitGameData;
 import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.domain.mongo.*;
@@ -341,7 +342,7 @@ public class GameSessionService {
         ChoiceEventType currentEventType = ChoiceEventType.getChoiceEventType();
         fastApiRequest.setEventType(currentEventType);
 
-        int currentNpcRank = 4;
+        int currentNpcRank = 0;
         if (currentEventType == ChoiceEventType.LIVING) {
             int currentChapter = progress / (stage.size() / 3 + 1) + 1;
             currentNpcRank = NpcGrade.getNpcNumberByRandom(currentChapter);
@@ -390,20 +391,25 @@ public class GameSessionService {
 
         gameSessionMongo.setUpdatedAt(LocalDateTime.now());
         gameSessionMongo.setBackground(createGameChoiceResponse.getChoiceInfo().getStory());
-        gameSessionMongo.setProgress(gameSessionMongo.getProgress() + 1);
+        gameSessionMongo.setProgress(gameSessionMongo.getProgress());
 
 
-        NpcInfoMongo npcInfoMongo = NpcInfoMongo.builder()
-                .rank(currentNpcRank)
-                .name(createGameChoiceResponse.getNpcInfo().getName())
-                .trait(createGameChoiceResponse.getNpcInfo().getTrait())
-                .NpcWeaponName(createGameChoiceResponse.getNpcInfo().getNpcWeaponName())
-                .NpcWeaponDescription(createGameChoiceResponse.getNpcInfo().getNpcWeaponDescription())
-                .build();
+        if (currentNpcRank > 0){
+            int[] npcStat = GameBalanceUtil.getNpcStatsByRank(currentNpcRank);
+            NpcInfoMongo npcInfoMongo = NpcInfoMongo.builder()
+                    .rank(currentNpcRank)
+                    .name(createGameChoiceResponse.getNpcInfo().getName())
+                    .trait(createGameChoiceResponse.getNpcInfo().getTrait())
+                    .NpcWeaponName(createGameChoiceResponse.getNpcInfo().getNpcWeaponName())
+                    .NpcWeaponDescription(createGameChoiceResponse.getNpcInfo().getNpcWeaponDescription())
+                    .strength(npcStat[0])
+                    .agility(npcStat[1])
+                    .intelligence(npcStat[2])
+                    .luck(npcStat[3])
+                    .build();
 
-        gameSessionMongo.setNpcInfo(npcInfoMongo);
-
-
+            gameSessionMongo.setNpcInfo(npcInfoMongo);
+        }
 
         List<ChoiceMongo> choiceList = new ArrayList<>();
         for (int i = 0; i < createGameChoiceResponse.getChoiceInfo().getChoice().size(); i++) {
