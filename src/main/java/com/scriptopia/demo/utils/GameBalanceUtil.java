@@ -2,6 +2,8 @@ package com.scriptopia.demo.utils;
 
 import com.scriptopia.demo.domain.Grade;
 import com.scriptopia.demo.domain.Stat;
+import com.scriptopia.demo.domain.mongo.ItemDefMongo;
+import com.scriptopia.demo.domain.mongo.PlayerInfoMongo;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,8 @@ import org.springframework.stereotype.Component;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 @Component
 @RequiredArgsConstructor
@@ -37,6 +41,39 @@ public class GameBalanceUtil {
             {70, 50, 35, 25},// rank 11 : L 국가급
             {100, 70, 50, 40}// rank 12 : L+ 초월급
     };
+
+    // NPC 등급별 예상 HP와 공격력 (HealthPoint, CombatPoint)
+    public static final int[][] NPC_BATTLE_STATS = {
+            {}, // index 0 dummy
+            {70, 18},   // rank 1: {HealthPoint, CombatPoint}
+            {105, 26},  // rank 2
+            {140, 35},  // rank 3
+            {152, 38},  // rank 4
+            {188, 47},  // rank 5
+            {204, 51},  // rank 6
+            {248, 62},  // rank 7
+            {268, 67},  // rank 8
+            {320, 80},  // rank 9
+            {344, 86},  // rank 10
+            {707, 101}, // rank 11
+            {963, 107}  // rank 12
+    };
+
+
+
+    private static final NavigableMap<Integer, Double> STAT_MULTIPLIERS = new TreeMap<>() {{
+        put(5, 1.1);
+        put(10, 1.2);
+        put(15, 1.3);
+        put(20, 1.4);
+        put(25, 1.5);
+        put(30, 1.6);
+        put(35, 1.7);
+        put(40, 1.8);
+        put(45, 1.9);
+        put(Integer.MAX_VALUE, 2.0); // 46 이상
+    }};
+
 
 
 
@@ -148,5 +185,104 @@ public class GameBalanceUtil {
         return secureRandom.nextDouble() * 100 < finalRate;
     }
 
+    /**
+     * @param player
+     * @param weapon
+     * @param artifact
+     * @return PlayerCombatPoint
+     */
+    public static int getBattlePlayerCombatPoint(PlayerInfoMongo player, ItemDefMongo weapon, ItemDefMongo artifact) {
+        int baseCombatPoint = 22; // 맨손일 때
 
+        if (weapon == null) {
+            return baseCombatPoint;
+        }
+
+        // 무기 메인 스탯 결정
+        Stat mainStat = weapon.getMainStat();
+        int playerStatValue = switch (mainStat) {
+            case STRENGTH -> player.getStrength();
+            case AGILITY -> player.getAgility();
+            case INTELLIGENCE -> player.getIntelligence();
+            case LUCK -> player.getLuck();
+        };
+
+        double multiplier = STAT_MULTIPLIERS.ceilingEntry(playerStatValue).getValue();
+
+        // 최종 전투력 계산
+        int weaponStat = weapon.getBaseStat();
+        int combatPoint = (int) (weaponStat * multiplier);
+
+        return combatPoint;
+    }
+
+
+    public static int simulateBattle(int playerCombatPoint, int npcCombatPoint){
+        int maxNum = playerCombatPoint + npcCombatPoint;
+        int num = secureRandom.nextInt(maxNum) + 1;
+
+        return playerCombatPoint >= num ? 1 : 0 ;
+    }
+
+
+    public static List<List<Integer>> getBattleLog(int playerWin, int playerDmg, int playerHp, int npcDmg, int npcRank) {
+        List<List<Integer>> hpLog = new ArrayList<>();
+
+        int npcHp = getNpcHealthPoint(npcRank);
+        int maxTurns = 10;
+        boolean playerVictory = playerWin == 1;
+
+        int prevPlayerHp = playerHp;
+        int prevNpcHp = npcHp;
+
+        for (int turn = 0; turn < maxTurns; turn++) {
+            if (playerHp <= 0 || npcHp <= 0) break;
+
+            // 랜덤 데미지 ±10%
+            int actualPlayerDmg = (int) Math.round(playerDmg * (0.9 + secureRandom.nextDouble() * 0.2));
+            int actualNpcDmg = (int) Math.round(npcDmg * (0.9 + secureRandom.nextDouble() * 0.2));
+
+            npcHp -= actualPlayerDmg;
+            playerHp -= actualNpcDmg;
+
+            // 승리 쪽이 턴 중 0 이하가 되면 이전 HP 범위에서 랜덤 회복
+            if (playerVictory && playerHp <= 0) {
+                playerHp = secureRandom.nextInt(prevPlayerHp) + 1;
+            } else if (!playerVictory && npcHp <= 0) {
+                npcHp = secureRandom.nextInt(prevNpcHp) + 1;
+            }
+
+            hpLog.add(List.of(Math.max(playerHp, 0), Math.max(npcHp, 0)));
+
+            prevPlayerHp = playerHp;
+            prevNpcHp = npcHp;
+        }
+
+        // 마지막 턴에 승리 쪽 HP 최소 1로 보정
+        if (playerVictory) {
+            npcHp = 0;
+            playerHp = Math.max(playerHp, 1);
+        } else {
+            playerHp = 0;
+            npcHp = Math.max(npcHp, 1);
+        }
+        hpLog.add(List.of(playerHp, npcHp));
+
+        return hpLog;
+    }
+
+
+    public static int getNpcCombatPoint(int npcRank) {
+        int base = NPC_BATTLE_STATS[npcRank][1];
+
+        double variance = 0.9 + secureRandom.nextDouble() * 0.2; // 0.9 ~ 1.1
+        return (int) Math.round(base * variance);
+    }
+
+    public static int getNpcHealthPoint(int npcRank) {
+        int base = NPC_BATTLE_STATS[npcRank][0];
+
+        double variance = 0.9 + secureRandom.nextDouble() * 0.2; // 0.9 ~ 1.1
+        return (int) Math.round(base * variance);
+    }
 }

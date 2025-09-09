@@ -1,6 +1,5 @@
 package com.scriptopia.demo.service;
 
-import com.mongodb.client.MongoClient;
 import com.scriptopia.demo.config.fastapi.FastApiClient;
 import com.scriptopia.demo.repository.mongo.GameSessionMongoRepository;
 import com.scriptopia.demo.repository.mongo.ItemDefMongoRepository;
@@ -20,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -436,5 +434,97 @@ public class GameSessionService {
     }
 
 
+    @Transactional
+    public CreateGameBattleResponse mapToCreateGameBattleRequest(Stat plyerStat, Long userId) {
+        if (!gameSessionRepository.existsByUserId(userId)) {
+            throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
+        }
 
+
+        GameSessionMongo gameSession = gameSessionMongoRepository.findById(userId.toString())
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+        // 장착된 플레이어 아이템
+        List<ItemDefMongo> equippedItems = new ArrayList<>();
+        for (InventoryMongo inv : gameSession.getInventory()) {
+            if (inv.isEquipped()) {
+                ItemDefMongo item = itemDefMongoRepository.findById(inv.getItemDefId())
+                        .orElseThrow(() -> new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND));
+                equippedItems.add(item);
+            }
+        }
+
+        // weapon, armor, artifact 분류
+        ItemDefMongo weapon = null;
+        ItemDefMongo armor = null;
+        ItemDefMongo artifact = null;
+
+        for (ItemDefMongo item : equippedItems) {
+            switch (item.getCategory()) {
+                case ItemType.WEAPON -> weapon = item;
+                case ItemType.ARMOR -> armor = item;
+                case ItemType.ARTIFACT -> artifact = item;
+            }
+        }
+
+        int playerDmg = (weapon == null) ? 22 : weapon.getBaseStat();
+        int playerHp = (weapon == null) ? gameSession.getPlayerInfo().getHealthPoint() : armor.getBaseStat();
+
+        int npcRank = gameSession.getNpcInfo().getRank();
+        int playerCombatPoint = GameBalanceUtil.getBattlePlayerCombatPoint(gameSession.getPlayerInfo(), weapon, artifact);
+        int npcCombatPoint = GameBalanceUtil.getNpcCombatPoint(npcRank);
+        int playerWin = GameBalanceUtil.simulateBattle(playerCombatPoint,npcCombatPoint);
+
+
+        List<List<Integer>> BattleLog = GameBalanceUtil.getBattleLog(playerWin, playerDmg, playerHp, playerCombatPoint, npcRank);
+
+
+        // Builder 패턴으로 CreateGameBattleRequest 구성
+        CreateGameBattleRequest fastApiRequest = CreateGameBattleRequest.builder()
+                .turnCount(BattleLog.size())
+                .worldView(gameSession.getHistoryInfo().getWorldView())
+                .location(gameSession.getLocation())
+                .playerName(gameSession.getPlayerInfo().getName())
+                .playerTrait(gameSession.getPlayerInfo().getTrait())
+                .playerDmg(gameSession.getPlayerInfo().getStrength())
+                .playerWeapon(weapon != null ? mapToItemEffect(weapon) : null)
+                .playerArmor(armor != null ? mapToItemEffect(armor) : null)
+                .playerArtifact(artifact != null ? mapToItemEffect(artifact) : null)
+                .npcName(gameSession.getNpcInfo().getName())
+                .npcTrait(gameSession.getNpcInfo().getTrait())
+                .npcDmg(gameSession.getNpcInfo().getStrength())
+                .npcWeapon(gameSession.getNpcInfo().getNpcWeaponName())
+                .npcWeaponDescription(gameSession.getNpcInfo().getNpcWeaponDescription())
+                .battleResult(playerWin)
+                .hpLog( BattleLog )
+                .build();
+
+
+
+
+        CreateGameBattleResponse fastApiResponse = fastApiService.battle(fastApiRequest);
+
+        if (fastApiResponse == null) {
+            throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
+        }
+
+        return fastApiResponse;
+
+    }
+
+    // ItemDefMongo -> CreateGameBattleRequest.Item 변환
+    private CreateGameBattleRequest.Item mapToItemEffect(ItemDefMongo item) {
+        List<CreateGameBattleRequest.Item.ItemEffect> effects = item.getItemEffect().stream()
+                .map(e -> CreateGameBattleRequest.Item.ItemEffect.builder()
+                        .name(e.getItemEffectName())
+                        .description(e.getItemEffectDescription())
+                        .build())
+                .toList();
+
+        return CreateGameBattleRequest.Item.builder()
+                .name(item.getName())
+                .description(item.getDescription())
+                .effects(effects)
+                .build();
+    }
 }
