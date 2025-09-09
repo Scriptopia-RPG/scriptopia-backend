@@ -136,6 +136,17 @@ public class GameBalanceUtil {
         return npcStats;
     }
 
+    public static boolean getChoiceProbability(int statValue) {
+        double baseRate = 40.0;      // 기본 확률 40%
+        double minRate = 30.0;       // 최소 30%
+        double maxRate = 80.0;       // 최대 80%
+        double statBonus = 0.8 * statValue; // 스탯 1당 +0.8%
+
+        double finalRate = baseRate + statBonus;
+        finalRate = Math.max(minRate, Math.min(finalRate, maxRate));
+
+        return secureRandom.nextDouble() * 100 < finalRate;
+    }
 
 
 }
