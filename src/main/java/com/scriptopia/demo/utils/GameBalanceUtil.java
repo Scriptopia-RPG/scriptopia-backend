@@ -252,38 +252,62 @@ public class GameBalanceUtil {
         return playerCombatPoint >= num ? 1 : 0 ;
     }
 
-
-    public static List<List<Integer>> getBattleLog(int playerWin, int playerDmg, int playerHp, int npcDmg, int npcRank) {
+    public static List<List<Integer>> getBattleLog(
+            int playerWin,
+            int playerDmg,
+            int playerHp,
+            int npcDmg,
+            int npcRank
+    ) {
         List<List<Integer>> hpLog = new ArrayList<>();
 
         int npcHp = getNpcHealthPoint(npcRank);
-        int playerCurrentHp = playerHp;
-        int npcCurrentHp = npcHp;
-        int maxTurns = 10;
+        int winnerDmg = (playerWin == 1) ? playerDmg : npcDmg;
+        int loserDmg = (playerWin == 1) ? npcDmg : playerDmg;
 
-        hpLog.add(Arrays.asList(playerCurrentHp, npcCurrentHp));
+        int winnerCurrentHp = (playerWin == 1) ? playerHp : npcHp;
+        int loserCurrentHp = (playerWin == 1) ? npcHp : playerHp;
+
+        int winnerIndex = (playerWin == 1) ? 0 : 1;
+        int loserIndex = (playerWin == 1) ? 1 : 0;
+
+        List<Integer> originHp = new ArrayList<>(Arrays.asList(0, 0));
+
+        originHp.set(loserIndex, loserCurrentHp);
+        originHp.set(winnerIndex, winnerCurrentHp);
+
+        hpLog.add(new ArrayList<>(originHp)); // 초기 로그 추가
+        List<Integer> currentHp = originHp;
 
 
-        for (int turn = 1; turn <= maxTurns; turn++) {
-            // 공격
-            npcCurrentHp -= playerDmg;
-            playerCurrentHp -= npcDmg;
+        while (loserCurrentHp > 0) {
 
-            // 최소 0으로
-            if (npcCurrentHp < 0) npcCurrentHp = 0;
-            if (playerCurrentHp < 0) playerCurrentHp = 0;
 
-            hpLog.add(Arrays.asList(playerCurrentHp, npcCurrentHp));
+            // 패배자에게만 데미지 적용
+            int damage = (int) Math.round(winnerDmg * (0.9 + 0.4 * secureRandom.nextDouble()));
+            loserCurrentHp -= damage;
+            if (loserCurrentHp < 0) loserCurrentHp = 0;
 
-            // 승패 체크
-            if (playerWin == 1 && npcCurrentHp == 0) break;
-            if (playerWin == 0 && playerCurrentHp == 0) break;
+            // winnerIndex, loserIndex 기준으로 정확히 넣기
+            currentHp.set(winnerIndex, winnerCurrentHp);
+            currentHp.set(loserIndex, loserCurrentHp);
+
+            hpLog.add(new ArrayList<>(currentHp));
         }
+
+        // 승리자 최소 HP (패배자가 0일 때)
+        int winnerMaxHp = (int) (winnerCurrentHp * (0.1 + secureRandom.nextDouble() * 0.4));
+
+        for (int i = 1 ; i < hpLog.size(); i++) {
+            List<Integer> turnHp = hpLog.get(i);
+            int damage = (int) Math.round(loserDmg * (0.9 + 0.4 * secureRandom.nextDouble()));
+            winnerCurrentHp = Math.max(winnerCurrentHp - damage, winnerMaxHp);
+            turnHp.set(winnerIndex,winnerCurrentHp);
+        }
+
 
         return hpLog;
     }
-
-
 
     public static int getNpcCombatPoint(int npcRank) {
         int base = NPC_BATTLE_STATS[npcRank][1];

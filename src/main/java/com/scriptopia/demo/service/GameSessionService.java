@@ -498,7 +498,7 @@ public class GameSessionService {
                 .playerArtifact(artifact != null ? mapToItemEffect(artifact) : null)
                 .npcName(gameSessionMongo.getNpcInfo().getName())
                 .npcTrait(gameSessionMongo.getNpcInfo().getTrait())
-                .npcDmg(gameSessionMongo.getNpcInfo().getStrength())
+                .npcDmg(npcCombatPoint)
                 .npcWeapon(gameSessionMongo.getNpcInfo().getNpcWeaponName())
                 .npcWeaponDescription(gameSessionMongo.getNpcInfo().getNpcWeaponDescription())
                 .battleResult(playerWin)
@@ -506,16 +506,17 @@ public class GameSessionService {
                 .build();
 
 
-        CreateGameBattleResponse fastApiResponse = fastApiService.battle(fastApiRequest);
-        System.out.println("fastApiRequest = " + fastApiRequest);
-        System.out.println("전투로그 = " + battleLog + "   턴 = " + battleLog.size());
+        System.out.println("플레이어 공격력 = " + playerDmg + "플레이어 체력 = " + playerHp + " npc 공격력 = " + npcCombatPoint + " npc 체력 = " + GameBalanceUtil.getNpcHealthPoint(npcRank));
+        System.out.println("전투로그 = " + battleLog + "   턴 = " + battleLog.size() + " 이긴사람 = " + playerWin);
 
+        CreateGameBattleResponse fastApiResponse = fastApiService.battle(fastApiRequest);
 
         if (fastApiResponse == null) {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
 
         return fastApiResponse;
+
 
     }
 
