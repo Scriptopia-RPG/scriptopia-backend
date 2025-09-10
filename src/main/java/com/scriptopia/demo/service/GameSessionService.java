@@ -267,7 +267,7 @@ public class GameSessionService {
 
 
     @Transactional
-    public int mapToCreateGameChoiceRequest(Long userId) {
+    public GameSessionMongo mapToCreateGameChoiceRequest(Long userId) {
 
         if (!gameSessionRepository.existsByUserId(userId)) {
             throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
@@ -358,7 +358,7 @@ public class GameSessionService {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
 
-
+        gameSessionMongo.setSceneType(SceneType.CHOICE);
         gameSessionMongo.setUpdatedAt(LocalDateTime.now());
         gameSessionMongo.setBackground(createGameChoiceResponse.getChoiceInfo().getStory());
         gameSessionMongo.setProgress(gameSessionMongo.getProgress());
@@ -430,7 +430,7 @@ public class GameSessionService {
         gameSessionMongo.setHistoryInfo(historyInfoMongo);
         gameSessionMongoRepository.save(gameSessionMongo);
 
-        return 1;
+        return gameSessionMongo;
     }
 
 
