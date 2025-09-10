@@ -4,10 +4,10 @@ package com.scriptopia.demo.domain;
 import java.security.SecureRandom;
 
 public enum RewardType {
-    GOLD(40),
-    LIFE(30),
-    ITEM(20),
-    STAT(10);
+    GOLD(60),
+    STAT(10),
+    ITEM(10),
+    NONE(20);
 
     private final int dropRate;
     private static final SecureRandom random = new SecureRandom();
