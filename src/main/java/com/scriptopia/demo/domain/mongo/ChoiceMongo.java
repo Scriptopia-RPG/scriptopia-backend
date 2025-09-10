@@ -1,6 +1,7 @@
 package com.scriptopia.demo.domain.mongo;
 
 import com.scriptopia.demo.domain.ChoiceResultType;
+import com.scriptopia.demo.domain.RewardType;
 import com.scriptopia.demo.domain.Stat;
 import lombok.*;
 
@@ -14,4 +15,6 @@ public class ChoiceMongo {
     private Stat stats; // STRENGTH, AGILITY, INTELLIGENCE, LUCK
     private Integer probability;
     private ChoiceResultType resultType; // BATTLE, SHOP, CHOICE, NONE
+    private RewardType rewardType; // GOLD, STAT, ITEM,  NONE
+
 }

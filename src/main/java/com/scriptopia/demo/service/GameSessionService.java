@@ -391,6 +391,7 @@ public class GameSessionService {
                     .stats(statInfo.get(i))
                     .probability(null)
                     .resultType(ChoiceResultType.nextResultType())
+                    .rewardType(RewardType.getRandomRewardType())
                     .build();
 
             choiceList.add(choiceMongo);
