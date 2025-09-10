@@ -3,7 +3,8 @@ package com.scriptopia.demo.config.fastapi;
 public enum FastApiEndpoint {
     INIT("/games/init"),
     CHOICE("/games/choice"),
-    BATTLE("/games/battle");
+    BATTLE("/games/battle"),
+    ITEM("/games/item");
 
     private final String path;
 
