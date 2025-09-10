@@ -515,11 +515,39 @@ public class GameSessionService {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
 
+
+        List<BattleStoryMongo> turnLogs = fastApiResponse.getBattleInfo().getTurnInfo()
+                .stream()
+                .map(info -> BattleStoryMongo.builder().turnInfo(info).build())
+                .toList();
+
+        BattleInfoMongo battleInfoMongo = BattleInfoMongo.builder()
+                .curTurnId(0L)
+                .playerHp(battleLog.stream().map(t -> t.get(0).longValue()).toList())
+                .enemyHp(battleLog.stream().map(t -> t.get(1).longValue()).toList())
+                .battleTurn(turnLogs)
+                .playerWin( playerWin == 1 )
+                .build();
+
+
+        gameSessionMongo.setBattleInfo(battleInfoMongo);
+        gameSessionMongo.setBackground(fastApiResponse.getBattleInfo().getReCap());
+        gameSessionMongo.setSceneType(SceneType.BATTLE);
+        gameSessionMongo.setUpdatedAt(LocalDateTime.now());
+
+
+        gameSessionMongoRepository.save(gameSessionMongo);
+
         return fastApiResponse;
 
 
     }
 
+
+    /**
+     * battle에서 사용 
+     * item -> request로 쉽게 매필
+     */
     // ItemDefMongo -> CreateGameBattleRequest.Item 변환
     private CreateGameBattleRequest.Item mapToItemEffect(ItemDefMongo item) {
         List<CreateGameBattleRequest.Item.ItemEffect> effects = item.getItemEffect().stream()
