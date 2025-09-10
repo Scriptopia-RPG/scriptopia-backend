@@ -2,6 +2,8 @@ package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.config.fastapi.FastApiEndpoint;
 import com.scriptopia.demo.dto.gamesession.*;
+import com.scriptopia.demo.dto.items.ItemFastApiRequest;
+import com.scriptopia.demo.dto.items.ItemFastApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -39,6 +41,16 @@ public class FastApiService {
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(CreateGameBattleResponse.class)
+                .block();
+    }
+
+    // 아이템 생성 (확장용)
+    public ItemFastApiResponse item(ItemFastApiRequest request) {
+        return fastApiWebClient.post()
+                .uri(FastApiEndpoint.ITEM.getPath())
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(ItemFastApiResponse.class)
                 .block();
     }
 }
