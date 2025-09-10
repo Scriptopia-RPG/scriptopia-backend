@@ -267,7 +267,7 @@ public class GameSessionService {
 
 
     @Transactional
-    public GameSessionMongo mapToCreateGameChoiceRequest(Long userId) {
+    public int mapToCreateGameChoiceRequest(Long userId) {
 
         if (!gameSessionRepository.existsByUserId(userId)) {
             throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
@@ -429,7 +429,7 @@ public class GameSessionService {
         gameSessionMongo.setHistoryInfo(historyInfoMongo);
         gameSessionMongoRepository.save(gameSessionMongo);
 
-        return gameSessionMongo;
+        return 1;
     }
 
 
@@ -539,8 +539,6 @@ public class GameSessionService {
         gameSessionMongoRepository.save(gameSessionMongo);
 
         return fastApiResponse;
-
-
     }
 
 
