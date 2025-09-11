@@ -51,8 +51,6 @@ public class SecurityConfig {
                         .requestMatchers(SecurityWhitelist.AUTH_WHITELIST).permitAll()
                         //public 권한(GET 요청)
                         .requestMatchers(HttpMethod.GET,SecurityWhitelist.PUBLIC_GETS).permitAll()
-                        //admin 권한
-                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
