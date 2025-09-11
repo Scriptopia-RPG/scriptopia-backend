@@ -27,6 +27,7 @@ public class GameSessionMongo {
 
     private String background;
     private String preChoice;
+    private String preReward;
     private String location;
     private Integer progress;
     private List<Integer> stage;
