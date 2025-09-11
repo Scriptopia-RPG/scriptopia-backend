@@ -35,8 +35,13 @@ public class ItemDefService {
     private final FastApiService fastApiService;
 
 
+    /**
+     * mongoDB, RDB에 저장 후 mongoDB의 item_Def_id를 리턴
+     * @param request
+     * @return
+     */
     @Transactional(readOnly = false)
-    public ItemFastApiResponse createItem(ItemDefRequest request) {
+    public String createItem(ItemDefRequest request) {
         /**
          * 1. 카테고리
          * 2. 등급
@@ -69,8 +74,6 @@ public class ItemDefService {
         System.out.println(effectGrades);
         Long gradeGradePrice = itemGradeDefRepository.findPriceByGrade(itemGrade);
         Long itemPrice = GameBalanceUtil.getItemPriceByGrade(gradeGradePrice, effectGradesList);
-
-
 
 
 
@@ -159,8 +162,7 @@ public class ItemDefService {
 
         itemDefRepository.save(itemDefRdb);
 
-        return response;
-
+        return itemDefMongo.getId();
     }
 
 
