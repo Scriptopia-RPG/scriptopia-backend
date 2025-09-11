@@ -1,6 +1,8 @@
 package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.config.fastapi.FastApiClient;
+import com.scriptopia.demo.dto.items.ItemDefRequest;
+import com.scriptopia.demo.dto.items.ItemFastApiResponse;
 import com.scriptopia.demo.repository.mongo.GameSessionMongoRepository;
 import com.scriptopia.demo.repository.mongo.ItemDefMongoRepository;
 import com.scriptopia.demo.utils.GameBalanceUtil;
@@ -20,6 +22,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +38,7 @@ public class GameSessionService {
     private final GameSessionMongoRepository gameSessionMongoRepository;
     private final UserItemRepository userItemRepository;
     private final FastApiService fastApiService;
+    private final ItemDefService itemDefService;
 
 
     public boolean duplcatedGameSession(Long userId) {
@@ -258,6 +262,8 @@ public class GameSessionService {
             userItemRepository.save(userItem);
         }
 
+        gameToChoice(userId);
+
         // MongoDB PK 반환
         return new StartGameResponse(
                 "게임이 생성되었습니다.",
@@ -266,8 +272,50 @@ public class GameSessionService {
     }
 
 
+    /**
+     * 게임 진행
+     * @param userId
+     */
     @Transactional
-    public GameSessionMongo mapToCreateGameChoiceRequest(Long userId) {
+    public GameSessionMongo gameProgress(Long userId) {
+
+        if (!gameSessionRepository.existsByUserId(userId)) {
+            throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
+        }
+
+
+        GameSession gameSession = gameSessionRepository.findByMongoId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+
+        String gameId = gameSession.getMongoId();
+        GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+
+        SceneType currentSceneType = gameSessionMongo.getSceneType();
+        switch (currentSceneType) {
+            case SceneType.CHOICE -> {
+                gameToChoice(userId);
+            }
+            case SceneType.BATTLE -> {
+                gameToDone(userId);
+            }
+            case SceneType.DONE -> {
+                gameToChoice(userId);
+            }
+            default -> throw new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND);
+        }
+
+        return gameSessionMongo;
+    }
+
+        /**
+         * 선택지 생성
+         * @param userId
+         */
+    @Transactional
+    public GameSessionMongo gameToChoice(Long userId) {
 
         if (!gameSessionRepository.existsByUserId(userId)) {
             throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
@@ -351,7 +399,7 @@ public class GameSessionService {
                 }).toList();
         fastApiRequest.setItemInfo(itemInfoList);
 
-
+        System.out.println("asdasd   "  + fastApiRequest);
         CreateGameChoiceResponse createGameChoiceResponse = fastApiService.makeChoice(fastApiRequest);
 
         if (createGameChoiceResponse == null) {
@@ -397,6 +445,17 @@ public class GameSessionService {
             choiceList.add(choiceMongo);
         }
 
+
+        ChoiceMongo promptChoice = ChoiceMongo.builder()
+                .detail(null)
+                .stats(null)
+                .probability(null)
+                .resultType(ChoiceResultType.nextResultType())
+                .rewardType(RewardType.getRandomRewardType())
+                .build();
+        choiceList.add(promptChoice);
+
+
         ChoiceInfoMongo choiceInfoMongo = ChoiceInfoMongo.builder()
                 .eventType(fastApiRequest.getEventType())
                 .story(createGameChoiceResponse.getChoiceInfo().getStory())
@@ -411,9 +470,12 @@ public class GameSessionService {
         return gameSessionMongo;
     }
 
-
+    /**
+     * @param userId
+     * @return win?
+     */
     @Transactional
-    public CreateGameBattleResponse mapToCreateGameBattleRequest(Long userId) {
+    public int gameToBattle(Long userId) {
         if (!gameSessionRepository.existsByUserId(userId)) {
             throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
         }
@@ -517,12 +579,12 @@ public class GameSessionService {
 
         gameSessionMongoRepository.save(gameSessionMongo);
 
-        return fastApiResponse;
+        return playerWin;
     }
 
 
     @Transactional
-    public GameSessionMongo mapToCreateGameDoneRequest(Long userId) {
+    public GameSessionMongo gameToDone(Long userId) {
         if (!gameSessionRepository.existsByUserId(userId)) {
             throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
         }
@@ -581,6 +643,11 @@ public class GameSessionService {
             }
         }
 
+        /**
+         * 
+         * reward가 있으면 그대로 현재를 갱신한 후 mongoDB 저장
+         */
+
 
         gameSessionMongo.setHistoryInfo(historyInfoMongo);
         gameSessionMongoRepository.save(gameSessionMongo);
@@ -590,6 +657,62 @@ public class GameSessionService {
 
 
 
+    @Transactional
+    public GameSessionMongo gameChoiceSelect(Long userId, GameChoiceRequest request) {
+        if (!gameSessionRepository.existsByUserId(userId)) {
+            throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
+        }
+
+        GameSession gameSession = gameSessionRepository.findByMongoId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+        String gameId = gameSession.getMongoId();
+        GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+        Stat userChoiceStat = null;
+        Integer probability = null;
+
+        Integer choiceIndex = request.getChoiceIndex();
+        choiceIndex = (choiceIndex == null) ? 3 : choiceIndex;
+        ChoiceMongo choiceMongo = gameSessionMongo.getChoiceInfo().getChoice().get(choiceIndex);
+
+        if (request.getChoiceIndex() == null) {
+            // 사용자 프롬프트 입력 → FAST API 호출해야 함
+        } else {
+            userChoiceStat = choiceMongo.getStats();
+            probability = GameBalanceUtil.getChoiceProbability(userChoiceStat, gameSessionMongo.getPlayerInfo());
+        }
+
+        RewardType rewardType = choiceMongo.getRewardType();
+        ChoiceResultType nextScene = choiceMongo.getResultType();
+        boolean isPass = GameBalanceUtil.isPass(probability);
+
+        RewardInfoMongo rewardInfo;
+
+        switch (nextScene) {
+            case CHOICE -> {
+                // 보상 없음 → 그냥 다음 Choice 리턴
+                return gameToChoice(userId);
+            }
+            case BATTLE -> {
+                isPass = (gameToBattle(userId) == 1);
+                gameSessionMongo = gameSessionMongoRepository.findById(gameId).get();
+                rewardInfo = handleReward(gameSessionMongo, rewardType, isPass);
+            }
+            case DONE -> {
+                gameToDone(userId);
+
+                gameSessionMongo = gameSessionMongoRepository.findById(gameId).get();
+                rewardInfo = handleReward(gameSessionMongo, rewardType, isPass);
+            }
+            default -> throw new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND);
+        }
+
+        // 보상 저장
+        gameSessionMongo.setRewardInfo(rewardInfo);
+        return gameSessionMongoRepository.save(gameSessionMongo);
+    }
 
 
     /**
@@ -610,5 +733,55 @@ public class GameSessionService {
                 .description(item.getDescription())
                 .effects(effects)
                 .build();
+    }
+
+
+    private ItemDefMongo convertToItemDefMongo(ItemFastApiResponse response) {
+        List<ItemEffectMongo> effects = new ArrayList<>();
+
+        if (response.getItemEffect() != null) {
+            for (ItemFastApiResponse.ItemEffect e : response.getItemEffect()) {
+                ItemEffectMongo effectMongo = ItemEffectMongo.builder()
+                        .itemEffectName(e.getItemEffectName())
+                        .itemEffectDescription(e.getItemEffectDescription())
+                        .build();
+
+                effects.add(effectMongo);
+            }
+        }
+
+        return ItemDefMongo.builder()
+                .name(response.getItemName())
+                .description(response.getItemDescription())
+                .itemEffect(effects)
+                .build();
+    }
+
+
+    /**
+     * 보상 처리 (ITEM 포함)
+     */
+    private RewardInfoMongo handleReward(GameSessionMongo gameSessionMongo, RewardType rewardType, boolean isPass) {
+        RewardInfoMongo rewardInfo = GameBalanceUtil.getReward(rewardType, isPass);
+
+        if (rewardType == RewardType.ITEM && isPass) {
+            ItemDefRequest itemDefRequest = ItemDefRequest.builder()
+                    .worldView(gameSessionMongo.getHistoryInfo().getWorldView())
+                    .location(gameSessionMongo.getLocation())
+                    .playerTrait(null)
+                    .previousStory(gameSessionMongo.getBackground())
+                    .build();
+
+            String itemMongoId = itemDefService.createItem(itemDefRequest);
+            InventoryMongo newItem = InventoryMongo.builder()
+                    .acquiredAt(LocalDateTime.now())
+                    .ItemDefId(itemMongoId)
+                    .source("Scenario")
+                    .equipped(false)
+                    .build();
+
+            gameSessionMongo.getInventory().add(newItem);
+        }
+        return rewardInfo;
     }
 }
