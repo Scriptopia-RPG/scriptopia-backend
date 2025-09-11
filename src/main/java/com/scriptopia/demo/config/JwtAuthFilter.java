@@ -36,20 +36,33 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtProvider jwt;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        String method = request.getMethod();
+
+        boolean authMatch = Arrays.stream(SecurityWhitelist.AUTH_WHITELIST)
+                .anyMatch(pattern -> pathMatcher.match(pattern, path));
+
+        boolean publicGetMatch = "GET".equalsIgnoreCase(method) &&
+                Arrays.stream(SecurityWhitelist.PUBLIC_GETS)
+                        .anyMatch(pattern -> pathMatcher.match(pattern, path));
+
+        boolean skip = authMatch || publicGetMatch;
+
+        if (skip) {
+            log.debug("➡️ Skipping JwtAuthFilter for whitelisted request: {} {}", method, path);
+        }
+
+        return skip;
+    }
+
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
-
-        String path = req.getServletPath();
-        String method = req.getMethod();
-
-        log.debug("Request path: {}", path);
-        log.debug("Whitelist match: {}", isWhitelisted(path, method));
-
-        if (isWhitelisted(path, method)) {
-            chain.doFilter(req, res);
-            return;
-        }
 
         String authHeader = req.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -89,19 +102,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
 
             chain.doFilter(req, res);
-    }
-
-    private boolean isWhitelisted(String path, String method) {
-
-
-        boolean authMatch = Arrays.stream(SecurityWhitelist.AUTH_WHITELIST)
-                .anyMatch(pattern -> pathMatcher.match(pattern, path));
-
-        boolean publicGetMatch = "GET".equalsIgnoreCase(method) &&
-                Arrays.stream(SecurityWhitelist.PUBLIC_GETS)
-                        .anyMatch(pattern -> pathMatcher.match(pattern, path));
-
-        return authMatch || publicGetMatch;
     }
 
 
