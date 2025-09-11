@@ -5,8 +5,11 @@ import com.scriptopia.demo.dto.exception.ErrorResponse;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.utils.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,6 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Arrays;
+
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -31,22 +37,22 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-
                         //public 권한
-                        .requestMatchers(
-                                SecurityWhitelist.AUTH_WHITELIST
-                        ).permitAll()
+                        .requestMatchers(SecurityWhitelist.AUTH_WHITELIST).permitAll()
+                        //public 권한(GET 요청)
+                        .requestMatchers(HttpMethod.GET,SecurityWhitelist.PUBLIC_GETS).permitAll()
                         //admin 권한
-                        .requestMatchers(
-                                "/admin/**"
-                        ).hasAuthority("ADMIN")
-
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
