@@ -15,8 +15,7 @@ public class AuctionController {
 
     private final AuctionService auctionService;
 
-
-    @GetMapping("/trades")
+    @GetMapping
     public ResponseEntity<TradeResponse> getTrades(
             @RequestBody TradeFilterRequest requestDto) {
 
@@ -25,7 +24,7 @@ public class AuctionController {
 
     }
 
-    @PostMapping("/trades/{auctionId}/purchase")
+    @PostMapping("/{auctionId}/purchase")
     public ResponseEntity<String> purchaseItem(
             @PathVariable String auctionId,
             Authentication authentication) {
@@ -36,7 +35,7 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/trades/me")
+    @GetMapping("/me")
     public ResponseEntity<MySaleItemResponse> mySaleItems(
             @RequestBody MySaleItemRequest requestDto,
             Authentication authentication) {
@@ -47,7 +46,7 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/trades")
+    @PostMapping
     public ResponseEntity<String> createAuction(@RequestBody AuctionRequest dto,
                                                 Authentication authentication ){
 
@@ -55,7 +54,7 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.createAuction(dto, userId));
     }
 
-    @DeleteMapping("/trades/{auctionId}")
+    @DeleteMapping("/{auctionId}")
     public ResponseEntity<String> cancelMySaleItem(
             @PathVariable String auctionId,
             Authentication authentication) {
@@ -66,7 +65,7 @@ public class AuctionController {
     }
 
 
-    @GetMapping("/trades/me/history")
+    @GetMapping("/me/history")
     public ResponseEntity<SettlementHistoryResponse> settlementHistory(
             @RequestBody SettlementHistoryRequest requestDto,
             Authentication authentication) {
@@ -77,7 +76,7 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
-    @PatchMapping("/trades/{settlementId}/confirm")
+    @PatchMapping("/{settlementId}/confirm")
     public ResponseEntity<String> confirmItem(
             @PathVariable String settlementId,
             Authentication authentication) {
