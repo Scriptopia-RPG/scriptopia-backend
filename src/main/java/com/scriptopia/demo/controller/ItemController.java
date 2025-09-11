@@ -16,8 +16,8 @@ public class ItemController {
 
 
     @PostMapping
-    public ResponseEntity<ItemFastApiResponse> createItem(@RequestBody ItemDefRequest request) {
-        ItemFastApiResponse savedItem = itemDefService.createItem(request);
+    public ResponseEntity<String> createItem(@RequestBody ItemDefRequest request) {
+        String savedItem = itemDefService.createItem(request);
         return ResponseEntity.ok(savedItem);
     }
 
