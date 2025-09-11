@@ -20,6 +20,6 @@ public class CreateGameDoneRequest {
 
     private String resultContent;
     private String playerName;
-    private String playerVictory;
+    private boolean playerVictory;
 
 }
