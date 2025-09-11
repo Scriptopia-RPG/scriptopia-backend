@@ -2,7 +2,6 @@ package com.scriptopia.demo.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scriptopia.demo.dto.exception.ErrorResponse;
-import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.utils.JwtProvider;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -13,27 +12,44 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.io.IOException;
-import java.security.SignatureException;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
-
+@Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwt;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
+
+        String path = req.getServletPath();
+        String method = req.getMethod();
+
+        System.out.println("Request path: " + path);
+        System.out.println("Whitelist match: " + isWhitelisted(path, method));
+
+        if (isWhitelisted(path, method)) {
+            chain.doFilter(req, res);
+            return;
+        }
 
         String authHeader = req.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -75,7 +91,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             chain.doFilter(req, res);
     }
 
+    private boolean isWhitelisted(String path, String method) {
 
+
+        boolean authMatch = Arrays.stream(SecurityWhitelist.AUTH_WHITELIST)
+                .anyMatch(pattern -> pathMatcher.match(pattern, path));
+
+        boolean publicGetMatch = "GET".equalsIgnoreCase(method) &&
+                Arrays.stream(SecurityWhitelist.PUBLIC_GETS)
+                        .anyMatch(pattern -> pathMatcher.match(pattern, path));
+
+        return authMatch || publicGetMatch;
+    }
 
 
     private void setErrorResponse(HttpServletResponse res, ErrorCode code) throws IOException {

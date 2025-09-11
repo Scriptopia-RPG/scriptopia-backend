@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -102,6 +103,7 @@ public class AuthController {
     }
 
 
+    @PreAuthorize("hasAnyAuthority('USER')")
     @PatchMapping("/password/change")
     public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest request,
                                                  Authentication authentication) {

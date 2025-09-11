@@ -25,7 +25,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    private final JwtProvider jwtProvider;
+    private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,13 +46,12 @@ public class SecurityConfig {
 
                         //admin 권한
                         .requestMatchers(
-                                ""
+                                "/admin/**"
                         ).hasAuthority("ADMIN")
 
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtAuthFilter(jwtProvider),
-                        UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
