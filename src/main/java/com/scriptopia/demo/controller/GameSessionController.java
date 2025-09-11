@@ -75,12 +75,12 @@ public class GameSessionController {
 
 
     @PostMapping("/test")
-    public ResponseEntity<CreateGameDoneResponse> testGame(
+    public ResponseEntity<GameSessionMongo> testGame(
             Authentication authentication) throws JsonProcessingException {
 
         Long userId = Long.valueOf(authentication.getName());
 
-        CreateGameDoneResponse response = gameSessionService.mapToCreateGameDoneRequest(userId);
+        GameSessionMongo response = gameSessionService.mapToCreateGameDoneRequest(userId);
         return ResponseEntity.ok(response);
     }
 
