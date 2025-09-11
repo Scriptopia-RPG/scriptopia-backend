@@ -5,6 +5,7 @@ import com.scriptopia.demo.dto.auction.*;
 import com.scriptopia.demo.service.AuctionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ public class AuctionController {
 
     }
 
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PostMapping("/{auctionId}/purchase")
     public ResponseEntity<String> purchaseItem(
             @PathVariable String auctionId,
@@ -35,6 +37,7 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @GetMapping("/me")
     public ResponseEntity<MySaleItemResponse> mySaleItems(
             @RequestBody MySaleItemRequest requestDto,
@@ -46,6 +49,7 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PostMapping
     public ResponseEntity<String> createAuction(@RequestBody AuctionRequest dto,
                                                 Authentication authentication ){
@@ -54,6 +58,7 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.createAuction(dto, userId));
     }
 
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @DeleteMapping("/{auctionId}")
     public ResponseEntity<String> cancelMySaleItem(
             @PathVariable String auctionId,
@@ -64,7 +69,7 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
-
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @GetMapping("/me/history")
     public ResponseEntity<SettlementHistoryResponse> settlementHistory(
             @RequestBody SettlementHistoryRequest requestDto,
@@ -76,6 +81,7 @@ public class AuctionController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PatchMapping("/{settlementId}/confirm")
     public ResponseEntity<String> confirmItem(
             @PathVariable String settlementId,

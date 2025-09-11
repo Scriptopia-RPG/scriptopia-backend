@@ -37,13 +37,13 @@ public class PiaShopController {
         String result = piaShopService.updatePiaItem(itemId, requestDto);
         return ResponseEntity.ok(result);
     }
-    @PreAuthorize("hasAnyAuthority('USER')")
+
     @GetMapping("/pia/items")
     public ResponseEntity<List<PiaItemResponse>> getPiaItems() {
         return ResponseEntity.ok(piaShopService.getPiaItems());
     }
 
-    @PreAuthorize("hasAnyAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PostMapping("/pia/item/purchase")
     public ResponseEntity<String> purchasePiaItem(
             @RequestBody PurchasePiaItemRequest requestDto,

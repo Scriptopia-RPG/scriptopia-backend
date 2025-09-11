@@ -103,7 +103,7 @@ public class AuthController {
     }
 
 
-    @PreAuthorize("hasAnyAuthority('USER')")
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PatchMapping("/password/change")
     public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest request,
                                                  Authentication authentication) {
