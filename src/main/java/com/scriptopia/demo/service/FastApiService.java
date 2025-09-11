@@ -44,6 +44,17 @@ public class FastApiService {
                 .block();
     }
 
+    // 결과 생성 (확장용)
+    public CreateGameDoneResponse done(CreateGameDoneRequest request) {
+        return fastApiWebClient.post()
+                .uri(FastApiEndpoint.DONE.getPath())
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(CreateGameDoneResponse.class)
+                .block();
+    }
+
+
     // 아이템 생성 (확장용)
     public ItemFastApiResponse item(ItemFastApiRequest request) {
         return fastApiWebClient.post()
@@ -53,4 +64,6 @@ public class FastApiService {
                 .bodyToMono(ItemFastApiResponse.class)
                 .block();
     }
+
+
 }
