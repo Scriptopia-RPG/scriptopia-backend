@@ -1,5 +1,6 @@
 package com.scriptopia.demo.domain.mongo;
 
+import com.scriptopia.demo.domain.RewardType;
 import com.scriptopia.demo.domain.SceneType;
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -27,7 +28,7 @@ public class GameSessionMongo {
 
     private String background;
     private String preChoice;
-    private String preReward;
+    private RewardType preReward;
     private String location;
     private Integer progress;
     private List<Integer> stage;
