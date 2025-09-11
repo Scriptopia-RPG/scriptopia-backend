@@ -11,8 +11,9 @@ public class SecurityWhitelist {
             "/auth/email/**",
             "/auth/password/reset/**",
 
-            "/oauth/**"
+            "/oauth/**",
 
+            "/shops/pia/items"
     };
 
     public static final String[] PUBLIC_GETS = {

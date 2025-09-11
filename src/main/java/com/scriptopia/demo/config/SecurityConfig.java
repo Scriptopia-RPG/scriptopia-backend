@@ -37,8 +37,6 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -51,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(SecurityWhitelist.AUTH_WHITELIST).permitAll()
                         //public 권한(GET 요청)
                         .requestMatchers(HttpMethod.GET,SecurityWhitelist.PUBLIC_GETS).permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
