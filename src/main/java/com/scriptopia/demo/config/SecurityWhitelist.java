@@ -14,9 +14,12 @@ public class SecurityWhitelist {
             "/oauth/**",
 
             "/shops/pia/items"
+
+
     };
 
     public static final String[] PUBLIC_GETS = {
-            "/trades"
+            "/trades",
+            "/shared-games/**"
     };
 }
