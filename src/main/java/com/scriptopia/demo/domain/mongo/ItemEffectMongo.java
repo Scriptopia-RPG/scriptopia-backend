@@ -1,6 +1,6 @@
 package com.scriptopia.demo.domain.mongo;
 
-import com.scriptopia.demo.domain.Grade;
+import com.scriptopia.demo.domain.EffectProbability;
 import lombok.*;
 
 @Data
@@ -10,5 +10,5 @@ import lombok.*;
 public class ItemEffectMongo {
     private String itemEffectName;
     private String itemEffectDescription;
-    private Grade grade; // COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
+    private EffectProbability effectProbability; // COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
 }

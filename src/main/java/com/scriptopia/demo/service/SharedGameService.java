@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +28,11 @@ public class SharedGameService {
     private final TagDefRepository tagDefRepository;
 
     @Transactional
-    public ResponseEntity<?> saveSharedGame(Long Id, Long historyId) {
+    public ResponseEntity<?> saveSharedGame(Long Id, UUID uuid) {
         User user = userRepository.findById(Id)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
-        History history = historyRepository.findById(historyId)
+        History history = historyRepository.findByUuid(uuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
 
         if(!history.getUser().getId().equals(Id)) {
@@ -52,6 +53,7 @@ public class SharedGameService {
 
         for(SharedGame game : games) {
             MySharedGameResponse dto = new MySharedGameResponse();
+            dto.setShared_game_uuid(game.getUuid());
             dto.setThumbnailUrl(game.getThumbnailUrl());
             dto.setTotalPlayed(sharedGameScoreRepository.countBySharedGameId(game.getId()));
             dto.setTitle(game.getTitle());
@@ -77,12 +79,12 @@ public class SharedGameService {
     }
 
     @Transactional
-    public void deletesharedGame(Long id, Long sharedId) {
+    public void deletesharedGame(Long id, UUID uuid) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
-        SharedGame game = sharedGameRepository.findById(sharedId)
-                .orElseThrow(() -> new CustomException(ErrorCode.E_404_SHARED_GAME_NOT_FOUND));
+        SharedGame game = sharedGameRepository.findByUuid(uuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
 
         if(!game.getUser().getId().equals(user.getId())) {        // 공유된 게임과 로그인한 사용자가 아닌 경우
             throw new CustomException(ErrorCode.E_401_NOT_EQUAL_SHARED_GAME);

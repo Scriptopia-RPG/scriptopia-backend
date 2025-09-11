@@ -21,7 +21,7 @@ public enum ChoiceEventType {
         this.ChoiceEventChance = ChoiceEventChance;
     }
 
-    public ChoiceEventType getChoiceEventType() {
+    public static ChoiceEventType getChoiceEventType() {
         int rand = random.nextInt(100) + 1;
         int cumulative = 0;
 

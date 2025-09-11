@@ -1,6 +1,5 @@
 package com.scriptopia.demo.service;
 
-import com.scriptopia.demo.adapter.EffectAdapter;
 import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.domain.mongo.ItemDefMongo;
 import com.scriptopia.demo.domain.mongo.ItemEffectMongo;
@@ -19,6 +18,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,11 +54,16 @@ public class ItemDefService {
         for (int i = 0; i < 3; i++) {
             EffectProbability effectGrade = EffectProbability.getRandomEffectGradeByWeaponGrade(itemGrade);
             if (effectGrade != null) {
+                Long effectPrice = effectGradeDefRepository.findPriceByEffectProbability(effectGrade)
+                        .orElseThrow(() -> new IllegalStateException("EffectGradeDef not found: " + effectGrade));
+
+                effectGradesList.add(effectPrice);
                 effectGrades.add(effectGrade);
-                effectGradesList.add(effectGradeDefRepository.findPriceByGrade(EffectAdapter.toGrade(effectGrade)).get());
+                // effectGradesList.add(effectGradeDefRepository.findPriceByEffectProbability(effectGrade).get());
             }
         }
 
+        System.out.println(effectGrades);
         Long gradeGradePrice = itemGradeDefRepository.findPriceByGrade(itemGrade);
         Long itemPrice = GameBalanceUtil.getItemPriceByGrade(gradeGradePrice, effectGradesList);
 
@@ -99,6 +105,8 @@ public class ItemDefService {
                 .block(); // 블로킹 호출 (간단 테스트용)
 
 
+        System.out.println("Fast Api = " + response);
+
         List<ItemEffectMongo> mongoEffects = new ArrayList<>();
         List<ItemFastApiResponse.ItemEffect> apiEffects = response.getItemEffect();
 
@@ -107,7 +115,7 @@ public class ItemDefService {
             EffectProbability effectGrade = i < effectGrades.size() ? effectGrades.get(i) : null;
 
             mongoEffects.add(ItemEffectMongo.builder()
-                    .grade(effectGrade != null ? EffectAdapter.toGrade(effectGrade) : Grade.COMMON)
+                    .effectProbability(effectGrade != null ? (effectGrade) : EffectProbability.COMMON)
                     .itemEffectName(apiEffect.getItemEffectName())
                     .itemEffectDescription(apiEffect.getItemEffectDescription())
                     .build());
@@ -152,10 +160,13 @@ public class ItemDefService {
             effect.setItemDef(itemDefRdb);
             effect.setEffectName(effectMongo.getItemEffectName());
             effect.setEffectDescription(effectMongo.getItemEffectDescription());
-            effect.setEffectGradeDef(effectGradeDefRepository.findByGrade(effectMongo.getGrade()).get());
+            effect.setEffectGradeDef(effectGradeDefRepository.findByEffectProbability(effectMongo.getEffectProbability()).get());
             rdbEffects.add(effect);
         }
         itemDefRdb.setItemEffects(rdbEffects);
+
+
+        System.out.println(itemDefRdb);
 
         itemDefRepository.save(itemDefRdb);
 

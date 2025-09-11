@@ -9,7 +9,7 @@ public enum ChoiceResultType {
     BATTLE(40),
     CHOICE(30),
     SHOP(10),
-    NONE(50);
+    NONE(30);
 
     private final int nextEventType;
 
@@ -20,8 +20,8 @@ public enum ChoiceResultType {
     }
 
 
-    public ChoiceResultType nextResultType() {
-        int rand = random.nextInt(nextEventType);
+    public static ChoiceResultType nextResultType() {
+        int rand = random.nextInt(100) + 1;
         int cumulative = 0;
 
         for(ChoiceResultType type : values()) {
