@@ -2,10 +2,12 @@ package com.scriptopia.demo.utils;
 
 import com.scriptopia.demo.domain.EffectProbability;
 import com.scriptopia.demo.domain.Grade;
+import com.scriptopia.demo.domain.RewardType;
 import com.scriptopia.demo.domain.Stat;
 import com.scriptopia.demo.domain.mongo.ItemDefMongo;
 import com.scriptopia.demo.domain.mongo.ItemEffectMongo;
 import com.scriptopia.demo.domain.mongo.PlayerInfoMongo;
+import com.scriptopia.demo.domain.mongo.RewardInfoMongo;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.EffectGradeDefRepository;
@@ -346,4 +348,45 @@ public class GameBalanceUtil {
         double variance = 0.9 + secureRandom.nextDouble() * 0.2; // 0.9 ~ 1.1
         return (int) Math.round(base * variance);
     }
+
+
+    public static boolean isPass(int choiceProbability) {
+        int randomCount = secureRandom.nextInt(100) + 1;
+
+        return (choiceProbability >= randomCount);
+    }
+
+    public static RewardInfoMongo getReward(RewardType rewardType, boolean isPass) {
+        RewardInfoMongo.RewardInfoMongoBuilder builder = RewardInfoMongo.builder();
+
+        // 기본값: 성공이면 생명 +1, 실패면 생명 -1
+        builder.rewardLife(isPass ? 1 : -1);
+
+        switch (rewardType) {
+            case GOLD:
+                int gold = secureRandom.nextInt(50) + 1; // 1~50 골드
+                builder.rewardGold(isPass ? gold : -gold);
+                break;
+
+            case STAT:
+                int statValue = secureRandom.nextInt(3) + 1; // 1~3 사이 스탯 변화
+                int statType = secureRandom.nextInt(4); // 0~3 → 힘, 민첩, 지능, 운 중 하나
+                switch (statType) {
+                    case 0 -> builder.rewardStrength(isPass ? statValue : -statValue);
+                    case 1 -> builder.rewardAgility(isPass ? statValue : -statValue);
+                    case 2 -> builder.rewardIntelligence(isPass ? statValue : -statValue);
+                    case 3 -> builder.rewardLuck(isPass ? statValue : -statValue);
+                }
+                break;
+            case ITEM:
+            case NONE:
+            default:
+                // 아무 보상 없음
+                break;
+        }
+
+        return builder.build();
+    }
+
+
 }
