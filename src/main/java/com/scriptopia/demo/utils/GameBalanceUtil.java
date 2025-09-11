@@ -132,6 +132,30 @@ public class GameBalanceUtil {
         return effectPrice;
     }
 
+    public static Integer getChoiceProbability(Stat stat, PlayerInfoMongo playerInfo) {
+        int baseProbability = 40; // 기본 선택지 확률 40%
+        double multiplier = 0.9 + (0.2 * secureRandom.nextDouble()); // 0.9 ~ 1.1
+        baseProbability = (int) (baseProbability * multiplier);
+
+        double statBonus = 0;
+
+        switch (stat) {
+            case STRENGTH -> statBonus = playerInfo.getStrength() * 0.8;
+            case AGILITY -> statBonus = playerInfo.getAgility() * 0.8;
+            case INTELLIGENCE -> statBonus = playerInfo.getIntelligence() * 0.8;
+            case LUCK -> statBonus = playerInfo.getLuck() * 0.8;
+        }
+
+        double probability = baseProbability + statBonus;
+
+        // 최소 30%, 최대 80% 제한
+        probability = Math.max(30, Math.min(80, probability));
+
+        return (int) Math.round(probability);
+    }
+
+
+
     /**
      * 플레이어 기본 스탯 초기화
      * @param playerStat (플레이어가 선택한 주 스탯)
