@@ -4,12 +4,13 @@ import lombok.Getter;
 
 import java.security.SecureRandom;
 
+
 @Getter
 public enum ChoiceResultType {
     BATTLE(40),
     CHOICE(30),
     SHOP(10),
-    NONE(30);
+    DONE(30);
 
     private final int nextEventType;
 
@@ -30,6 +31,6 @@ public enum ChoiceResultType {
                 return type;
             }
         }
-        return NONE;
+        return DONE;
     }
 }
