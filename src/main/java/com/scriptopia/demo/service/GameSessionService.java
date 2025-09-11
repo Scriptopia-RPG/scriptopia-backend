@@ -389,7 +389,7 @@ public class GameSessionService {
             ChoiceMongo choiceMongo = ChoiceMongo.builder()
                     .detail(choice.getDetail())
                     .stats(statInfo.get(i))
-                    .probability(null)
+                    .probability(GameBalanceUtil.getChoiceProbability(statInfo.get(i), gameSessionMongo.getPlayerInfo()))
                     .resultType(ChoiceResultType.nextResultType())
                     .rewardType(RewardType.getRandomRewardType())
                     .build();
@@ -405,29 +405,7 @@ public class GameSessionService {
 
         gameSessionMongo.setChoiceInfo(choiceInfoMongo);
 
-        HistoryInfoMongo historyInfoMongo = gameSessionMongo.getHistoryInfo();
 
-        /**
-         *  이 부분 저장하는 것은 해당 DONE 이 나올 때 요약을 사용해야 함 **여기가 아님**
-         */
-        if (currentEventStage > 0) {
-            switch (currentEventStage) {
-                case 1:
-                    historyInfoMongo.setEpilogue1Title(createGameChoiceResponse.getChoiceInfo().getTitle());
-                    historyInfoMongo.setEpilogue1Content(createGameChoiceResponse.getChoiceInfo().getStory());
-                    break;
-                case 3:
-                    historyInfoMongo.setEpilogue2Title(createGameChoiceResponse.getChoiceInfo().getTitle());
-                    historyInfoMongo.setEpilogue2Content(createGameChoiceResponse.getChoiceInfo().getStory());
-                    break;
-                case 5:
-                    historyInfoMongo.setEpilogue3Title(createGameChoiceResponse.getChoiceInfo().getTitle());
-                    historyInfoMongo.setEpilogue3Content(createGameChoiceResponse.getChoiceInfo().getStory());
-                    break;
-            }
-        }
-
-        gameSessionMongo.setHistoryInfo(historyInfoMongo);
         gameSessionMongoRepository.save(gameSessionMongo);
 
         return gameSessionMongo;
@@ -541,6 +519,77 @@ public class GameSessionService {
 
         return fastApiResponse;
     }
+
+
+    @Transactional
+    public GameSessionMongo mapToCreateGameDoneRequest(Long userId) {
+        if (!gameSessionRepository.existsByUserId(userId)) {
+            throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
+        }
+
+        GameSession gameSession = gameSessionRepository.findByMongoId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+
+        String gameId = gameSession.getMongoId();
+        GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+
+        CreateGameDoneRequest fastApiRequest = CreateGameDoneRequest.builder()
+                .worldView(gameSessionMongo.getHistoryInfo().getWorldView())
+                .location(gameSessionMongo.getLocation())
+                .previousStory(gameSessionMongo.getBackground())
+                .selectedChoice(gameSessionMongo.getPreChoice())
+                .resultContent(RewardType.getRewardSummary(gameSessionMongo.getRewardInfo()))
+                .playerName(gameSessionMongo.getPlayerInfo().getName())
+                .playerVictory( (gameSessionMongo.getSceneType() == SceneType.BATTLE))
+                .build();
+
+
+        CreateGameDoneResponse fastApiResponse = fastApiService.done(fastApiRequest);
+
+
+        if (fastApiResponse == null) {
+            throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
+        }
+
+
+        gameSessionMongo.setSceneType(SceneType.DONE);
+        gameSessionMongo.setUpdatedAt(LocalDateTime.now());
+        gameSessionMongo.setLocation(fastApiResponse.getDoneInfo().getNewLocation());
+        gameSessionMongo.setBackground(fastApiResponse.getDoneInfo().getReCap());
+        gameSessionMongo.setProgress(gameSessionMongo.getProgress() + 1);
+
+
+        int currentProgress = gameSessionMongo.getProgress();
+        List<Integer> stage = gameSessionMongo.getStage();
+        int currentEventStage = stage.get(currentProgress);
+        HistoryInfoMongo historyInfoMongo = gameSessionMongo.getHistoryInfo();
+
+        if (currentEventStage > 0) {
+            switch (currentEventStage) {
+                case 2:
+                    historyInfoMongo.setEpilogue1Content(fastApiResponse.getDoneInfo().getReCap());
+                    break;
+                case 4:
+                    historyInfoMongo.setEpilogue2Content(fastApiResponse.getDoneInfo().getReCap());
+                    break;
+                case 6:
+                    historyInfoMongo.setEpilogue3Content(fastApiResponse.getDoneInfo().getReCap());
+                    break;
+            }
+        }
+
+
+        gameSessionMongo.setHistoryInfo(historyInfoMongo);
+        gameSessionMongoRepository.save(gameSessionMongo);
+
+        return gameSessionMongo;
+    }
+
+
+
 
 
     /**
