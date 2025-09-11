@@ -191,7 +191,7 @@ public class LocalAccountService {
         User user = localAccount.getUser();
         user.setLastLoginAt(LocalDateTime.now());
 
-        List<String> roles = List.of(Role.USER.toString());
+        List<String> roles = List.of(user.getRole().toString());
         String access  = jwt.createAccessToken(user.getId(), roles);
         String refresh = jwt.createRefreshToken(user.getId(), req.getDeviceId());
 
