@@ -1,9 +1,13 @@
 package com.scriptopia.demo.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scriptopia.demo.dto.exception.ErrorResponse;
+import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.utils.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -38,12 +42,6 @@ public class SecurityConfig {
                         .requestMatchers(
                                 SecurityWhitelist.AUTH_WHITELIST
                         ).permitAll()
-
-                        //user 권한
-                        .requestMatchers(
-                                "/auth/password/change"
-                        ).hasAuthority("USER")
-
                         //admin 권한
                         .requestMatchers(
                                 "/admin/**"
@@ -51,7 +49,23 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, e) -> {
+                    res.setStatus(ErrorCode.E_401.getStatus().value());
+                    res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    res.setCharacterEncoding("UTF-8");
+                    new ObjectMapper().writeValue(res.getOutputStream(),
+                            new ErrorResponse(ErrorCode.E_401));
+                })
+                .accessDeniedHandler((req, res, e) -> {
+                    res.setStatus(ErrorCode.E_403.getStatus().value());
+                    res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    res.setCharacterEncoding("UTF-8");
+                    new ObjectMapper().writeValue(res.getOutputStream(),
+                            new ErrorResponse(ErrorCode.E_403));
+                })
+        );
         return http.build();
     }
 }

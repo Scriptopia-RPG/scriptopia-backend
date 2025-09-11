@@ -8,6 +8,8 @@ public class SecurityWhitelist {
             "/auth/register",
             "/auth/email/**",
             "/auth/password/reset/**",
+            "/oauth/**"
+
 
 
     };

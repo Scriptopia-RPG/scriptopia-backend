@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,14 +28,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwt;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
-    @Value("${server.servlet.context-path}")
-    private String contextPath;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
@@ -43,8 +43,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String path = req.getServletPath();
         String method = req.getMethod();
 
-        System.out.println("Request path: " + path);
-        System.out.println("Whitelist match: " + isWhitelisted(path, method));
+        log.debug("Request path: {}", path);
+        log.debug("Whitelist match: {}", isWhitelisted(path, method));
 
         if (isWhitelisted(path, method)) {
             chain.doFilter(req, res);
