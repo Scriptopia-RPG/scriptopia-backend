@@ -41,8 +41,8 @@ public class PublicSharedGameController {
                                                                                      @RequestParam(required = false) Long lastId,
                                                                                      @RequestParam(defaultValue = "20") int size,
                                                                                      @RequestParam(required = false) List<Long> tagIds,
-                                                                                     @RequestParam(required = false) String q) {
+                                                                                     @RequestParam(required = false) String query) {
         Long viewerId = (authentication == null) ? null : Long.valueOf(authentication.getName());
-        return sharedGameService.getPublicSharedGames(viewerId, lastId, size, tagIds, q);
+        return sharedGameService.getPublicSharedGames(viewerId, lastId, size, tagIds, query);
     }
 }
