@@ -5,10 +5,11 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class PublicSharedGameDetailResponse {
-    private Long sharedGameId;
+    private UUID sharedGameUUID;
     private String nickname;
     private String thumbnailUrl;
     private Long totalPlayed;

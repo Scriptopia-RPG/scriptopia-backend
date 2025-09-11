@@ -4,10 +4,11 @@ import com.scriptopia.demo.domain.History;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 public class HistoryPageResponse {
-    private Long id;
+    private UUID uuid;
     private String title;
     private Long score;
     private String thumbnail_url;
@@ -15,7 +16,7 @@ public class HistoryPageResponse {
 
     public static HistoryPageResponse from(History h) {
         HistoryPageResponse dto = new HistoryPageResponse();
-        dto.setId(h.getId());
+        dto.setUuid(h.getUuid());
         dto.setTitle(h.getTitle());
         dto.setScore(h.getScore());
         dto.setThumbnail_url(h.getThumbnailUrl());

@@ -79,7 +79,7 @@ public class SharedGameService {
     }
 
     @Transactional
-    public void deletesharedGame(Long id, UUID uuid) {
+    public void deleteSharedGame(Long id, UUID uuid) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
 
@@ -93,8 +93,8 @@ public class SharedGameService {
         sharedGameRepository.delete(game);
     }
 
-    public ResponseEntity<?> getDetailedSharedGame(Long sharedId) {
-        SharedGame game = sharedGameRepository.findById(sharedId)
+    public ResponseEntity<?> getDetailedSharedGame(UUID uuid) {
+        SharedGame game = sharedGameRepository.findByUuid(uuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_SHARED_GAME_NOT_FOUND));
 
         List<String> tagName = gameTagRepository.findTagNamesBySharedGameId(game.getId());
@@ -102,7 +102,7 @@ public class SharedGameService {
         List<SharedGameScore> score = sharedGameScoreRepository.findAllBySharedGameIdOrderByScoreDescCreatedAtDesc(game.getId());
 
         PublicSharedGameDetailResponse dto = new PublicSharedGameDetailResponse();
-        dto.setSharedGameId(game.getId());
+        dto.setSharedGameUUID(game.getUuid());
         dto.setNickname(game.getUser().getNickname());
         dto.setThumbnailUrl(game.getThumbnailUrl());
         dto.setTotalPlayed(game.getTotalPlayed());

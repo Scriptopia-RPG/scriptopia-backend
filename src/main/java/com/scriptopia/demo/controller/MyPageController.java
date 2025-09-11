@@ -58,7 +58,7 @@ public class MyPageController {
     public ResponseEntity<?> delete(Authentication authentication, @PathVariable UUID uuid) {
         Long userId = Long.valueOf(authentication.getName());
 
-        sharedGameService.deletesharedGame(userId, uuid);
+        sharedGameService.deleteSharedGame(userId, uuid);
 
         return ResponseEntity.ok("게임이 삭제되었습니다.");
     }
