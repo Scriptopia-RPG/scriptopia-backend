@@ -1,8 +1,10 @@
 package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.config.fastapi.FastApiClient;
+import com.scriptopia.demo.dto.gamesession.ingame.InGameChoiceResponse;
 import com.scriptopia.demo.dto.items.ItemDefRequest;
 import com.scriptopia.demo.dto.items.ItemFastApiResponse;
+import com.scriptopia.demo.mapper.InGameMapper;
 import com.scriptopia.demo.repository.mongo.GameSessionMongoRepository;
 import com.scriptopia.demo.repository.mongo.ItemDefMongoRepository;
 import com.scriptopia.demo.utils.GameBalanceUtil;
@@ -39,6 +41,7 @@ public class GameSessionService {
     private final UserItemRepository userItemRepository;
     private final FastApiService fastApiService;
     private final ItemDefService itemDefService;
+    private final InGameMapper inGameMapper;
 
 
     public boolean duplcatedGameSession(Long userId) {
@@ -269,6 +272,47 @@ public class GameSessionService {
                 "게임이 생성되었습니다.",
                 mysqlSession.getMongoId()
         );
+    }
+
+    public Object getInGameDataDto(Long userId){
+        if (!gameSessionRepository.existsByUserId(userId)) {
+            throw new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND);
+        }
+
+        GameSession gameSession = gameSessionRepository.findByMongoId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+
+        String gameId = gameSession.getMongoId();
+        GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+
+        SceneType currentSceneType = gameSessionMongo.getSceneType();
+        if (currentSceneType == SceneType.CHOICE) {
+            return InGameChoiceResponse.builder()
+                    .sceneType("CHOICE")
+                    .startedAt(gameSessionMongo.getStartedAt())
+                    .updatedAt(gameSessionMongo.getUpdatedAt())
+                    .background(gameSessionMongo.getBackground())
+                    .location(gameSessionMongo.getLocation())
+                    .progress(gameSessionMongo.getProgress())
+                    .stageSize(gameSessionMongo.getStage() != null ? gameSessionMongo.getStage().size() : 0)
+                    .playerInfo(inGameMapper.mapPlayer(gameSessionMongo.getPlayerInfo()))
+                    .npcInfo(inGameMapper.mapNpc(gameSessionMongo.getNpcInfo()))
+                    .inventory(inGameMapper.mapInventory(gameSessionMongo.getInventory())  )
+                    .choiceInfo(inGameMapper.mapChoice(gameSessionMongo.getChoiceInfo()))
+                    .build();
+
+        } else if (currentSceneType == SceneType.DONE) {
+
+        } else if (currentSceneType == SceneType.SHOP) {
+
+        } else if (currentSceneType == SceneType.BATTLE) {
+
+        }
+
+        return null;
     }
 
 
