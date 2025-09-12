@@ -78,8 +78,9 @@ public class GameSessionController {
 
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    @GetMapping()
+    @GetMapping("/{gameId}")
     public ResponseEntity<?> getInGameData(
+            @PathVariable("gameId") String gameId,
             Authentication authentication) throws JsonProcessingException {
 
         Long userId = Long.valueOf(authentication.getName());
