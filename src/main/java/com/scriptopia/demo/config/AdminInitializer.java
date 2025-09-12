@@ -3,6 +3,7 @@ package com.scriptopia.demo.config;
 import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.repository.LocalAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
+import com.scriptopia.demo.repository.UserSettingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -22,6 +23,7 @@ public class AdminInitializer implements ApplicationRunner {
     private final UserRepository userRepository;
     private final LocalAccountRepository localAccountRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserSettingRepository userSettingRepository;
 
     @Value("${app.admin.username}")
     private String adminUsername;
@@ -44,7 +46,6 @@ public class AdminInitializer implements ApplicationRunner {
             admin.setProfileImgUrl(null);
             admin.setRole(Role.ADMIN);
             admin.setLoginType(LoginType.LOCAL);
-
             User adminUser = userRepository.save(admin);
 
 
@@ -54,9 +55,17 @@ public class AdminInitializer implements ApplicationRunner {
             localAccount.setPassword(passwordEncoder.encode(adminPassword));
             localAccount.setUpdatedAt(LocalDateTime.now());
             localAccount.setStatus(UserStatus.VERIFIED);
-
             LocalAccount adminAccount = localAccountRepository.save(localAccount);
 
+            UserSetting userSetting = new UserSetting();
+            userSetting.setUser(adminUser);
+            userSetting.setTheme(Theme.DARK);
+            userSetting.setFontType(FontType.PretendardVariable);
+            userSetting.setFontSize(16);
+            userSetting.setLineHeight(1);
+            userSetting.setWordSpacing(1);
+            userSetting.setUpdatedAt(LocalDateTime.now());
+            userSettingRepository.save(userSetting);
 
         }
     }

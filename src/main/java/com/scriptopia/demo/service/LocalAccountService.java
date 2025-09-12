@@ -7,6 +7,7 @@ import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.LocalAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
+import com.scriptopia.demo.repository.UserSettingRepository;
 import com.scriptopia.demo.utils.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -50,7 +51,7 @@ public class LocalAccountService {
     private static final Pattern WS = Pattern.compile("[\\s\\p{Z}\\u200B\\u200C\\u200D\\uFEFF]");
 
     private static final long TOKEN_EXPIRATION = 30;
-
+    private final UserSettingRepository userSettingRepository;
 
 
     @Transactional
@@ -168,11 +169,14 @@ public class LocalAccountService {
 
         //환경 설정 초기 값
         UserSetting userSetting = new UserSetting();
+        userSetting.setUser(user);
         userSetting.setTheme(Theme.DARK);
         userSetting.setFontType(FontType.PretendardVariable);
         userSetting.setFontSize(16);
         userSetting.setLineHeight(1);
+        userSetting.setWordSpacing(1);
         userSetting.setUpdatedAt(LocalDateTime.now());
+        userSettingRepository.save(userSetting);
 
     }
 
