@@ -82,7 +82,7 @@ public class AuctionController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    @PatchMapping("/{settlementId}/confirm")
+    @PostMapping("/{settlementId}/confirm")
     public ResponseEntity<String> confirmItem(
             @PathVariable String settlementId,
             Authentication authentication) {
