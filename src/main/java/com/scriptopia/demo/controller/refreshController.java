@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
@@ -30,7 +31,7 @@ public class refreshController {
     private static final boolean COOKIE_SECURE = true;
     private static final String COOKIE_SAMESITE = "None";
 
-    // 쿠키 기반 리프레시
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PostMapping("/refresh")
     public ResponseEntity<RefreshResponse> refresh(
             @CookieValue(name = RT_COOKIE, required = false) String refreshToken,

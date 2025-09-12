@@ -59,6 +59,7 @@ public enum ErrorCode {
 
 
     //404 Not Found
+    E_404("E404000","요청하신 리소스를 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
     E_404_REFRESH_NOT_FOUND("E404001", "유효한 리프레시 세션을 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
     E_404_USER_NOT_FOUND("E404002","사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
     E_404_AUCTION_NOT_FOUND("E404003", "해당 아이템이 존재하지 않습니다.", HttpStatus.NOT_FOUND),

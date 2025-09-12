@@ -55,9 +55,9 @@ public class LocalAccountService {
 
     @Transactional
     public void resetPassword(String token,String newPassword) {
+
         String key = "reset:token:" + token;
         String email = redisTemplate.opsForValue().get(key);
-        System.out.println(key);
         if (email == null) {
             throw new CustomException(ErrorCode.E_401);
         }
@@ -82,6 +82,9 @@ public class LocalAccountService {
 
     @Transactional
     public void sendVerificationCode(String email) {
+        if (localAccountRepository.existsByEmail(email)){
+            throw new CustomException(ErrorCode.E_409_EMAIL_TAKEN);
+        }
         String code = String.format("%06d", (int)(Math.random() * 999999));
         mailService.saveCode(email, code);
         mailService.sendVerificationCode(email, code);
@@ -188,7 +191,7 @@ public class LocalAccountService {
         User user = localAccount.getUser();
         user.setLastLoginAt(LocalDateTime.now());
 
-        List<String> roles = List.of(Role.USER.toString());
+        List<String> roles = List.of(user.getRole().toString());
         String access  = jwt.createAccessToken(user.getId(), roles);
         String refresh = jwt.createRefreshToken(user.getId(), req.getDeviceId());
 

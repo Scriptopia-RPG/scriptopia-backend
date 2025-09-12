@@ -14,7 +14,7 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
     @Query("select h from History h where h.uuid = :uuid")
     Optional<History> findByUuid(@Param("uuid") UUID uuid);
 
-    @Query("select h.id from History h where h.user.id = : userId and h.uuid = :uuid")
+    @Query("select h.id from History h where h.user.id = :userId and h.uuid = :uuid")
     Optional<Long> findByUserIdAndUuid(@Param("userId") Long userId, @Param("uuid") UUID uuid);
 
     Page<History> findByUserIdAndIdLessThanOrderByIdDesc(Long userId, Long lastId, Pageable pageable);
