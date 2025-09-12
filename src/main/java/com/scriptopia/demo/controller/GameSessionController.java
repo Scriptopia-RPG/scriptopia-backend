@@ -57,27 +57,6 @@ public class GameSessionController {
 
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    @PostMapping("/progress")
-    public ResponseEntity<GameSessionMongo> keepGame(
-            Authentication authentication) throws JsonProcessingException {
-
-        Long userId = Long.valueOf(authentication.getName());
-
-        GameSessionMongo response = gameSessionService.gameProgress(userId);
-        return ResponseEntity.ok(response);
-    }
-
-    /*
-     * 게임 -> 기존 게임 조회
-     */
-    @GetMapping("/me")
-    public ResponseEntity<?> loadGameSession(Authentication authentication) {
-        Long userId = Long.valueOf(authentication.getName());
-        return gameSessionService.getGameSession(userId);
-    }
-
-
-    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @GetMapping("/{gameId}")
     public ResponseEntity<?> getInGameData(
             @PathVariable("gameId") String gameId,
@@ -90,6 +69,44 @@ public class GameSessionController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @PostMapping("/progress")
+    public ResponseEntity<GameSessionMongo> keepGame(
+            Authentication authentication) throws JsonProcessingException {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        GameSessionMongo response = gameSessionService.gameProgress(userId);
+        return ResponseEntity.ok(response);
+    }
+
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @PostMapping("/test")
+    public ResponseEntity<GameSessionMongo> selectChoice(
+            @RequestBody GameChoiceRequest request,
+            Authentication authentication) throws JsonProcessingException {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        GameSessionMongo response = gameSessionService.gameChoiceSelect(userId, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
+    /*
+     * 게임 -> 기존 게임 조회
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> loadGameSession(Authentication authentication) {
+        Long userId = Long.valueOf(authentication.getName());
+        return gameSessionService.getGameSession(userId);
+    }
+
 
 
     /**
