@@ -1,5 +1,6 @@
 package com.scriptopia.demo.controller;
 
+import com.scriptopia.demo.dto.users.UserAssetsResponse;
 import com.scriptopia.demo.dto.users.UserSettingsDTO;
 import com.scriptopia.demo.service.UserService;
 import jakarta.validation.Valid;
@@ -36,4 +37,15 @@ public class UserController {
         userService.updateUserSettings(userId,request);
         return ResponseEntity.ok("사용자 설정이 변경되었습니다.");
     }
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @GetMapping("/assets")
+    public ResponseEntity<UserAssetsResponse> getUserAssets(
+            Authentication authentication
+    ) {
+        String userId = authentication.getName();
+        UserAssetsResponse response = userService.getUserAssets(userId);
+        return ResponseEntity.ok(response);
+    }
+
 }

@@ -1,9 +1,12 @@
 package com.scriptopia.demo.service;
 
+import com.scriptopia.demo.domain.User;
 import com.scriptopia.demo.domain.UserSetting;
+import com.scriptopia.demo.dto.users.UserAssetsResponse;
 import com.scriptopia.demo.dto.users.UserSettingsDTO;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
+import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.repository.UserSettingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +20,7 @@ import java.time.LocalDateTime;
 public class UserService {
 
     private final UserSettingRepository userSettingRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public UserSettingsDTO getUserSettings(String userId){
@@ -48,6 +52,19 @@ public class UserService {
         userSetting.setWordSpacing(request.getWordSpacing());
         userSetting.setUpdatedAt(LocalDateTime.now());
 
+
+    }
+
+    @Transactional
+    public UserAssetsResponse getUserAssets(String userId){
+
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(
+                () -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND)
+        );
+
+        return UserAssetsResponse.builder()
+                .pia(user.getPia())
+                .build();
 
     }
 
