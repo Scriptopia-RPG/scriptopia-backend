@@ -45,6 +45,10 @@ public class SharedGame {
         if(uuid == null) {
             uuid = UUID.randomUUID();
         }
+
+        if(sharedAt == null) {
+            sharedAt = LocalDateTime.now();
+        }
     }
 
     public static SharedGame from(User user, History h) {
