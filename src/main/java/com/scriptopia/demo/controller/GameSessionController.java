@@ -40,26 +40,30 @@ public class GameSessionController {
         Long userId = Long.valueOf(authentication.getName());
         return gameSessionService.deleteGameSession(userId, gameId);
     }
-
-    /*
-     * 게임 시작
-     */
+    
+    
+    // 게임 시작
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PostMapping
-    public ResponseEntity<StartGameResponse> startNewGame(@RequestBody StartGameRequest request,
-                                                          Authentication authentication) throws JsonProcessingException {
+    public ResponseEntity<StartGameResponse> startNewGame(
+            @RequestBody StartGameRequest request,
+            Authentication authentication) throws JsonProcessingException {
+
         Long userId = Long.valueOf(authentication.getName());
+
         StartGameResponse response = gameSessionService.startNewGame(userId, request);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 테스트 중
-     */
-    @PostMapping("/test")
-    public ResponseEntity<GameSessionMongo> testGame(Authentication authentication)
-            throws JsonProcessingException {
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @PostMapping("/progress")
+    public ResponseEntity<GameSessionMongo> keepGame(
+            Authentication authentication) throws JsonProcessingException {
+
         Long userId = Long.valueOf(authentication.getName());
-        GameSessionMongo response = gameSessionService.mapToCreateGameChoiceRequest(userId);
+
+        GameSessionMongo response = gameSessionService.gameProgress(userId);
         return ResponseEntity.ok(response);
     }
 
@@ -71,6 +75,22 @@ public class GameSessionController {
         Long userId = Long.valueOf(authentication.getName());
         return gameSessionService.getGameSession(userId);
     }
+
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @GetMapping("/{gameId}")
+    public ResponseEntity<?> getInGameData(
+            @PathVariable("gameId") String gameId,
+            Authentication authentication) throws JsonProcessingException {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        // service에서 sceneType별 DTO를 반환
+        Object response = gameSessionService.getInGameDataDto(userId);
+
+        return ResponseEntity.ok(response);
+    }
+
 
     /**
      * 현재는 userId, sessionId를 통해 저장하는데
