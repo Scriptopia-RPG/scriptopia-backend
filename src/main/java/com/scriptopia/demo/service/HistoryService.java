@@ -146,4 +146,5 @@ public class HistoryService {
 
         return ResponseEntity.ok(page.getContent().stream().map(HistoryPageResponse::from).toList());
     }
+
 }
