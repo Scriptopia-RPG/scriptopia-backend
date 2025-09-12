@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GameSessionRequest {
-    private String token;
+    private String gameId;
 }

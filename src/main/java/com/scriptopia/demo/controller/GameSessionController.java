@@ -1,6 +1,7 @@
 package com.scriptopia.demo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.scriptopia.demo.domain.GameSession;
 import com.scriptopia.demo.domain.mongo.GameSessionMongo;
 import com.scriptopia.demo.dto.gamesession.*;
 import com.scriptopia.demo.service.GameSessionService;
@@ -23,22 +24,20 @@ public class GameSessionController {
      * 게임 -> 게임 도중 종료
      */
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping("/{gameId}/exit")
-    public ResponseEntity<?> createGameSession(Authentication authentication,
-                                               @PathVariable("gameId") String gameId) {
+    @PostMapping("/exit")
+    public ResponseEntity<?> createGameSession(Authentication authentication, @RequestBody GameSessionRequest request) {
         Long userId = Long.valueOf(authentication.getName());
-        return gameSessionService.saveGameSession(userId, gameId);
+        return gameSessionService.saveGameSession(userId, request.getGameId());
     }
 
     /*
      * 게임 -> 기존 게임 삭제
      */
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @DeleteMapping("/{gameId}")
-    public ResponseEntity<?> deleteGameSession(Authentication authentication,
-                                               @PathVariable("gameId") String gameId) {
+    @DeleteMapping("")
+    public ResponseEntity<?> deleteGameSession(Authentication authentication, @RequestBody GameSessionRequest request) {
         Long userId = Long.valueOf(authentication.getName());
-        return gameSessionService.deleteGameSession(userId, gameId);
+        return gameSessionService.deleteGameSession(userId, request.getGameId());
     }
     
     
@@ -55,6 +54,7 @@ public class GameSessionController {
         return ResponseEntity.ok(response);
     }
 
+<<<<<<< Updated upstream
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PostMapping("/progress")
@@ -64,6 +64,17 @@ public class GameSessionController {
         Long userId = Long.valueOf(authentication.getName());
 
         GameSessionMongo response = gameSessionService.gameProgress(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 테스트 중
+     */
+    @PostMapping("/test")
+    public ResponseEntity<GameSessionMongo> testGame(Authentication authentication)
+            throws JsonProcessingException {
+        Long userId = Long.valueOf(authentication.getName());
+        GameSessionMongo response = gameSessionService.mapToCreateGameChoiceRequest(userId);
         return ResponseEntity.ok(response);
     }
 
@@ -100,11 +111,10 @@ public class GameSessionController {
      * 게임 -> 히스토리 생성
      */
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping("/{gameId}/history")
-    public ResponseEntity<?> addHistory(@PathVariable("gameId") String gameId,
-                                        Authentication authentication) {
+    @PostMapping("/history")
+    public ResponseEntity<?> addHistory(Authentication authentication, @RequestBody GameSessionRequest request) {
         Long userId = Long.valueOf(authentication.getName());
-        return historyService.createHistory(userId, gameId);
+        return historyService.createHistory(userId, request.getGameId());
     }
 
     /** 개발용: 로컬 MongoDB에 더미 세션 한 건 심어서 테스트용 ObjectId 반환 */
