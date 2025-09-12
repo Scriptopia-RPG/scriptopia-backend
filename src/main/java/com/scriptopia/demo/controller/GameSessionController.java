@@ -9,6 +9,7 @@ import com.scriptopia.demo.service.GameSessionService;
 import com.scriptopia.demo.service.HistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,7 @@ public class GameSessionController {
     private final GameSessionService gameSessionService;
     private final HistoryService historyService;
 
+    @PreAuthorize("hasAnyAuthority('USER')")
     @PostMapping("/{gameId}/exit")
     public ResponseEntity<?> createGameSession(Authentication authentication, @PathVariable String gameId) {
         // 게임 세션 정보 저장
@@ -27,6 +29,7 @@ public class GameSessionController {
         return gameSessionService.saveGameSession(userId, gameId);
     }
 
+    @PreAuthorize("hasAnyAuthority('USER')")
     @DeleteMapping("/{gameId}")
     public ResponseEntity<?> deleteGameSession(Authentication authentication, @PathVariable String sessionId) {
         Long userId = Long.valueOf(authentication.getName());
@@ -64,6 +67,7 @@ public class GameSessionController {
      * 현재는 userId, sessionId를 통해 저장하는데
      * 인증 관리 부분 끝나면 header에 token 꺼내오고 requestparameter session_id로 저장하게 수정
      */
+    @PreAuthorize("hasAnyAuthority('USER')")
     @PostMapping("/{gameId}/history")
     public ResponseEntity<?> addHistory(@PathVariable String gameId, Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
