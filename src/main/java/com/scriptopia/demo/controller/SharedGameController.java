@@ -1,8 +1,10 @@
 package com.scriptopia.demo.controller;
 
+import com.scriptopia.demo.domain.SharedGame;
 import com.scriptopia.demo.domain.SharedGameFavorite;
 import com.scriptopia.demo.dto.sharedgame.CursorPage;
 import com.scriptopia.demo.dto.sharedgame.PublicSharedGameResponse;
+import com.scriptopia.demo.dto.sharedgame.SharedGameRequest;
 import com.scriptopia.demo.service.SharedGameFavoriteService;
 import com.scriptopia.demo.service.SharedGameService;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +28,10 @@ public class SharedGameController {
      */
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping
-    public ResponseEntity<?> share(Authentication authentication, @PathVariable UUID uuid) {
+    public ResponseEntity<?> share(Authentication authentication, @RequestBody SharedGameRequest req) {
         Long userId = Long.valueOf(authentication.getName());
 
-        return sharedGameService.saveSharedGame(userId, uuid);
+        return sharedGameService.saveSharedGame(userId, req.getUuid());
     }
 
     /*
@@ -48,7 +50,7 @@ public class SharedGameController {
     /*
     게임공유 : 공유된 게임 상세 조회
      */
-    @GetMapping("{sharedGameId}")
+    @GetMapping("/{sharedGameId}")
     public ResponseEntity<?> getSharedGameDetail(@PathVariable("sharedGameId") UUID sharedGameId) {
         return sharedGameService.getDetailedSharedGame(sharedGameId);
     }
@@ -58,7 +60,7 @@ public class SharedGameController {
      */
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("{sharedGameId}/like")
-    public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameId") Long sharedGameId, Authentication authentication) {
+    public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameId") UUID sharedGameId, Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
         return sharedGameFavoriteService.saveFavorite(userId, sharedGameId);
@@ -67,7 +69,6 @@ public class SharedGameController {
     /*
     게임공유 : 공유된 게임 태그 조회
      */
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/tags")
     public ResponseEntity<?> getSharedGameTags() {
         return sharedGameService.getTag();
