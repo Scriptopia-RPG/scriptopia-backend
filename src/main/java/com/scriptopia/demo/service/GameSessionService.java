@@ -53,7 +53,10 @@ public class GameSessionService {
         GameSession sessions = gameSessionRepository.findByMongoId(user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_STORED_GAME_NOT_FOUND));
 
-        return ResponseEntity.ok(sessions);
+        GameSessionResponse gameSessionResponse = new GameSessionResponse();
+        gameSessionResponse.setSessionId(sessions.getMongoId());
+
+        return ResponseEntity.ok(gameSessionResponse);
     }
 
     @Transactional

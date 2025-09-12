@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("shared-games")
+@RequestMapping("/shared-games")
 @RequiredArgsConstructor
 public class SharedGameController {
     private final SharedGameService sharedGameService;
@@ -58,7 +58,7 @@ public class SharedGameController {
      */
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("{sharedGameId}/like")
-    public ResponseEntity<?> likeSharedGame(@PathVariable Long sharedGameId, Authentication authentication) {
+    public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameId") Long sharedGameId, Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
         return sharedGameFavoriteService.saveFavorite(userId, sharedGameId);
