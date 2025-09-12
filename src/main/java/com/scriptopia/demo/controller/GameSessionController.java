@@ -31,7 +31,7 @@ public class GameSessionController {
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @DeleteMapping("/{gameId}")
-    public ResponseEntity<?> deleteGameSession(Authentication authentication, @PathVariable String sessionId) {
+    public ResponseEntity<?> deleteGameSession(Authentication authentication, @PathVariable("gameId") String sessionId) {
         Long userId = Long.valueOf(authentication.getName());
 
         return gameSessionService.deleteGameSession(userId, sessionId);
@@ -74,6 +74,21 @@ public class GameSessionController {
         GameSessionMongo response = gameSessionService.gameChoiceSelect(userId, request);
         return ResponseEntity.ok(response);
     }
+
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @GetMapping()
+    public ResponseEntity<?> getInGameData(
+            Authentication authentication) throws JsonProcessingException {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        // service에서 sceneType별 DTO를 반환
+        Object response = gameSessionService.getInGameDataDto(userId);
+
+        return ResponseEntity.ok(response);
+    }
+
 
     /**
      * 현재는 userId, sessionId를 통해 저장하는데
