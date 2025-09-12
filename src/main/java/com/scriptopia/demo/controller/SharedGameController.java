@@ -7,6 +7,7 @@ import com.scriptopia.demo.service.SharedGameFavoriteService;
 import com.scriptopia.demo.service.SharedGameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,7 @@ public class SharedGameController {
     /*
     게임 공유 -> 게임 공유하기
      */
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<?> share(Authentication authentication, @PathVariable UUID uuid) {
         Long userId = Long.valueOf(authentication.getName());
@@ -54,6 +56,7 @@ public class SharedGameController {
     /*
     게임공유 : 공유 게임 Like 요청
      */
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("{sharedGameId}/like")
     public ResponseEntity<?> likeSharedGame(@PathVariable Long sharedGameId, Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
@@ -64,6 +67,7 @@ public class SharedGameController {
     /*
     게임공유 : 공유된 게임 태그 조회
      */
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/tags")
     public ResponseEntity<?> getSharedGameTags() {
         return sharedGameService.getTag();
@@ -72,6 +76,7 @@ public class SharedGameController {
     /*
     게임 공유 -> 공유한 게임 삭제
      */
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/shared-games")
     public ResponseEntity<?> delete(Authentication authentication, @PathVariable UUID uuid) {
         Long userId = Long.valueOf(authentication.getName());
@@ -84,6 +89,7 @@ public class SharedGameController {
     /*
     게임 공유 -> 공유한 게임 조회(내가 공유한 게임 조회)
      */
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/me")
     public ResponseEntity<?> getMySharedGames(Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());

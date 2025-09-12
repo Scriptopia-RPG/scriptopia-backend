@@ -20,7 +20,10 @@ public class GameSessionController {
     private final GameSessionService gameSessionService;
     private final HistoryService historyService;
 
-    @PreAuthorize("hasAnyAuthority('USER')")
+    /*
+    게임 -> 게임 도중 종료
+     */
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/{gameId}/exit")
     public ResponseEntity<?> createGameSession(Authentication authentication, @PathVariable String gameId) {
         // 게임 세션 정보 저장
@@ -29,7 +32,10 @@ public class GameSessionController {
         return gameSessionService.saveGameSession(userId, gameId);
     }
 
-    @PreAuthorize("hasAnyAuthority('USER')")
+    /*
+    게임 -> 기존 게임 삭제
+     */
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/{gameId}")
     public ResponseEntity<?> deleteGameSession(Authentication authentication, @PathVariable String sessionId) {
         Long userId = Long.valueOf(authentication.getName());
@@ -67,8 +73,7 @@ public class GameSessionController {
      * 현재는 userId, sessionId를 통해 저장하는데
      * 인증 관리 부분 끝나면 header에 token 꺼내오고 requestparameter session_id로 저장하게 수정
      */
-    @PreAuthorize("hasAnyAuthority('USER')")
-    @PostMapping("/{gameId}/history")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     public ResponseEntity<?> addHistory(@PathVariable String gameId, Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
