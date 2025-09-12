@@ -4,6 +4,8 @@ import com.scriptopia.demo.domain.*;
 import com.scriptopia.demo.domain.mongo.ItemDefMongo;
 import com.scriptopia.demo.domain.mongo.ItemEffectMongo;
 import com.scriptopia.demo.dto.items.*;
+import com.scriptopia.demo.exception.CustomException;
+import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.EffectGradeDefRepository;
 import com.scriptopia.demo.repository.ItemDefRepository;
 import com.scriptopia.demo.repository.ItemGradeDefRepository;
@@ -30,10 +32,16 @@ public class ItemDefService {
     private final ItemGradeDefRepository itemGradeDefRepository;
     private final EffectGradeDefRepository effectGradeDefRepository;
     private final ItemDefMongoRepository itemDefMongoRepository;
+    private final FastApiService fastApiService;
 
 
+    /**
+     * mongoDB, RDB에 저장 후 mongoDB의 item_Def_id를 리턴
+     * @param request
+     * @return
+     */
     @Transactional(readOnly = false)
-    public ItemFastApiResponse createItem(ItemDefRequest request) {
+    public String createItem(ItemDefRequest request) {
         /**
          * 1. 카테고리
          * 2. 등급
@@ -69,8 +77,6 @@ public class ItemDefService {
 
 
 
-
-
         ItemFastApiRequest fastRequest = ItemFastApiRequest.builder()
                 .worldView(request.getWorldView())
                 .location(request.getLocation())
@@ -89,23 +95,12 @@ public class ItemDefService {
                 .build();
 
 
-        // 추후 config 에서 통합관리
-        WebClient client = WebClient.builder()
-                .baseUrl("http://localhost:8000") // FastAPI 서버 주소
-                .build();
+        ItemFastApiResponse response = fastApiService.item(fastRequest);
 
+        if (response == null) {
+            throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
+        }
 
-        ItemFastApiResponse response = client.post()
-                .uri("/games/item") // FastAPI 엔드포인트
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(fastRequest) // 생성한 ItemFastApiRequest 객체
-                .retrieve()
-                .bodyToMono(ItemFastApiResponse.class)
-                .block(); // 블로킹 호출 (간단 테스트용)
-
-
-        System.out.println("Fast Api = " + response);
 
         List<ItemEffectMongo> mongoEffects = new ArrayList<>();
         List<ItemFastApiResponse.ItemEffect> apiEffects = response.getItemEffect();
@@ -165,13 +160,9 @@ public class ItemDefService {
         }
         itemDefRdb.setItemEffects(rdbEffects);
 
-
-        System.out.println(itemDefRdb);
-
         itemDefRepository.save(itemDefRdb);
 
-        return response;
-
+        return itemDefMongo.getId();
     }
 
 

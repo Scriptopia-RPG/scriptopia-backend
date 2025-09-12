@@ -15,7 +15,7 @@ public class CreateGameChoiceRequest {
     private String currentStory;
     private String location;
     private String currentChoice;
-    private List<Stat> choiceStat;
+    private List<String> choiceStat;
     private ChoiceEventType eventType;
     private Integer npcRank;
     private PlayerInfo playerInfo;

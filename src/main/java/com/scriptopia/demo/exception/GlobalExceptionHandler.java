@@ -79,11 +79,12 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ErrorCode.E_401_REFRESH_EXPIRED));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
 
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(ErrorCode.E_500));
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
+
+//        return ResponseEntity
+//                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(new ErrorResponse(ErrorCode.E_500));
+//    }
 }
