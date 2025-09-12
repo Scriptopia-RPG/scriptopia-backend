@@ -1,4 +1,4 @@
-package com.scriptopia.demo.dto.localaccount;
+package com.scriptopia.demo.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -13,17 +13,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RegisterRequest {
 
-    @NotBlank(message = "이메일은 필수 입력 값입니다.")
-    @Email(message = "올바른 이메일 형식이 아닙니다.")
+    @NotBlank(message = "E_400_MISSING_EMAIL")
+    @Email(message = "E_400_INVALID_EMAIL_FORMAT")
     private String email;
 
-    @Size(min = 8, max = 20, message = "비밀번호는 8~20자리여야 합니다.")
+    @Size(min = 8, max = 20, message = "E_400_PASSWORD_SIZE")
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-{}\\[\\]:;\"'<>,.?/]).+$",
-            message = "비밀번호는 소문자, 숫자, 특수문자를 포함해야 합니다."
+            message = "E_400_PASSWORD_COMPLEXITY"
     )
     private String password;
 
-    @NotBlank(message = "닉네임은 필수 입력 값입니다.")
+    @NotBlank(message = "E_400_MISSING_NICKNAME")
     private String nickname;
 }

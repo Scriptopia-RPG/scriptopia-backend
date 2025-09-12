@@ -1,6 +1,6 @@
 package com.scriptopia.demo.controller;
 
-import com.scriptopia.demo.dto.localaccount.*;
+import com.scriptopia.demo.dto.auth.*;
 import com.scriptopia.demo.service.LocalAccountService;
 import com.scriptopia.demo.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,9 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.Duration;
-import java.util.List;
 
 @RestController
 @RequestMapping("/auth")

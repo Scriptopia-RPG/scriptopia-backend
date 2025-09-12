@@ -1,14 +1,13 @@
 package com.scriptopia.demo.controller;
 
-import com.scriptopia.demo.dto.users.GetSettingsResponse;
+import com.scriptopia.demo.dto.users.UserSettingsDTO;
 import com.scriptopia.demo.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users/me")
@@ -19,11 +18,22 @@ public class UserController {
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @GetMapping("/settings")
-    public ResponseEntity<GetSettingsResponse> getUserSettings(
+    public ResponseEntity<UserSettingsDTO> getUserSettings(
             Authentication authentication
     ) {
         String userId = authentication.getName();
-        GetSettingsResponse response = userService.getUserSettings(userId);
+        UserSettingsDTO response = userService.getUserSettings(userId);
         return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @PutMapping("/settings")
+    public ResponseEntity<String> updateUserSettings(
+            Authentication authentication,
+            @RequestBody @Valid UserSettingsDTO request
+    ) {
+        String userId = authentication.getName();
+        userService.updateUserSettings(userId,request);
+        return ResponseEntity.ok("사용자 설정이 변경되었습니다.");
     }
 }

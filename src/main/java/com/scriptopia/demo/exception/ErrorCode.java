@@ -38,6 +38,7 @@ public enum ErrorCode {
     E_400_ITEM_NO_USES_LEFT("E400025", "아이템 사용 가능 횟수가 남아있지 않습니다.", HttpStatus.BAD_REQUEST),
     E_400_EMPTY_FILE("E400026", "파일이 비어있습니다.", HttpStatus.BAD_REQUEST),
     E_400_INVALID_NPC_RANK("E400027", "잘못된 NPC 랭크입니다.", HttpStatus.BAD_REQUEST),
+    E_400_INVALID_ENUM_TYPE("E4000028","요청 값이 잘못되었습니다. (Enum 타입 확인 필요)",HttpStatus.BAD_REQUEST),
 
 
     //401 Unauthorized
@@ -70,6 +71,7 @@ public enum ErrorCode {
     E_404_Duplicated_Game_Session("E404008", "이미 저장된 게임이 존재합니다.", HttpStatus.NOT_FOUND),
     E_404_ITEM_NOT_FOUND("E404009", "아이템이 없습니다.", HttpStatus.NOT_FOUND),
     E_404_PAGE_NOT_FOUND("E404010", "페이지가 없습니다.", HttpStatus.NOT_FOUND),
+    E_404_SETTING_NOT_FOUND("E404011", "유저 설정을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
 
 

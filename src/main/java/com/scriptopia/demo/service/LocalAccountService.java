@@ -2,7 +2,7 @@ package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.config.JwtProperties;
 import com.scriptopia.demo.domain.*;
-import com.scriptopia.demo.dto.localaccount.*;
+import com.scriptopia.demo.dto.auth.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.LocalAccountRepository;
@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
