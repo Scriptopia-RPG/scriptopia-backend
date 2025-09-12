@@ -1,6 +1,7 @@
 package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.config.fastapi.FastApiClient;
+import com.scriptopia.demo.dto.gamesession.ingame.InGameBattleResponse;
 import com.scriptopia.demo.dto.gamesession.ingame.InGameChoiceResponse;
 import com.scriptopia.demo.dto.items.ItemDefRequest;
 import com.scriptopia.demo.dto.items.ItemFastApiResponse;
@@ -297,9 +298,39 @@ public class GameSessionService {
 
         } else if (currentSceneType == SceneType.DONE) {
 
+
         } else if (currentSceneType == SceneType.SHOP) {
 
         } else if (currentSceneType == SceneType.BATTLE) {
+            BattleInfoMongo battleInfo = gameSessionMongo.getBattleInfo();
+
+            return InGameBattleResponse.builder()
+                    .sceneType("BATTLE")
+                    .startedAt(gameSessionMongo.getStartedAt())
+                    .updatedAt(gameSessionMongo.getUpdatedAt())
+                    .background(gameSessionMongo.getBackground())
+                    .location(gameSessionMongo.getLocation())
+                    .progress(gameSessionMongo.getProgress())
+                    .stageSize(gameSessionMongo.getStage() != null ? gameSessionMongo.getStage().size() : 0)
+                    .playerInfo(inGameMapper.mapPlayer(gameSessionMongo.getPlayerInfo()))
+                    .npcInfo(inGameMapper.mapNpc(gameSessionMongo.getNpcInfo()))
+                    .inventory(inGameMapper.mapInventory(gameSessionMongo.getInventory()))
+                    .playerHp(battleInfo != null && battleInfo.getPlayerHp() != null
+                            ? battleInfo.getPlayerHp().stream().map(Long::intValue).toList()
+                            : List.of())
+                    .enemyHp(battleInfo != null && battleInfo.getEnemyHp() != null
+                            ? battleInfo.getEnemyHp().stream().map(Long::intValue).toList()
+                            : List.of())
+                    .battleStory(battleInfo != null && battleInfo.getBattleTurn() != null
+                            ? battleInfo.getBattleTurn().stream()
+                            .map(bs -> InGameBattleResponse.BattleStoryResponse.builder()
+                                    .turnInfo(bs.getTurnInfo())
+                                    .build())
+                            .toList()
+                            : List.of())
+                    .playerWin(battleInfo != null ? battleInfo.getPlayerWin() : null)
+                    .curTurnId(battleInfo != null ? battleInfo.getCurTurnId() : null)
+                    .build();
 
         }
 
