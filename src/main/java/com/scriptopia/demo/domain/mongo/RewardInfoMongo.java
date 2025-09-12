@@ -9,8 +9,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RewardInfoMongo {
-    private List<Long> gainedItemDefId;
-    private List<Long> lostItemsDefId;
+    private List<String> gainedItemDefId;
+    private List<String> lostItemsDefId;
     private Integer rewardStrength;
     private Integer rewardAgility;
     private Integer rewardIntelligence;
