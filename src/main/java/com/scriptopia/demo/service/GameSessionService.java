@@ -3,6 +3,7 @@ package com.scriptopia.demo.service;
 import com.scriptopia.demo.config.fastapi.FastApiClient;
 import com.scriptopia.demo.dto.gamesession.ingame.InGameBattleResponse;
 import com.scriptopia.demo.dto.gamesession.ingame.InGameChoiceResponse;
+import com.scriptopia.demo.dto.gamesession.ingame.InGameDoneResponse;
 import com.scriptopia.demo.dto.items.ItemDefRequest;
 import com.scriptopia.demo.dto.items.ItemFastApiResponse;
 import com.scriptopia.demo.mapper.InGameMapper;
@@ -297,6 +298,42 @@ public class GameSessionService {
                     .build();
 
         } else if (currentSceneType == SceneType.DONE) {
+
+            RewardInfoMongo rewardInfo = gameSessionMongo.getRewardInfo();
+
+            List<String> gainedItemNames = List.of();
+            if (rewardInfo != null && rewardInfo.getGainedItemDefId() != null) {
+                gainedItemNames = rewardInfo.getGainedItemDefId().stream()
+                        .map(itemDefId -> itemDefMongoRepository.findById(itemDefId)
+                                .map(ItemDefMongo::getName)
+                                .orElse("Unknown Item"))
+                        .toList();
+            }
+
+
+            return InGameDoneResponse.builder()
+                    .sceneType("DONE")
+                    .startedAt(gameSessionMongo.getStartedAt())
+                    .updatedAt(gameSessionMongo.getUpdatedAt())
+                    .background(gameSessionMongo.getBackground())
+                    .location(gameSessionMongo.getLocation())
+                    .progress(gameSessionMongo.getProgress())
+                    .stageSize(gameSessionMongo.getStage() != null ? gameSessionMongo.getStage().size() : 0)
+                    .playerInfo(inGameMapper.mapPlayer(gameSessionMongo.getPlayerInfo()))
+                    .npcInfo(inGameMapper.mapNpc(gameSessionMongo.getNpcInfo()))
+                    .inventory(inGameMapper.mapInventory(gameSessionMongo.getInventory()))
+                    .rewardInfo(
+                            InGameDoneResponse.RewardInfoResponse.builder()
+                                    .gainedItemNames(gainedItemNames)
+                                    .rewardStrength(rewardInfo != null && rewardInfo.getRewardStrength() != null ? rewardInfo.getRewardStrength() : 0)
+                                    .rewardAgility(rewardInfo != null && rewardInfo.getRewardAgility() != null ? rewardInfo.getRewardAgility() : 0)
+                                    .rewardIntelligence(rewardInfo != null && rewardInfo.getRewardIntelligence() != null ? rewardInfo.getRewardIntelligence() : 0)
+                                    .rewardLuck(rewardInfo != null && rewardInfo.getRewardLuck() != null ? rewardInfo.getRewardLuck() : 0)
+                                    .rewardLife(rewardInfo != null && rewardInfo.getRewardLife() != null ? rewardInfo.getRewardLife() : 0)
+                                    .rewardGold(rewardInfo != null && rewardInfo.getRewardGold() != null ? rewardInfo.getRewardGold() : 0)
+                                    .build()
+                    )
+                    .build();
 
 
         } else if (currentSceneType == SceneType.SHOP) {
