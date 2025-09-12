@@ -4,10 +4,7 @@ import com.scriptopia.demo.domain.EffectProbability;
 import com.scriptopia.demo.domain.Grade;
 import com.scriptopia.demo.domain.RewardType;
 import com.scriptopia.demo.domain.Stat;
-import com.scriptopia.demo.domain.mongo.ItemDefMongo;
-import com.scriptopia.demo.domain.mongo.ItemEffectMongo;
-import com.scriptopia.demo.domain.mongo.PlayerInfoMongo;
-import com.scriptopia.demo.domain.mongo.RewardInfoMongo;
+import com.scriptopia.demo.domain.mongo.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.EffectGradeDefRepository;
@@ -15,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
@@ -388,5 +386,60 @@ public class GameBalanceUtil {
         return builder.build();
     }
 
+    public static PlayerInfoMongo updateReward(PlayerInfoMongo playerInfo, RewardInfoMongo rewardInfo) {
+        if (rewardInfo != null) {
+            if (rewardInfo.getRewardStrength() != null)
+                playerInfo.setStrength(playerInfo.getStrength() + rewardInfo.getRewardStrength());
 
+            if (rewardInfo.getRewardAgility() != null)
+                playerInfo.setAgility(playerInfo.getAgility() + rewardInfo.getRewardAgility());
+
+            if (rewardInfo.getRewardIntelligence() != null)
+                playerInfo.setIntelligence(playerInfo.getIntelligence() + rewardInfo.getRewardIntelligence());
+
+            if (rewardInfo.getRewardLuck() != null)
+                playerInfo.setLuck(playerInfo.getLuck() + rewardInfo.getRewardLuck());
+
+            if (rewardInfo.getRewardLife() != null)
+                playerInfo.setLife(playerInfo.getLife() + rewardInfo.getRewardLife());
+
+            if (rewardInfo.getRewardGold() != null)
+                playerInfo.setGold(playerInfo.getGold() + rewardInfo.getRewardGold());
+
+            if (rewardInfo.getRewardTrait() != null)
+                playerInfo.setTrait(rewardInfo.getRewardTrait());
+        }
+
+        return playerInfo;
+    }
+
+
+    public static List<InventoryMongo> updateRewardItem(List<InventoryMongo> inventory, RewardInfoMongo rewardInfo) {
+        if (rewardInfo == null || rewardInfo.getGainedItemDefId() == null) {
+            return inventory;
+        }
+
+        for (String id : rewardInfo.getGainedItemDefId()) {
+            InventoryMongo newItem = InventoryMongo.builder()
+                    .itemDefId(id)
+                    .equipped(false)
+                    .source("Scenario")
+                    .build();
+            inventory.add(newItem);
+        }
+
+        return inventory;
+    }
+
+    public static List<String> updateInGameItem(List<String> inGameItem, RewardInfoMongo rewardInfo) {
+        if (rewardInfo == null || rewardInfo.getGainedItemDefId() == null) {
+            return inGameItem;
+        }
+
+        for (String id : rewardInfo.getGainedItemDefId()) {
+            inGameItem.add(id);
+        }
+
+        return inGameItem;
+    }
 }
