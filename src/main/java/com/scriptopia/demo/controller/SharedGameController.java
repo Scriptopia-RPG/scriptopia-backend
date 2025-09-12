@@ -79,10 +79,10 @@ public class SharedGameController {
      */
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/shared-games")
-    public ResponseEntity<?> delete(Authentication authentication, @PathVariable UUID uuid) {
+    public ResponseEntity<?> delete(Authentication authentication, @RequestBody SharedGameRequest req) {
         Long userId = Long.valueOf(authentication.getName());
 
-        sharedGameService.deleteSharedGame(userId, uuid);
+        sharedGameService.deleteSharedGame(userId, req.getUuid());
 
         return ResponseEntity.ok("게임이 삭제되었습니다.");
     }
