@@ -41,18 +41,6 @@ public class GameSessionService {
     private final ItemDefService itemDefService;
 
 
-    public boolean duplcatedGameSession(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
-
-        boolean game = gameSessionRepository.existsByUserId(user.getId());
-
-        if(game) {
-            return true;
-        }
-        else return false;
-    }
-
     public ResponseEntity<?> getGameSession(Long userid) {
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
