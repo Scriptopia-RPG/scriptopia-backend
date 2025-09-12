@@ -32,24 +32,4 @@ public class MyPageController {
         return historyService.fetchMyHistory(userId, lastId, size);
     }
 
-
-    /*
-    게임 -> 기존 게임 조회
-     */
-    @GetMapping("/my-page/game")
-    public ResponseEntity<?> loadGameSession(Authentication authentication) {
-        Long userId = Long.valueOf(authentication.getName());
-
-        return gameSessionService.getGameSession(userId);
-    }
-
-    /*
-    게임 -> 기존 게임 삭제
-     */
-    @DeleteMapping("/my-page/game/{gameId}")
-    public ResponseEntity<?> deleteGameSession(Authentication authentication, @PathVariable String gameId) {
-        Long userId = Long.valueOf(authentication.getName());
-
-        return gameSessionService.deleteGameSession(userId, gameId);
-    }
 }
