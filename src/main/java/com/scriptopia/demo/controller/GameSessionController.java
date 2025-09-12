@@ -14,7 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users/games")
+@RequestMapping("/games")
 @RequiredArgsConstructor
 public class GameSessionController {
     private final GameSessionService gameSessionService;
@@ -61,6 +61,14 @@ public class GameSessionController {
 
         GameSessionMongo response = gameSessionService.mapToCreateGameChoiceRequest(userId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentGame(Authentication authentication) {
+        Long userId = Long.valueOf(authentication.getName());
+
+
+
     }
 
     /**

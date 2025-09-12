@@ -19,8 +19,19 @@ public class MyPageController {
     private final SharedGameService sharedGameService;
     private final GameSessionService gameSessionService;
 
+
     /*
-    계정관리 : 내 히스토리 조회 -> 무한스크롤
+    게임 공유 -> 게임 공유하기
+     */
+    @PostMapping("/my-page/share/{uuid}")
+    public ResponseEntity<?> share(Authentication authentication, @PathVariable UUID uuid) {
+        Long userId = Long.valueOf(authentication.getName());
+
+        return sharedGameService.saveSharedGame(userId, uuid);
+    }
+
+    /*
+    유저 -> 사용자 게임 기록 조회
      */
     @GetMapping("/my-page/history")
     public ResponseEntity<List<HistoryPageResponse>> getHistory(@RequestParam(required = false) UUID lastId,
@@ -32,7 +43,7 @@ public class MyPageController {
     }
 
     /*
-    계정관리 : 내가 공유한 게임 조회
+    게임 공유 -> 공유한 게임 조회(내가 공유한 게임 조회)
      */
     @GetMapping("/my-page/games/shared")
     public ResponseEntity<?> getMySharedGames(Authentication authentication) {
@@ -41,18 +52,9 @@ public class MyPageController {
         return sharedGameService.getMySharedGames(userId);
     }
 
-    /*
-    계정관리 : 내 히스토리 공유하기
-     */
-    @PostMapping("/my-page/share/{uuid}")
-    public ResponseEntity<?> share(Authentication authentication, @PathVariable UUID uuid) {
-        Long userId = Long.valueOf(authentication.getName());
-
-        return sharedGameService.saveSharedGame(userId, uuid);
-    }
 
     /*
-    계정관리 : 내가 공유한 게임 삭제
+    게임 공유 -> 공유한 게임 삭제
      */
     @DeleteMapping("/my-page/share/{uuid}")
     public ResponseEntity<?> delete(Authentication authentication, @PathVariable UUID uuid) {
@@ -64,22 +66,12 @@ public class MyPageController {
     }
 
     /*
-    계정관리 : 게임 세션(이어하기) 조회
+    게임 -> 기존 게임 조회
      */
     @GetMapping("/my-page/game")
     public ResponseEntity<?> loadGameSession(Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
         return gameSessionService.getGameSession(userId);
-    }
-
-    /*
-    계정관리 : 게임 세션(이어하기) 삭제
-     */
-    @DeleteMapping("/my-page/game/{gameId}")
-    public ResponseEntity<?> deleteGameSession(Authentication authentication, @PathVariable String gameId) {
-        Long userId = Long.valueOf(authentication.getName());
-
-        return gameSessionService.deleteGameSession(userId, gameId);
     }
 }
