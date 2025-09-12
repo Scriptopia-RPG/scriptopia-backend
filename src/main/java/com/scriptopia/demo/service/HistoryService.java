@@ -90,13 +90,6 @@ public class HistoryService {
         return ResponseEntity.ok(saved.getObjectId("_id").toHexString());
     }
 
-    public ResponseEntity<?> getHistory(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
-
-
-    }
-
     private HistoryRequest mapMongoToHistoryRequest(Document doc) {
         JsonNode root = asJson(doc);
         JsonNode hi   = root.path("history_info");

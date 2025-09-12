@@ -63,14 +63,6 @@ public class GameSessionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentGame(Authentication authentication) {
-        Long userId = Long.valueOf(authentication.getName());
-
-
-
-    }
-
     /**
      * 현재는 userId, sessionId를 통해 저장하는데
      * 인증 관리 부분 끝나면 header에 token 꺼내오고 requestparameter session_id로 저장하게 수정
