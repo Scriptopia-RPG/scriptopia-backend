@@ -7,10 +7,10 @@ import java.security.SecureRandom;
 
 @Getter
 public enum ChoiceResultType {
-    BATTLE(40),
-    CHOICE(30),
-    SHOP(10),
-    DONE(30);
+    BATTLE(20),
+    CHOICE(40),
+    DONE(45),
+    SHOP(5);
 
     private final int nextEventType;
 
@@ -21,8 +21,14 @@ public enum ChoiceResultType {
     }
 
 
-    public static ChoiceResultType nextResultType() {
-        int rand = random.nextInt(100) + 1;
+    public static ChoiceResultType nextResultType(ChoiceEventType nextEventType) {
+        int rand = 0;
+        if( nextEventType == ChoiceEventType.LIVING){
+            rand = random.nextInt(100) + 1; // 1 ~ 100
+        }else{
+            rand = random.nextInt(60) + 41; // 41 ~ 100
+        }
+
         int cumulative = 0;
 
         for(ChoiceResultType type : values()) {
