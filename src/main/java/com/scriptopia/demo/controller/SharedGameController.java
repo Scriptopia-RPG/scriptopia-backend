@@ -14,7 +14,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/games/shared")
 @RequiredArgsConstructor
-public class PublicSharedGameController {
+public class SharedGameController {
     private final SharedGameService sharedGameService;
 
     /*
