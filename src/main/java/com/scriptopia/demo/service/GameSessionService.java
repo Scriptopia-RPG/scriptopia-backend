@@ -211,7 +211,7 @@ public class GameSessionService {
         // Inventory Data
         List<InventoryMongo> inventoryMongoList = new ArrayList<>();
         inventoryMongoList.add(InventoryMongo.builder()
-                .ItemDefId(savedItemDefMongo.getId())
+                .itemDefId(savedItemDefMongo.getId())
                 .acquiredAt(LocalDateTime.now())
                 .equipped(true)
                 .source("StartWeapon")
@@ -335,9 +335,9 @@ public class GameSessionService {
         fastApiRequest.setLocation(gameSessionMongo.getLocation());
 
 
-        List<Stat> statInfo = new ArrayList<>();
+        List<String> statInfo = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            statInfo.add(Stat.getRandomMainStat());
+            statInfo.add(Stat.getRandomMainStat().toString());
         }
 
 
@@ -436,9 +436,9 @@ public class GameSessionService {
 
             ChoiceMongo choiceMongo = ChoiceMongo.builder()
                     .detail(choice.getDetail())
-                    .stats(statInfo.get(i))
-                    .probability(GameBalanceUtil.getChoiceProbability(statInfo.get(i), gameSessionMongo.getPlayerInfo()))
-                    .resultType(ChoiceResultType.nextResultType())
+                    .stats(Stat.valueOf(statInfo.get(i)))
+                    .probability(GameBalanceUtil.getChoiceProbability(Stat.valueOf(statInfo.get(i)), gameSessionMongo.getPlayerInfo()))
+                    .resultType(ChoiceResultType.nextResultType(currentEventType))
                     .rewardType(RewardType.getRandomRewardType())
                     .build();
 
@@ -450,7 +450,7 @@ public class GameSessionService {
                 .detail(null)
                 .stats(null)
                 .probability(null)
-                .resultType(ChoiceResultType.nextResultType())
+                .resultType(ChoiceResultType.nextResultType(currentEventType))
                 .rewardType(RewardType.getRandomRewardType())
                 .build();
         choiceList.add(promptChoice);
@@ -631,12 +631,15 @@ public class GameSessionService {
 
         if (currentEventStage > 0) {
             switch (currentEventStage) {
+                case 1:
                 case 2:
                     historyInfoMongo.setEpilogue1Content(fastApiResponse.getDoneInfo().getReCap());
                     break;
+                case 3:
                 case 4:
                     historyInfoMongo.setEpilogue2Content(fastApiResponse.getDoneInfo().getReCap());
                     break;
+                case 5:
                 case 6:
                     historyInfoMongo.setEpilogue3Content(fastApiResponse.getDoneInfo().getReCap());
                     break;
@@ -647,6 +650,19 @@ public class GameSessionService {
          * 
          * reward가 있으면 그대로 현재를 갱신한 후 mongoDB 저장
          */
+        PlayerInfoMongo playerInfoMongo = gameSessionMongo.getPlayerInfo();
+        RewardInfoMongo rewardInfoMongo = gameSessionMongo.getRewardInfo();
+        List<InventoryMongo> inventory = gameSessionMongo.getInventory();
+        List<String> inGameItem = gameSessionMongo.getCreatedItems();
+
+
+        playerInfoMongo = GameBalanceUtil.updateReward(playerInfoMongo, rewardInfoMongo);
+        inventory = GameBalanceUtil.updateRewardItem(inventory, rewardInfoMongo);
+        inGameItem = GameBalanceUtil.updateInGameItem(inGameItem, rewardInfoMongo);
+
+        gameSessionMongo.setPlayerInfo(playerInfoMongo);
+        gameSessionMongo.setInventory(inventory);
+        gameSessionMongo.setCreatedItems(inGameItem);
 
 
         gameSessionMongo.setHistoryInfo(historyInfoMongo);
@@ -699,6 +715,8 @@ public class GameSessionService {
                 isPass = (gameToBattle(userId) == 1);
                 gameSessionMongo = gameSessionMongoRepository.findById(gameId).get();
                 rewardInfo = handleReward(gameSessionMongo, rewardType, isPass);
+
+
             }
             case DONE -> {
                 gameToDone(userId);
@@ -773,14 +791,12 @@ public class GameSessionService {
                     .build();
 
             String itemMongoId = itemDefService.createItem(itemDefRequest);
-            InventoryMongo newItem = InventoryMongo.builder()
-                    .acquiredAt(LocalDateTime.now())
-                    .ItemDefId(itemMongoId)
-                    .source("Scenario")
-                    .equipped(false)
-                    .build();
-
-            gameSessionMongo.getInventory().add(newItem);
+            List<String> gainItemList = rewardInfo.getGainedItemDefId();
+            if (gainItemList == null) {
+                gainItemList = new ArrayList<>(); // null이면 새 리스트 생성
+            }
+            gainItemList.add(itemMongoId);
+            rewardInfo.setGainedItemDefId(gainItemList);
         }
         return rewardInfo;
     }
