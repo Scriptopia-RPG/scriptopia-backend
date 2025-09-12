@@ -1,9 +1,7 @@
 package com.scriptopia.demo.service;
 
-import com.scriptopia.demo.domain.User;
 import com.scriptopia.demo.domain.UserSetting;
 import com.scriptopia.demo.dto.users.GetSettingsResponse;
-import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.repository.UserSettingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +15,7 @@ public class UserService {
     private final UserSettingRepository userSettingRepository;
 
     @Transactional
-    public GetSettingsResponse getSettings(String userId){
+    public GetSettingsResponse getUserSettings(String userId){
 
         UserSetting userSetting = userSettingRepository.findByUserId(Long.valueOf(userId));
 
