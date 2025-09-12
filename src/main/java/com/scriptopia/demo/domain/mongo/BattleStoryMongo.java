@@ -6,7 +6,6 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BattleTurnMongo {
-    private Integer turnId;
+public class BattleStoryMongo {
     private String turnInfo;
 }

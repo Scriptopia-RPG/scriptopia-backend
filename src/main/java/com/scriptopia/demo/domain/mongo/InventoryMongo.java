@@ -13,8 +13,12 @@ public class InventoryMongo {
     @Id
     private String id;
 
-    private String ItemDefId;
+    private String itemDefId;
     private LocalDateTime acquiredAt;
     private Boolean equipped;
     private String source;
+
+    public boolean isEquipped() {
+        return this.equipped;
+    }
 }
