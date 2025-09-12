@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -21,14 +23,14 @@ public class SharedGameFavoriteService {
     private final SharedGameScoreRepository sharedGameScoreRepository;
 
     @Transactional
-    public ResponseEntity<?> saveFavorite(Long userId, Long sharedGameId) {
+    public ResponseEntity<?> saveFavorite(Long userId, UUID uuid) {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
-        var game = sharedGameRepository.findById(sharedGameId)
+        var game = sharedGameRepository.findByUuid(uuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_SHARED_GAME_NOT_FOUND));
 
         // 토글 처리
-        var existing = sharedGameFavoriteRepository.findByUserIdAndSharedGameId(userId, sharedGameId);
+        var existing = sharedGameFavoriteRepository.findByUserIdAndSharedGameId(userId, game.getId());
         boolean liked;
         if (existing.isPresent()) {
             sharedGameFavoriteRepository.delete(existing.get());
@@ -41,15 +43,15 @@ public class SharedGameFavoriteService {
             liked = true;
         }
 
-        long likeCount = sharedGameFavoriteRepository.countBySharedGameId(sharedGameId);
-        long playCount = sharedGameScoreRepository.countBySharedGameId(sharedGameId);
-        Long maxScore  = sharedGameScoreRepository.maxScoreBySharedGameId(sharedGameId);
+        long likeCount = sharedGameFavoriteRepository.countBySharedGameId(game.getId());
+        long playCount = sharedGameScoreRepository.countBySharedGameId(game.getId());
+        Long maxScore  = sharedGameScoreRepository.maxScoreBySharedGameId(game.getId());
 
         // 태그 이름들
-        var tagNames = gameTagRepository.findTagNamesBySharedGameId(sharedGameId);
+        var tagNames = gameTagRepository.findTagNamesBySharedGameId(game.getId());
 
         var dto = new SharedGameFavoriteResponse();
-        dto.setSharedGameId(sharedGameId);
+        dto.setSharedGameId(game.getId());
         dto.setThumbnailUrl(game.getThumbnailUrl());
         dto.setLiked(liked);
         dto.setLikeCount(likeCount);
