@@ -70,3 +70,6 @@ app:
   admin:
     username: ${ADMIN_NAME}
     password: ${ADMIN_PASSWORD}
+
+image-dir: ./uploads/
+image-url-prefix: /images
