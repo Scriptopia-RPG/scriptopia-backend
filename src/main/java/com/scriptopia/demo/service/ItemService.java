@@ -29,6 +29,7 @@ public class ItemService {
     private final FastApiService fastApiService;
     private final UserItemRepository userItemRepository;
     private final UserRepository userRepository;
+    private final ItemEffectRepository itemEffectRepository;
 
 
     @Transactional
@@ -192,8 +193,6 @@ public class ItemService {
 
         List<ItemEffect> rdbEffects = new ArrayList<>();
 
-        System.out.println(effectProbabilities);
-        System.out.println(createdItemEffects);
         //아이템 효과 정보 RDBMS 매핑
         for (int i = 0; i < effectProbabilities.size(); i++) {
             ItemEffect effect = new ItemEffect();
@@ -201,7 +200,8 @@ public class ItemService {
             effect.setEffectName(createdItemEffects.get(i).getItemEffectName());
             effect.setEffectDescription(createdItemEffects.get(i).getItemEffectDescription());
             effect.setEffectGradeDef(effectGradeDefRepository.findByEffectProbability(effectProbabilities.get(i)).get());
-            rdbEffects.add(effect);
+            ItemEffect savedItemEffect = itemEffectRepository.save(effect);
+            rdbEffects.add(savedItemEffect);
         }
         itemDefRepository.save(itemDefRdb);
 
@@ -234,7 +234,7 @@ public class ItemService {
                 .luck(initItemData.getStats()[3])
                 .mainStat(initItemData.getMainStat())
                 .grade(initItemData.getGrade())
-                .itemEffect(effects)   // 리스트 주입
+                .itemEffects(effects)   // 리스트 주입
                 .remainingUses(initItemData.getRemainingUses())
                 .price(initItemData.getItemPrice())
                 .build();
