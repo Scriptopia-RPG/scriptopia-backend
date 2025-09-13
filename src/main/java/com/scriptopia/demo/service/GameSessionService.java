@@ -1,6 +1,5 @@
 package com.scriptopia.demo.service;
 
-import com.scriptopia.demo.config.fastapi.FastApiClient;
 import com.scriptopia.demo.dto.gamesession.ingame.InGameBattleResponse;
 import com.scriptopia.demo.dto.gamesession.ingame.InGameChoiceResponse;
 import com.scriptopia.demo.dto.gamesession.ingame.InGameDoneResponse;
