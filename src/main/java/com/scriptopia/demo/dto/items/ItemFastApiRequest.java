@@ -20,7 +20,7 @@ public class ItemFastApiRequest {
     private int baseStat;
     private Stat mainStat;
     private Grade grade;
-    private List<EffectProbability> itemEffect;
+    private List<EffectProbability> itemEffects;
     private int strength;
     private int agility;
     private int intelligence;
