@@ -6,9 +6,7 @@ import com.scriptopia.demo.domain.mongo.ItemEffectMongo;
 import com.scriptopia.demo.dto.items.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
-import com.scriptopia.demo.repository.EffectGradeDefRepository;
-import com.scriptopia.demo.repository.ItemDefRepository;
-import com.scriptopia.demo.repository.ItemGradeDefRepository;
+import com.scriptopia.demo.repository.*;
 import com.scriptopia.demo.repository.mongo.ItemDefMongoRepository;
 import com.scriptopia.demo.utils.InitItemData;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +27,8 @@ public class ItemService {
     private final EffectGradeDefRepository effectGradeDefRepository;
     private final ItemDefMongoRepository itemDefMongoRepository;
     private final FastApiService fastApiService;
+    private final UserItemRepository userItemRepository;
+    private final UserRepository userRepository;
 
 
     @Transactional
@@ -48,7 +48,7 @@ public class ItemService {
                 .baseStat(initItemData.getBaseStat())
                 .mainStat(initItemData.getMainStat())
                 .grade(initItemData.getGrade())
-                .itemEffect(initItemData.getEffectGrades())
+                .itemEffects(initItemData.getEffectGrades())
                 .strength(initItemData.getStats()[0])
                 .agility(initItemData.getStats()[1])
                 .intelligence(initItemData.getStats()[2])
@@ -138,6 +138,8 @@ public class ItemService {
         itemDefRdb.setPrice(initItemData.getItemPrice());
         itemDefRdb.setCreatedAt(LocalDateTime.now());
 
+
+
         List<ItemEffect> rdbEffects = new ArrayList<>();
 
         //아이템 효과 정보 RDBMS 매핑
@@ -157,13 +159,83 @@ public class ItemService {
         return itemDefMongo.getId();
     }
 
-    public String createItemInWeb(ItemDefRequest request) {
+    @Transactional
+    public ItemDTO createItemInWeb(String userId, ItemDefRequest request) {
+
+        User user = userRepository.findById(Long.valueOf(userId)).get();
 
         InitItemData initItemData = new InitItemData(itemGradeDefRepository, effectGradeDefRepository);
 
         //fastAPI 통해서 아이템 생성
         ItemFastApiResponse response = createItemInit(request, initItemData);
 
+        List<EffectProbability> effectProbabilities = initItemData.getEffectGrades();
+        List<ItemFastApiResponse.ItemEffect> createdItemEffects = response.getItemEffects();
+
+        //아이템 정보 RDBMS 매핑
+        ItemDef itemDefRdb = new ItemDef();
+        itemDefRdb.setName(response.getItemName());
+        itemDefRdb.setDescription(response.getItemDescription());
+        itemDefRdb.setItemGradeDef(itemGradeDefRepository.findByGrade(initItemData.getGrade()).get());
+        itemDefRdb.setPicSrc("test link"); // Mongo 참조 대신 직접 값 지정
+        itemDefRdb.setItemType(initItemData.getItemType());
+        itemDefRdb.setBaseStat(initItemData.getBaseStat());
+        itemDefRdb.setStrength(initItemData.getStats()[0]);
+        itemDefRdb.setAgility(initItemData.getStats()[1]);
+        itemDefRdb.setIntelligence(initItemData.getStats()[2]);
+        itemDefRdb.setLuck(initItemData.getStats()[3]);
+        itemDefRdb.setMainStat(initItemData.getMainStat());
+        itemDefRdb.setPrice(initItemData.getItemPrice());
+        itemDefRdb.setCreatedAt(LocalDateTime.now());
+
+        List<ItemEffect> rdbEffects = new ArrayList<>();
+
+        System.out.println(effectProbabilities);
+        System.out.println(createdItemEffects);
+        //아이템 효과 정보 RDBMS 매핑
+        for (int i = 0; i < effectProbabilities.size(); i++) {
+            ItemEffect effect = new ItemEffect();
+            effect.setItemDef(itemDefRdb);
+            effect.setEffectName(createdItemEffects.get(i).getItemEffectName());
+            effect.setEffectDescription(createdItemEffects.get(i).getItemEffectDescription());
+            effect.setEffectGradeDef(effectGradeDefRepository.findByEffectProbability(effectProbabilities.get(i)).get());
+            rdbEffects.add(effect);
+        }
+        itemDefRepository.save(itemDefRdb);
+
+        UserItem userItem = new UserItem();
+        userItem.setItemDef(itemDefRdb);
+        userItem.setUser(user);
+        userItem.setRemainingUses(initItemData.getRemainingUses());
+        userItem.setTradeStatus(TradeStatus.OWNED);
+
+        userItemRepository.save(userItem);
+
+
+        List<ItemEffectDTO> effects = rdbEffects.stream()
+                .map(e -> ItemEffectDTO.builder()
+                        .effectProbability(e.getEffectGradeDef().getEffectProbability()) // enum/객체 그대로 매핑
+                        .effectName(e.getEffectName())
+                        .description(e.getEffectDescription())
+                        .build())
+                .toList();
+
+        return ItemDTO.builder()
+                .name(response.getItemName())
+                .description(response.getItemDescription())
+                .picSrc("test link")
+                .itemType(initItemData.getItemType())
+                .baseStat(initItemData.getBaseStat())
+                .strength(initItemData.getStats()[0])
+                .agility(initItemData.getStats()[1])
+                .intelligence(initItemData.getStats()[2])
+                .luck(initItemData.getStats()[3])
+                .mainStat(initItemData.getMainStat())
+                .grade(initItemData.getGrade())
+                .itemEffect(effects)   // 리스트 주입
+                .remainingUses(initItemData.getRemainingUses())
+                .price(initItemData.getItemPrice())
+                .build();
 
     }
 
