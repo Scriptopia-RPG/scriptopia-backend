@@ -1,5 +1,6 @@
 package com.scriptopia.demo.controller;
 
+import com.scriptopia.demo.dto.items.ItemDTO;
 import com.scriptopia.demo.dto.users.PiaItemDTO;
 import com.scriptopia.demo.dto.users.UserAssetsResponse;
 import com.scriptopia.demo.dto.users.UserSettingsDTO;
@@ -20,6 +21,15 @@ public class UserController {
 
     private final UserService userService;
 
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @GetMapping("/items/game")
+    public ResponseEntity<List<ItemDTO>> getGameItems(
+            Authentication authentication
+    ) {
+        String userId = authentication.getName();
+        List<ItemDTO> response = userService.getGameItems(userId);
+        return ResponseEntity.ok(response);
+    }
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @GetMapping("/items/pia")
@@ -61,6 +71,8 @@ public class UserController {
         UserAssetsResponse response = userService.getUserAssets(userId);
         return ResponseEntity.ok(response);
     }
+
+
 
 
 
