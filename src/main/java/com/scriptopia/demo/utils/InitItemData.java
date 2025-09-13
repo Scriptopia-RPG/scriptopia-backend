@@ -22,6 +22,7 @@ public class InitItemData {
     private List<Long> effectPrices;
     private Long gradePrice;
     private Long itemPrice;
+    private Integer remainingUses;
 
     public InitItemData(ItemGradeDefRepository itemGradeDefRepository,
                         EffectGradeDefRepository effectGradeDefRepository) {
@@ -51,5 +52,6 @@ public class InitItemData {
         // 등급 가격, 최종 아이템 가격
         this.gradePrice = itemGradeDefRepository.findPriceByGrade(grade);
         this.itemPrice = GameBalanceUtil.getItemPriceByGrade(gradePrice, effectPrices);
+        this.remainingUses = 5;
     }
 }
