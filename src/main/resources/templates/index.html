@@ -2,9 +2,214 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Scriptopia!</title>
+    <title>Scriptopia - Main</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial; background-color: #1e1e2f; color: white; margin:0; padding:0; }
+        h1 { margin-top: 20px; font-size: 2em; text-align:center; }
+        input, textarea { padding:10px; margin:5px; border-radius:5px; border:none; width:300px; }
+        textarea { height: 80px; }
+        .btn { padding:10px 20px; font-size:1.1em; font-weight:bold; color:#1e1e2f; background-color:#ffcc00; border:none; border-radius:10px; cursor:pointer; margin:5px; transition:0.3s; }
+        .btn:hover { background-color:#ffaa00; }
+        #tokenDisplay { margin-top:10px; word-break:break-all; background:#333; padding:10px; border-radius:5px; display:none; text-align:center; }
+        pre { text-align:left; background:#222; padding:10px; border-radius:5px; white-space:pre-wrap; word-wrap:break-word; max-height:400px; overflow:auto; }
+
+        /* 레이아웃 */
+        .container { display:flex; flex-direction:column; height:100vh; padding:10px; box-sizing:border-box; }
+        .top { text-align:center; margin-bottom:10px; }
+        .middle { display:flex; flex:1; gap:10px; }
+        .left { width:300px; display:flex; flex-direction:column; justify-content:space-between; }
+        .left .player-info, .left .item-info { background:#333; padding:10px; border-radius:10px; margin-bottom:10px; }
+        .center { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:space-between; }
+        .story { background:#222; padding:20px; border-radius:10px; width:100%; flex:1; overflow:auto; margin-bottom:10px; }
+        .choices { display:flex; justify-content:center; gap:10px; margin-bottom:10px; }
+        .right { width:200px; display:flex; flex-direction:column; justify-content:space-between; }
+        .right button { width:100%; margin-bottom:10px; }
+    </style>
 </head>
 <body>
-<h1>Hello, Scriptopia!</h1>
+<div class="container">
+
+    <!-- 상단: 로그인/토큰 표시 -->
+    <div class="top">
+        <div id="loginContainer">
+            <h2>로그인</h2>
+            <input type="text" id="email" placeholder="Email"><br>
+            <input type="password" id="password" placeholder="Password"><br>
+            <input type="text" id="deviceId" placeholder="Device ID"><br>
+            <button id="loginBtn" class="btn">로그인</button>
+        </div>
+        <div id="tokenDisplay">
+            <strong>로그인 토큰:</strong>
+            <div id="tokenValue"></div>
+            <button id="logoutBtn" class="btn">로그아웃</button>
+        </div>
+    </div>
+
+    <!-- 중단: 좌측, 중앙, 우측 영역 -->
+    <div class="middle">
+        <!-- 좌측: Player 정보 + 인벤토리 -->
+        <div class="left">
+            <div class="player-info" id="playerInfo">
+                <h3>Player Info</h3>
+                <div id="playerStats">HP: 100<br>MP: 50<br>Level: 1</div>
+            </div>
+            <div class="item-info" id="itemInfo">
+                <h3>Inventory</h3>
+                <div id="playerItems">아이템 없음</div>
+            </div>
+        </div>
+
+        <!-- 중앙: 스토리 + 선택지 -->
+        <div class="center">
+            <div class="story" id="storyText">게임 시작 전...</div>
+            <div class="choices" id="choiceContainer"></div>
+        </div>
+
+        <!-- 우측: 불러오기 + 계속 진행 버튼 -->
+        <div class="right">
+            <button id="getInGameDataBtn" class="btn">게임 불러오기</button>
+            <button id="keepGameBtn" class="btn">게임 진행</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        let accessToken = localStorage.getItem('accessToken');
+        let gameId = "sss"; // 고정
+
+        const loginContainer = document.getElementById('loginContainer');
+        const tokenDisplay = document.getElementById('tokenDisplay');
+        const tokenValue = document.getElementById('tokenValue');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        const playerStats = document.getElementById('playerStats');
+        const playerItems = document.getElementById('playerItems');
+        const storyText = document.getElementById('storyText');
+        const choiceContainer = document.getElementById('choiceContainer');
+        const getInGameDataBtn = document.getElementById('getInGameDataBtn');
+        const keepGameBtn = document.getElementById('keepGameBtn');
+
+        // 로그아웃
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                const res = await fetch('/api/v1/auth/logout', {
+                    method: 'POST',
+                    headers: {'Authorization': 'Bearer ' + accessToken}
+                });
+                if(!res.ok){ alert('로그아웃 실패'); return; }
+
+                localStorage.removeItem('accessToken');
+                accessToken = null;
+
+                loginContainer.style.display = 'block';
+                tokenDisplay.style.display = 'none';
+                storyText.textContent = '게임 시작 전...';
+                choiceContainer.innerHTML = '';
+                playerStats.innerHTML = 'HP: 100<br>MP: 50<br>Level: 1';
+                playerItems.textContent = '아이템 없음';
+
+                alert('로그아웃 완료');
+            } catch(err){ console.error(err); alert('로그아웃 오류'); }
+        });
+
+        // 로그인
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const deviceId = document.getElementById('deviceId').value;
+
+            try {
+                const res = await fetch('/api/v1/auth/login',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({email,password,deviceId})
+                });
+                if(!res.ok){ alert('로그인 실패'); return; }
+                const data = await res.json();
+                accessToken = data.accessToken;
+                localStorage.setItem('accessToken', accessToken);
+
+                loginContainer.style.display = 'none';
+                tokenDisplay.style.display = 'block';
+                tokenValue.textContent = accessToken;
+            } catch(err){ console.error(err); alert('로그인 오류'); }
+        });
+
+        // 게임 불러오기
+        getInGameDataBtn.addEventListener('click', async () => {
+            if(!accessToken){ alert('로그인 필요'); return; }
+            try {
+                const res = await fetch(`/api/v1/games/${gameId}`,{
+                    headers:{'Authorization':'Bearer ' + accessToken}
+                });
+                if(!res.ok){ alert('조회 실패'); return; }
+                const data = await res.json();
+                updateGameUI(data);
+            } catch(err){ console.error(err); alert('조회 오류'); }
+        });
+
+        // 게임 진행
+        keepGameBtn.addEventListener('click', async () => {
+            if(!accessToken){ alert('로그인 필요'); return; }
+            try{
+                const res = await fetch(`/api/v1/games/progress`,{
+                    method:'POST',
+                    headers:{'Authorization':'Bearer ' + accessToken}
+                });
+                if(!res.ok){ alert('게임 진행 실패'); return; }
+                const data = await res.json();
+                updateGameUI(data);
+            } catch(err){ console.error(err); alert('진행 오류'); }
+        });
+
+        // 선택 전송
+        const sendChoice = async (index) => {
+            try{
+                const res = await fetch(`/api/v1/games/${gameId}/choice`,{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','Authorization':'Bearer '+accessToken},
+                    body: JSON.stringify({choiceIndex:index})
+                });
+                if(!res.ok){ alert('선택 실패'); return; }
+                const data = await res.json();
+                updateGameUI(data);
+            } catch(err){ console.error(err); alert('선택 오류'); }
+        };
+
+        const updateGameUI = (data) => {
+            // 스토리
+            storyText.textContent = data.background || '스토리 없음';
+
+            // 플레이어 정보
+            if(data.playerInfo){
+                const p = data.playerInfo;
+                playerStats.innerHTML = `HP: ${p.healthPoint}<br>MP: ???<br>Level: ${p.level}<br>Life: ${p.life}<br>STR: ${p.strength}, AGI: ${p.agility}, INT: ${p.intelligence}, LUCK: ${p.luck}, GOLD: ${p.gold}`;
+            }
+
+            // 인벤토리
+            if(data.inventory && data.inventory.length > 0){
+                // 아이템 이름만 표시
+                playerItems.textContent = data.inventory.map(item => item.name).join(', ');
+            } else {
+                playerItems.textContent = '아이템 없음';
+            }
+
+            // 선택지
+            choiceContainer.innerHTML = '';
+            if(data.sceneType === 'CHOICE' && Array.isArray(data.choiceInfo)){
+                data.choiceInfo.forEach((choice, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn';
+                    btn.textContent = `${idx+1}. ${choice.detail}`;
+                    btn.addEventListener('click', () => sendChoice(idx));
+                    choiceContainer.appendChild(btn);
+                });
+            }
+        };
+    });
+</script>
 </body>
 </html>

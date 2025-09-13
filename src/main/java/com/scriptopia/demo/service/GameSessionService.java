@@ -500,7 +500,6 @@ public class GameSessionService {
                 }).toList();
         fastApiRequest.setItemInfo(itemInfoList);
 
-        System.out.println("asdasd   "  + fastApiRequest);
         CreateGameChoiceResponse createGameChoiceResponse = fastApiService.makeChoice(fastApiRequest);
 
         if (createGameChoiceResponse == null) {
@@ -512,10 +511,10 @@ public class GameSessionService {
         gameSessionMongo.setBackground(createGameChoiceResponse.getChoiceInfo().getStory());
         gameSessionMongo.setProgress(gameSessionMongo.getProgress());
 
-
+        NpcInfoMongo npcInfoMongo = null;
         if (currentNpcRank > 0){
             int[] npcStat = GameBalanceUtil.getNpcStatsByRank(currentNpcRank);
-            NpcInfoMongo npcInfoMongo = NpcInfoMongo.builder()
+            npcInfoMongo = NpcInfoMongo.builder()
                     .rank(currentNpcRank)
                     .name(createGameChoiceResponse.getNpcInfo().getName())
                     .trait(createGameChoiceResponse.getNpcInfo().getTrait())
