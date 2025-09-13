@@ -4,8 +4,12 @@ import com.scriptopia.demo.domain.LocalAccount;
 import com.scriptopia.demo.domain.PiaItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface PiaItemRepository extends JpaRepository<PiaItem, Long> {
     boolean existsByName(String name);  // 이름으로 중복 체크
 
     boolean existsByNameAndIdNot(String name, Long id);
+
+    Optional<PiaItem> findByName(String itemName);
 }

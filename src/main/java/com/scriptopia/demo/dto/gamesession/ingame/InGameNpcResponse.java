@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class InGameNpcResponse {
         private String name;
-        private int rank;
+        private Integer rank;
         private String trait;
-        private int strength;
-        private int agility;
-        private int intelligence;
-        private int luck;
+        private Integer strength;
+        private Integer agility;
+        private Integer intelligence;
+        private Integer luck;
         private String npcWeaponName;
         private String npcWeaponDescription;
 
