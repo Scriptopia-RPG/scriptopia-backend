@@ -1,4 +1,8 @@
 spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+
   config:
     import: optional:file:.env[.properties]
   datasource:
