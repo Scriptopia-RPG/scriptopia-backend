@@ -10,23 +10,19 @@ import com.scriptopia.demo.repository.EffectGradeDefRepository;
 import com.scriptopia.demo.repository.ItemDefRepository;
 import com.scriptopia.demo.repository.ItemGradeDefRepository;
 import com.scriptopia.demo.repository.mongo.ItemDefMongoRepository;
-import com.scriptopia.demo.utils.GameBalanceUtil;
+import com.scriptopia.demo.utils.InitItemData;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ItemDefService {
+public class ItemService {
 
     private final ItemDefRepository itemDefRepository;
     private final ItemGradeDefRepository itemGradeDefRepository;
@@ -35,13 +31,9 @@ public class ItemDefService {
     private final FastApiService fastApiService;
 
 
-    /**
-     * mongoDB, RDB에 저장 후 mongoDB의 item_Def_id를 리턴
-     * @param request
-     * @return
-     */
-    @Transactional(readOnly = false)
-    public String createItem(ItemDefRequest request) {
+
+    @Transactional
+    public ItemFastApiResponse createItemInit(ItemDefRequest request, InitItemData initItemData){
         /**
          * 1. 카테고리
          * 2. 등급
@@ -50,46 +42,19 @@ public class ItemDefService {
          * 5. 아이템 이펙트( 최대 등급 3개)
          * 6. 추가 스탯
          */
-        ItemType itemCategory = ItemType.getRandomItemType();
-        Grade itemGrade = Grade.getRandomGradeByProbability();
-        int baseStat = Grade.getRandomBaseStat(itemCategory, itemGrade);
-        Stat mainStat = Stat.getRandomMainStat();
-        int[] additionalStats = GameBalanceUtil.getRandomItemStatsByGrade(itemGrade); // strength, agility, intelligence, luck
-
-
-        List<EffectProbability> effectGrades = new ArrayList<>();
-        List<Long> effectGradesList = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            EffectProbability effectGrade = EffectProbability.getRandomEffectGradeByWeaponGrade(itemGrade);
-            if (effectGrade != null) {
-                Long effectPrice = effectGradeDefRepository.findPriceByEffectProbability(effectGrade)
-                        .orElseThrow(() -> new IllegalStateException("EffectGradeDef not found: " + effectGrade));
-
-                effectGradesList.add(effectPrice);
-                effectGrades.add(effectGrade);
-                // effectGradesList.add(effectGradeDefRepository.findPriceByEffectProbability(effectGrade).get());
-            }
-        }
-
-        System.out.println(effectGrades);
-        Long gradeGradePrice = itemGradeDefRepository.findPriceByGrade(itemGrade);
-        Long itemPrice = GameBalanceUtil.getItemPriceByGrade(gradeGradePrice, effectGradesList);
-
-
-
         ItemFastApiRequest fastRequest = ItemFastApiRequest.builder()
                 .worldView(request.getWorldView())
                 .location(request.getLocation())
-                .category(itemCategory)
-                .baseStat(baseStat)
-                .mainStat(mainStat)
-                .grade(itemGrade)
-                .itemEffect(effectGrades)
-                .strength(additionalStats[0])
-                .agility(additionalStats[1])
-                .intelligence(additionalStats[2])
-                .luck(additionalStats[3])
-                .price(itemPrice)
+                .category(initItemData.getItemType())
+                .baseStat(initItemData.getBaseStat())
+                .mainStat(initItemData.getMainStat())
+                .grade(initItemData.getGrade())
+                .itemEffect(initItemData.getEffectGrades())
+                .strength(initItemData.getStats()[0])
+                .agility(initItemData.getStats()[1])
+                .intelligence(initItemData.getStats()[2])
+                .luck(initItemData.getStats()[3])
+                .price(initItemData.getItemPrice())
                 .playerTrait(request.getPlayerTrait())
                 .previousStory(request.getPreviousStory())
                 .build();
@@ -100,10 +65,32 @@ public class ItemDefService {
         if (response == null) {
             throw new CustomException(ErrorCode.E_500_EXTERNAL_API_ERROR);
         }
+        return response;
+    }
+
+
+
+    /**
+     * mongoDB, RDB에 저장 후 mongoDB의 item_Def_id를 리턴
+     * @param request
+     * @return
+     */
+    @Transactional(readOnly = false)
+    public String createMongoItem(ItemDefRequest request) {
+
+        //아이템 초기 수치 생성
+        InitItemData initItemData = new InitItemData(itemGradeDefRepository, effectGradeDefRepository);
+
+        //fastAPI 통해서 아이템 생성
+        ItemFastApiResponse response = createItemInit(request, initItemData);
 
 
         List<ItemEffectMongo> mongoEffects = new ArrayList<>();
         List<ItemFastApiResponse.ItemEffect> apiEffects = response.getItemEffect();
+
+        List<EffectProbability> effectGrades = initItemData.getEffectGrades();
+
+
 
         for (int i = 0; i < apiEffects.size(); i++) {
             ItemFastApiResponse.ItemEffect apiEffect = apiEffects.get(i);
@@ -120,24 +107,25 @@ public class ItemDefService {
                 .itemPicSrc("test link")
                 .name(response.getItemName())
                 .description(response.getItemDescription())
-                .category(itemCategory)
-                .baseStat(baseStat)
+                .category(initItemData.getItemType())
+                .baseStat(initItemData.getBaseStat())
                 .itemEffect(mongoEffects)
-                .strength(additionalStats[0])
-                .agility(additionalStats[1])
-                .intelligence(additionalStats[2])
-                .luck(additionalStats[3])
-                .mainStat(mainStat)
-                .grade(itemGrade)
-                .price(itemPrice)
+                .strength(initItemData.getStats()[0])
+                .agility(initItemData.getStats()[1])
+                .intelligence(initItemData.getStats()[2])
+                .luck(initItemData.getStats()[3])
+                .mainStat(initItemData.getMainStat())
+                .grade(initItemData.getGrade())
+                .price(initItemData.getItemPrice())
                 .build();
+
 
         itemDefMongoRepository.save(itemDefMongo);
 
         ItemDef itemDefRdb = new ItemDef();
         itemDefRdb.setName(itemDefMongo.getName());
         itemDefRdb.setDescription(itemDefMongo.getDescription());
-        itemDefRdb.setItemGradeDef(itemGradeDefRepository.findByGrade(itemGrade).get());
+        itemDefRdb.setItemGradeDef(itemGradeDefRepository.findByGrade(initItemData.getGrade()).get());
         itemDefRdb.setPicSrc(itemDefMongo.getItemPicSrc());
         itemDefRdb.setItemType(itemDefMongo.getCategory());
         itemDefRdb.setBaseStat(itemDefMongo.getBaseStat());
