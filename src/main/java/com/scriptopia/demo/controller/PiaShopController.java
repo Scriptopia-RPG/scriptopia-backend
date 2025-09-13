@@ -1,9 +1,12 @@
 package com.scriptopia.demo.controller;
 
+import com.scriptopia.demo.dto.items.ItemDTO;
+import com.scriptopia.demo.dto.items.ItemDefRequest;
 import com.scriptopia.demo.dto.piashop.PiaItemRequest;
 import com.scriptopia.demo.dto.piashop.PiaItemResponse;
 import com.scriptopia.demo.dto.piashop.PiaItemUpdateRequest;
 import com.scriptopia.demo.dto.piashop.PurchasePiaItemRequest;
+import com.scriptopia.demo.service.ItemService;
 import com.scriptopia.demo.service.PiaShopService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,7 @@ import java.util.List;
 @RequestMapping("/shops")
 public class PiaShopController {
     private final PiaShopService piaShopService;
+    private final ItemService itemService;
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/items/pia")
@@ -44,7 +48,7 @@ public class PiaShopController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    @PostMapping("/pia/item/purchase")
+    @PostMapping("/pia/purchase")
     public ResponseEntity<String> purchasePiaItem(
             @RequestBody PurchasePiaItemRequest requestDto,
             Authentication authentication) {
@@ -52,6 +56,17 @@ public class PiaShopController {
         Long userId = Long.valueOf(authentication.getName());
         piaShopService.purchasePiaItem(userId, requestDto);
         return ResponseEntity.ok("PIA 아이템을 구매했습니다.");
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @PostMapping("/pia/items/anvil")
+    public ResponseEntity<ItemDTO> useItemAnvil(
+            @RequestBody ItemDefRequest request,
+            Authentication authentication) {
+
+        ItemDTO response = piaShopService.useItemAnvil(authentication.getName(), request);
+
+        return ResponseEntity.ok(response);
     }
 
 

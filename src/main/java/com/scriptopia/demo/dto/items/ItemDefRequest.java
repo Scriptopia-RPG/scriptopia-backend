@@ -12,6 +12,8 @@ import java.util.List;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ItemDefRequest {
 
     private String worldView;
