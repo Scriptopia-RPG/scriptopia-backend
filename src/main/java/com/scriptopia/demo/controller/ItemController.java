@@ -1,8 +1,7 @@
 package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.dto.items.ItemDefRequest;
-import com.scriptopia.demo.dto.items.ItemFastApiResponse;
-import com.scriptopia.demo.service.ItemDefService;
+import com.scriptopia.demo.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,12 +11,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ItemController {
 
-    private final ItemDefService itemDefService;
+    private final ItemService itemService;
 
 
     @PostMapping
     public ResponseEntity<String> createItem(@RequestBody ItemDefRequest request) {
-        String savedItem = itemDefService.createItem(request);
+        String savedItem = itemService.createMongoItem(request);
         return ResponseEntity.ok(savedItem);
     }
 
