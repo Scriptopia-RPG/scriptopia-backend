@@ -833,6 +833,88 @@ public class GameSessionService {
     }
 
 
+
+
+    @Transactional
+    public GameSessionMongo gameEquipItem(Long userId, String itemId) {
+        // 1. 게임 세션 조회
+        GameSession gameSession = gameSessionRepository.findByMongoId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+        GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameSession.getMongoId())
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+        PlayerInfoMongo playerInfo = gameSessionMongo.getPlayerInfo();
+        List<InventoryMongo> inventory = gameSessionMongo.getInventory();
+
+        // 2. 장착하려는 아이템 가져오기 (기존 ID 유지)
+        InventoryMongo targetInventory = inventory.stream()
+                .filter(inv -> inv.getItemDefId().equals(itemId))
+                .findFirst()
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND));
+
+        ItemDefMongo targetDef = itemDefMongoRepository.findById(itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND));
+
+        ItemType category = targetDef.getCategory();
+
+        // 3. Toggle: 이미 장착되어 있으면 해제
+        if (targetInventory.isEquipped()) {
+            targetInventory.setEquipped(false);
+            removeStats(playerInfo, targetDef);
+            return gameSessionMongoRepository.save(gameSessionMongo);
+        }
+
+        // 4. 같은 카테고리 장착 아이템 찾기
+        InventoryMongo currentlyEquipped = inventory.stream()
+                .filter(InventoryMongo::isEquipped)
+                .filter(inv -> {
+                    ItemDefMongo def = itemDefMongoRepository.findById(inv.getItemDefId()).orElse(null);
+                    return def != null && def.getCategory() == category;
+                })
+                .findFirst()
+                .orElse(null);
+
+        // 5. 기존 장착 해제 및 스탯 제거
+        if (currentlyEquipped != null) {
+            ItemDefMongo oldDef = itemDefMongoRepository.findById(currentlyEquipped.getItemDefId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND));
+            currentlyEquipped.setEquipped(false);
+            removeStats(playerInfo, oldDef);
+        }
+
+        // 6. 새 아이템 장착 및 스탯 적용
+        targetInventory.setEquipped(true);
+        addStats(playerInfo, targetDef);
+
+        // 7. 저장 (ID 유지)
+        return gameSessionMongoRepository.save(gameSessionMongo);
+    }
+
+    // 스탯 더하기
+    private void addStats(PlayerInfoMongo player, ItemDefMongo item) {
+        player.setStrength(player.getStrength() + safeStat(item.getStrength()));
+        player.setAgility(player.getAgility() + safeStat(item.getAgility()));
+        player.setIntelligence(player.getIntelligence() + safeStat(item.getIntelligence()));
+        player.setLuck(player.getLuck() + safeStat(item.getLuck()));
+    }
+
+    // 스탯 빼기
+    private void removeStats(PlayerInfoMongo player, ItemDefMongo item) {
+        player.setStrength(player.getStrength() - safeStat(item.getStrength()));
+        player.setAgility(player.getAgility() - safeStat(item.getAgility()));
+        player.setIntelligence(player.getIntelligence() - safeStat(item.getIntelligence()));
+        player.setLuck(player.getLuck() - safeStat(item.getLuck()));
+    }
+
+    // null-safe 처리
+    private int safeStat(Integer stat) {
+        return stat != null ? stat : 0;
+    }
+
+
+
+
     /**
      * battle에서 사용 
      * item -> request로 쉽게 매필
