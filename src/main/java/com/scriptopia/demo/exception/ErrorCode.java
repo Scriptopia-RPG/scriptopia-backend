@@ -41,6 +41,7 @@ public enum ErrorCode {
     E_400_INVALID_NPC_RANK("E400027", "잘못된 NPC 랭크입니다.", HttpStatus.BAD_REQUEST),
     E_400_INVALID_ENUM_TYPE("E400028","요청 값이 잘못되었습니다. (Enum 타입 확인 필요)",HttpStatus.BAD_REQUEST),
     E_400_TAG_DUPLICATED("E400029", "중복된 태그입니다.", HttpStatus.BAD_REQUEST),
+    E_400_IMAGE_URL_ERROR("E40030", "요청값이 잘못되었습니다.", HttpStatus.BAD_REQUEST),
 
     //401 Unauthorized
     E_401("401000", "인증되지 않은 요청입니다. (토큰 없음, 만료, 잘못됨)",HttpStatus.UNAUTHORIZED),
