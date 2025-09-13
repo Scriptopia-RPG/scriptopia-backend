@@ -42,7 +42,6 @@ public enum ErrorCode {
     E_400_INVALID_ENUM_TYPE("E400028","요청 값이 잘못되었습니다. (Enum 타입 확인 필요)",HttpStatus.BAD_REQUEST),
     E_400_TAG_DUPLICATED("E400029", "중복된 태그입니다.", HttpStatus.BAD_REQUEST),
 
-
     //401 Unauthorized
     E_401("401000", "인증되지 않은 요청입니다. (토큰 없음, 만료, 잘못됨)",HttpStatus.UNAUTHORIZED),
     E_401_INVALID_CREDENTIALS("E401001","이메일 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
