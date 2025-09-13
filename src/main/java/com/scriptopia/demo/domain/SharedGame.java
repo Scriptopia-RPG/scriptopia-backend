@@ -1,6 +1,5 @@
 package com.scriptopia.demo.domain;
 
-import com.scriptopia.demo.dto.sharedgame.SharedGameRequest;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

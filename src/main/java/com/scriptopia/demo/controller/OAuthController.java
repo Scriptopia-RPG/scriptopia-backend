@@ -1,7 +1,6 @@
 package com.scriptopia.demo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.scriptopia.demo.dto.localaccount.LoginResponse;
 import com.scriptopia.demo.dto.oauth.OAuthLoginResponse;
 import com.scriptopia.demo.dto.oauth.SocialSignupRequest;
 import com.scriptopia.demo.service.OAuthService;

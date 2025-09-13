@@ -1,4 +1,4 @@
-package com.scriptopia.demo.dto.localaccount;
+package com.scriptopia.demo.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class VerifyCodeRequest {
 
-    @NotBlank(message = "이메일은 필수 입력 값입니다.")
-    @Email(message = "올바른 이메일 형식이 아닙니다.")
+    @NotBlank(message = "E_400_MISSING_EMAIL")
+    @Email(message = "E_400_INVALID_EMAIL_FORMAT")
     private String email;
 
     private String code;
