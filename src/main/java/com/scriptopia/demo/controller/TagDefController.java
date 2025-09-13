@@ -16,17 +16,14 @@ public class TagDefController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping
-    public ResponseEntity<?> addTag(@RequestBody TagDefCreateRequest req, Authentication authentication) {
-        Long userId = Long.valueOf(authentication.getName());
+    public ResponseEntity<?> addTag(@RequestBody TagDefCreateRequest req) {
 
-        return tagDefService.addTagName(req, userId);
+        return tagDefService.addTagName(req);
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @DeleteMapping
-    public ResponseEntity<?> removeTag(@RequestBody TagDefDeleteRequest req, Authentication authentication) {
-        Long userId = Long.valueOf(authentication.getName());
-
-        return tagDefService.removeTagName(req, userId);
+    public ResponseEntity<?> removeTag(@RequestBody TagDefDeleteRequest req) {
+        return tagDefService.removeTagName(req);
     }
 }

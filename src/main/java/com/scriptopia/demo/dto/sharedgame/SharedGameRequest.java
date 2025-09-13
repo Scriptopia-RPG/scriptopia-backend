@@ -4,12 +4,9 @@ import com.scriptopia.demo.domain.User;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 public class SharedGameRequest {
-    private Long userId;
-    private String thumbnail_url;
-    private String title;
-    private String world_view;
-    private String background_story;
+    private UUID uuid;
 }
