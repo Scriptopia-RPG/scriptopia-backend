@@ -858,8 +858,8 @@ public class GameSessionService {
     private ItemDefMongo convertToItemDefMongo(ItemFastApiResponse response) {
         List<ItemEffectMongo> effects = new ArrayList<>();
 
-        if (response.getItemEffect() != null) {
-            for (ItemFastApiResponse.ItemEffect e : response.getItemEffect()) {
+        if (response.getItemEffects() != null) {
+            for (ItemFastApiResponse.ItemEffect e : response.getItemEffects()) {
                 ItemEffectMongo effectMongo = ItemEffectMongo.builder()
                         .itemEffectName(e.getItemEffectName())
                         .itemEffectDescription(e.getItemEffectDescription())
@@ -891,7 +891,7 @@ public class GameSessionService {
                     .previousStory(gameSessionMongo.getBackground())
                     .build();
 
-            String itemMongoId = itemService.createMongoItem(itemDefRequest);
+            String itemMongoId = itemService.createItemInGame(itemDefRequest);
             List<String> gainItemList = rewardInfo.getGainedItemDefId();
             if (gainItemList == null) {
                 gainItemList = new ArrayList<>(); // null이면 새 리스트 생성

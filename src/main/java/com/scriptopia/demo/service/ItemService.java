@@ -31,9 +31,8 @@ public class ItemService {
     private final FastApiService fastApiService;
 
 
-
     @Transactional
-    public ItemFastApiResponse createItemInit(ItemDefRequest request, InitItemData initItemData){
+    public ItemFastApiResponse createItemInit(ItemDefRequest request, InitItemData initItemData) {
         /**
          * 1. 카테고리
          * 2. 등급
@@ -69,14 +68,14 @@ public class ItemService {
     }
 
 
-
     /**
      * mongoDB, RDB에 저장 후 mongoDB의 item_Def_id를 리턴
+     *
      * @param request
      * @return
      */
     @Transactional(readOnly = false)
-    public String createMongoItem(ItemDefRequest request) {
+    public String createItemInGame(ItemDefRequest request) {
 
         //아이템 초기 수치 생성
         InitItemData initItemData = new InitItemData(itemGradeDefRepository, effectGradeDefRepository);
@@ -85,24 +84,25 @@ public class ItemService {
         ItemFastApiResponse response = createItemInit(request, initItemData);
 
 
+        // 생성한 아이템 효과 MongoDB 매핑
         List<ItemEffectMongo> mongoEffects = new ArrayList<>();
-        List<ItemFastApiResponse.ItemEffect> apiEffects = response.getItemEffect();
 
-        List<EffectProbability> effectGrades = initItemData.getEffectGrades();
+        List<ItemFastApiResponse.ItemEffect> createdItemEffects = response.getItemEffects();
+        List<EffectProbability> effectProbabilities = initItemData.getEffectGrades();
 
-
-
-        for (int i = 0; i < apiEffects.size(); i++) {
-            ItemFastApiResponse.ItemEffect apiEffect = apiEffects.get(i);
-            EffectProbability effectGrade = i < effectGrades.size() ? effectGrades.get(i) : null;
+        for (int i = 0; i < createdItemEffects.size(); i++) {
+            ItemFastApiResponse.ItemEffect createdEffect = createdItemEffects.get(i);
+            EffectProbability effectProbability = i < effectProbabilities.size() ? effectProbabilities.get(i) : null;
 
             mongoEffects.add(ItemEffectMongo.builder()
-                    .effectProbability(effectGrade != null ? (effectGrade) : EffectProbability.COMMON)
-                    .itemEffectName(apiEffect.getItemEffectName())
-                    .itemEffectDescription(apiEffect.getItemEffectDescription())
+                    .effectProbability(effectProbability != null ? (effectProbability) : EffectProbability.COMMON)
+                    .itemEffectName(createdEffect.getItemEffectName())
+                    .itemEffectDescription(createdEffect.getItemEffectDescription())
                     .build());
         }
 
+
+        //아이템 정보 MongoDB 매핑
         ItemDefMongo itemDefMongo = ItemDefMongo.builder()
                 .itemPicSrc("test link")
                 .name(response.getItemName())
@@ -119,33 +119,37 @@ public class ItemService {
                 .price(initItemData.getItemPrice())
                 .build();
 
-
         itemDefMongoRepository.save(itemDefMongo);
 
+
+        //아이템 정보 RDBMS 매핑
         ItemDef itemDefRdb = new ItemDef();
-        itemDefRdb.setName(itemDefMongo.getName());
-        itemDefRdb.setDescription(itemDefMongo.getDescription());
+        itemDefRdb.setName(response.getItemName());
+        itemDefRdb.setDescription(response.getItemDescription());
         itemDefRdb.setItemGradeDef(itemGradeDefRepository.findByGrade(initItemData.getGrade()).get());
-        itemDefRdb.setPicSrc(itemDefMongo.getItemPicSrc());
-        itemDefRdb.setItemType(itemDefMongo.getCategory());
-        itemDefRdb.setBaseStat(itemDefMongo.getBaseStat());
-        itemDefRdb.setStrength(itemDefMongo.getStrength());
-        itemDefRdb.setAgility(itemDefMongo.getAgility());
-        itemDefRdb.setIntelligence(itemDefMongo.getIntelligence());
-        itemDefRdb.setLuck(itemDefMongo.getLuck());
-        itemDefRdb.setMainStat(itemDefMongo.getMainStat());
-        itemDefRdb.setPrice(itemDefMongo.getPrice());
+        itemDefRdb.setPicSrc("test link"); // Mongo 참조 대신 직접 값 지정
+        itemDefRdb.setItemType(initItemData.getItemType());
+        itemDefRdb.setBaseStat(initItemData.getBaseStat());
+        itemDefRdb.setStrength(initItemData.getStats()[0]);
+        itemDefRdb.setAgility(initItemData.getStats()[1]);
+        itemDefRdb.setIntelligence(initItemData.getStats()[2]);
+        itemDefRdb.setLuck(initItemData.getStats()[3]);
+        itemDefRdb.setMainStat(initItemData.getMainStat());
+        itemDefRdb.setPrice(initItemData.getItemPrice());
         itemDefRdb.setCreatedAt(LocalDateTime.now());
 
         List<ItemEffect> rdbEffects = new ArrayList<>();
-        for (ItemEffectMongo effectMongo : itemDefMongo.getItemEffect()) {
+
+        //아이템 효과 정보 RDBMS 매핑
+        for (int i = 0; i < effectProbabilities.size(); i++) {
             ItemEffect effect = new ItemEffect();
             effect.setItemDef(itemDefRdb);
-            effect.setEffectName(effectMongo.getItemEffectName());
-            effect.setEffectDescription(effectMongo.getItemEffectDescription());
-            effect.setEffectGradeDef(effectGradeDefRepository.findByEffectProbability(effectMongo.getEffectProbability()).get());
+            effect.setEffectName(createdItemEffects.get(i).getItemEffectName());
+            effect.setEffectDescription(createdItemEffects.get(i).getItemEffectDescription());
+            effect.setEffectGradeDef(effectGradeDefRepository.findByEffectProbability(effectProbabilities.get(i)).get());
             rdbEffects.add(effect);
         }
+
         itemDefRdb.setItemEffects(rdbEffects);
 
         itemDefRepository.save(itemDefRdb);
@@ -153,6 +157,15 @@ public class ItemService {
         return itemDefMongo.getId();
     }
 
+    public String createItemInWeb(ItemDefRequest request) {
+
+        InitItemData initItemData = new InitItemData(itemGradeDefRepository, effectGradeDefRepository);
+
+        //fastAPI 통해서 아이템 생성
+        ItemFastApiResponse response = createItemInit(request, initItemData);
+
+
+    }
 
 
 }

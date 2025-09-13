@@ -19,4 +19,5 @@ public class EffectGradeDef {
 
     @Enumerated(EnumType.STRING)
     private EffectProbability effectProbability;
+
 }

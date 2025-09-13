@@ -13,7 +13,7 @@ public class ItemFastApiResponse {
 
     private String itemName;
     private String itemDescription;
-    private List<ItemEffect> itemEffect;
+    private List<ItemEffect> itemEffects;
 
     @Data
     @NoArgsConstructor
