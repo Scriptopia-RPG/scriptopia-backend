@@ -27,6 +27,15 @@ public class UserController {
     private final HistoryService historyService;
     private final UserCharacterImgService userCharacterImgService;
 
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @GetMapping("/items/game")
+    public ResponseEntity<List<ItemDTO>> getGameItems(
+            Authentication authentication
+    ) {
+        String userId = authentication.getName();
+        List<ItemDTO> response = userService.getGameItems(userId);
+        return ResponseEntity.ok(response);
+    }
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @GetMapping("/items/pia")

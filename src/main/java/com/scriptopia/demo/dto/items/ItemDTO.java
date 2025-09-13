@@ -26,7 +26,7 @@ public class ItemDTO {
     private Integer luck;
     private Stat mainStat; // STRENGTH, AGILITY, INTELLIGENCE, LUCK
     private Grade grade;    // COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
-    private List<ItemEffectDTO> itemEffect;
+    private List<ItemEffectDTO> itemEffects;
     private Integer remainingUses;
     private Long price;
 }

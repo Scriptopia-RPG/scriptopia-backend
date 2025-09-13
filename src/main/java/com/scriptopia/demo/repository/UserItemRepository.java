@@ -7,11 +7,15 @@ import com.scriptopia.demo.domain.UserItem;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserItemRepository extends JpaRepository<UserItem, Long> {
     Optional<UserItem> findByItemDefAndTradeStatus(ItemDef itemDef, TradeStatus tradeStatus);
 
     Optional<UserItem> findByUserIdAndItemDefId(Long userId, Long itemDefId);
+
+    List<UserItem> findAllByUserId(Long userId);
+
 
 }

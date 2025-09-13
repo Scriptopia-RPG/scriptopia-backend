@@ -3,11 +3,13 @@ package com.scriptopia.demo.service;
 import com.scriptopia.demo.domain.User;
 import com.scriptopia.demo.domain.UserPiaItem;
 import com.scriptopia.demo.domain.UserSetting;
+import com.scriptopia.demo.dto.items.ItemDTO;
 import com.scriptopia.demo.dto.users.PiaItemDTO;
 import com.scriptopia.demo.dto.users.UserAssetsResponse;
 import com.scriptopia.demo.dto.users.UserSettingsDTO;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
+import com.scriptopia.demo.mapper.ItemMapper;
 import com.scriptopia.demo.repository.UserPiaItemRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.repository.UserSettingRepository;
@@ -27,6 +29,18 @@ public class UserService {
     private final UserSettingRepository userSettingRepository;
     private final UserRepository userRepository;
     private final UserPiaItemRepository userPiaItemRepository;
+    private final ItemMapper itemMapper;
+
+    @Transactional
+    public List<ItemDTO> getGameItems(String userId){
+
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(
+                () -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND)
+        );
+
+        return itemMapper.mapUser(user);
+    }
+
 
     @Transactional
     public UserSettingsDTO getUserSettings(String userId){
