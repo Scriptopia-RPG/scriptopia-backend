@@ -25,7 +25,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +40,7 @@ public class GameSessionService {
     private final GameSessionMongoRepository gameSessionMongoRepository;
     private final UserItemRepository userItemRepository;
     private final FastApiService fastApiService;
-    private final ItemDefService itemDefService;
+    private final ItemService itemService;
     private final InGameMapper inGameMapper;
 
 
@@ -892,7 +891,7 @@ public class GameSessionService {
                     .previousStory(gameSessionMongo.getBackground())
                     .build();
 
-            String itemMongoId = itemDefService.createItem(itemDefRequest);
+            String itemMongoId = itemService.createMongoItem(itemDefRequest);
             List<String> gainItemList = rewardInfo.getGainedItemDefId();
             if (gainItemList == null) {
                 gainItemList = new ArrayList<>(); // null이면 새 리스트 생성
