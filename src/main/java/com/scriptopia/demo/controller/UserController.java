@@ -1,5 +1,6 @@
 package com.scriptopia.demo.controller;
 
+import com.scriptopia.demo.dto.users.PiaItemDTO;
 import com.scriptopia.demo.dto.users.UserAssetsResponse;
 import com.scriptopia.demo.dto.users.UserSettingsDTO;
 import com.scriptopia.demo.service.UserService;
@@ -10,12 +11,25 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/users/me")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @GetMapping("/items/pia")
+    public ResponseEntity<List<PiaItemDTO>> getPiaItems(
+            Authentication authentication
+    ) {
+        String userId = authentication.getName();
+        List<PiaItemDTO> response = userService.getPiaItems(userId);
+        return ResponseEntity.ok(response);
+    }
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @GetMapping("/settings")
@@ -47,5 +61,7 @@ public class UserController {
         UserAssetsResponse response = userService.getUserAssets(userId);
         return ResponseEntity.ok(response);
     }
+
+
 
 }
