@@ -22,7 +22,24 @@ public class InGameDoneResponse {
     private int progress;
     private int stageSize;
 
-    private InGamePlayerResponse playerInfo; // 외부
-    private InGameNpcResponse npcInfo; // 외부
-    private List<InGameInventoryResponse> inventory; // 외부
+    private InGamePlayerResponse playerInfo;
+    private InGameNpcResponse npcInfo;
+    private List<InGameInventoryResponse> inventory;
+
+    // 🏆 보상 정보
+    private RewardInfoResponse rewardInfo;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RewardInfoResponse {
+        private List<String> gainedItemNames;
+        private int rewardStrength;
+        private int rewardAgility;
+        private int rewardIntelligence;
+        private int rewardLuck;
+        private int rewardLife;
+        private int rewardGold;
+    }
 }
