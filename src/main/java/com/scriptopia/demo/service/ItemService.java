@@ -162,7 +162,9 @@ public class ItemService {
     @Transactional
     public ItemDTO createItemInWeb(String userId, ItemDefRequest request) {
 
-        User user = userRepository.findById(Long.valueOf(userId)).get();
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(
+                () -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND)
+        );
 
         InitItemData initItemData = new InitItemData(itemGradeDefRepository, effectGradeDefRepository);
 
