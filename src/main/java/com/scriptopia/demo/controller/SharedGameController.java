@@ -2,14 +2,11 @@ package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.domain.SharedGame;
 import com.scriptopia.demo.domain.SharedGameFavorite;
-import com.scriptopia.demo.dto.TagDef.TagDefCreateRequest;
-import com.scriptopia.demo.dto.TagDef.TagDefDeleteRequest;
 import com.scriptopia.demo.dto.sharedgame.CursorPage;
 import com.scriptopia.demo.dto.sharedgame.PublicSharedGameResponse;
 import com.scriptopia.demo.dto.sharedgame.SharedGameRequest;
 import com.scriptopia.demo.service.SharedGameFavoriteService;
 import com.scriptopia.demo.service.SharedGameService;
-import com.scriptopia.demo.service.TagDefService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +22,6 @@ import java.util.UUID;
 public class SharedGameController {
     private final SharedGameService sharedGameService;
     private final SharedGameFavoriteService sharedGameFavoriteService;
-    private final TagDefService tagDefService;
 
     /*
     게임 공유 -> 게임 공유하기
@@ -100,18 +96,5 @@ public class SharedGameController {
         Long userId = Long.valueOf(authentication.getName());
 
         return sharedGameService.getMySharedGames(userId);
-    }
-
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @PostMapping("/tags")
-    public ResponseEntity<?> addTag(@RequestBody TagDefCreateRequest req) {
-
-        return tagDefService.addTagName(req);
-    }
-
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @DeleteMapping("/tags")
-    public ResponseEntity<?> removeTag(@RequestBody TagDefDeleteRequest req) {
-        return tagDefService.removeTagName(req);
     }
 }
