@@ -71,8 +71,9 @@ public class GameSessionController {
 
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    @PostMapping("/progress")
+    @PostMapping("/{gameId}/progress")
     public ResponseEntity<GameSessionMongo> keepGame(
+            @PathVariable("gameId") String gameId,
             Authentication authentication) throws JsonProcessingException {
 
         Long userId = Long.valueOf(authentication.getName());
@@ -83,14 +84,29 @@ public class GameSessionController {
 
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    @PostMapping("/test")
+    @PostMapping("/{gameId}/select")
     public ResponseEntity<GameSessionMongo> selectChoice(
+            @PathVariable("gameId") String gameId,
             @RequestBody GameChoiceRequest request,
             Authentication authentication) throws JsonProcessingException {
 
         Long userId = Long.valueOf(authentication.getName());
 
         GameSessionMongo response = gameSessionService.gameChoiceSelect(userId, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @PostMapping("/equipItem/{gameId}/{itemId}")
+    public ResponseEntity<GameSessionMongo> equipItem(
+            @PathVariable("gameId") String gameId,
+            @PathVariable("itemId") String itemId,
+            Authentication authentication) throws JsonProcessingException {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        GameSessionMongo response = gameSessionService.gameEquipItem(userId, itemId);
 
         return ResponseEntity.ok(response);
     }
