@@ -2,6 +2,7 @@ package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.domain.SharedGame;
 import com.scriptopia.demo.domain.SharedGameFavorite;
+import com.scriptopia.demo.domain.SharedGameSort;
 import com.scriptopia.demo.dto.TagDef.TagDefCreateRequest;
 import com.scriptopia.demo.dto.TagDef.TagDefDeleteRequest;
 import com.scriptopia.demo.dto.sharedgame.CursorPage;
@@ -43,12 +44,13 @@ public class SharedGameController {
      */
     @GetMapping
     public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(Authentication authentication,
-                                                                                     @RequestParam(required = false) Long lastId,
+                                                                                     @RequestParam(required = false) UUID lastUUID,
                                                                                      @RequestParam(defaultValue = "20") int size,
                                                                                      @RequestParam(required = false) List<Long> tagIds,
-                                                                                     @RequestParam(required = false) String query) {
+                                                                                     @RequestParam(required = false) String query,
+                                                                                     @RequestParam(defaultValue = "LATEST")SharedGameSort sort) {
         Long viewerId = (authentication == null) ? null : Long.valueOf(authentication.getName());
-        return sharedGameService.getPublicSharedGames(viewerId, lastId, size, tagIds, query);
+        return sharedGameService.getPublicSharedGames(viewerId, lastUUID, size, tagIds, query, sort);
     }
 
     /*

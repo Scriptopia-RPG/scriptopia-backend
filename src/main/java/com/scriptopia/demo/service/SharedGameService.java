@@ -8,10 +8,12 @@ import com.scriptopia.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -105,7 +107,7 @@ public class SharedGameService {
         dto.setSharedGameUUID(game.getUuid());
         dto.setNickname(game.getUser().getNickname());
         dto.setThumbnailUrl(game.getThumbnailUrl());
-        dto.setTotalPlayed(game.getTotalPlayed());
+        dto.setTotalPlayed(sharedGameScoreRepository.countBySharedGameId(game.getId()));
         dto.setTitle(game.getTitle());
         dto.setWorldView(game.getWorldView());
         dto.setBackgroundStory(game.getBackgroundStory());
@@ -144,47 +146,97 @@ public class SharedGameService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(Long userId, Long lastId, int size,
-                                                                                     List<Long> tagIds, String q) {
+    public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(Long userId,
+                                                                               UUID lastUuid,
+                                                                               int size,
+                                                                               List<Long> tagIds,
+                                                                               String q,
+                                                                               SharedGameSort sort) {
+        String raw = (q == null) ? "" : q;
+        String trimmed = raw.strip();
+        boolean qBlank = trimmed.isEmpty();
+        String qLike = "%" + trimmed.toLowerCase() + "%";
 
-        PageRequest pr = PageRequest.of(0, size);
-        Page<SharedGame> page;
+        // 2) 태그/커서/정렬 전처리
+        boolean tagEmpty = (tagIds == null || tagIds.isEmpty());
+        SharedGameSort effectiveSort = qBlank ? sort : SharedGameSort.LATEST;
 
-        boolean hasQ = q != null && q.isBlank();
-        boolean hasTags = tagIds != null && !tagIds.isEmpty();
+        boolean useCursor = (lastUuid != null);
+        Long lastId = null;
+        LocalDateTime lastSharedAt = null;
+        Long lastPlayCount = null;
+        Long lastTopScore = null;
 
-        if(hasQ) {
-            page = sharedGameRepository.pageSearchOnly(lastId, q.trim(), pr);
+        if (useCursor) {
+            SharedGame pivot = sharedGameRepository.findByUuid(lastUuid)
+                    .orElseThrow(() -> new CustomException(ErrorCode.E_404_PAGE_NOT_FOUND));
+            lastId = pivot.getId();
+
+            switch (effectiveSort) {
+                case LATEST -> lastSharedAt = pivot.getSharedAt();
+                case POPULAR -> lastPlayCount = sharedGameScoreRepository.countBySharedGameId(lastId);
+                case TOP_SCORE -> {
+                    Long max = sharedGameScoreRepository.maxScoreBySharedGameId(lastId);
+                    lastTopScore = (max == null) ? 0L : max;
+                }
+            }
         }
-        else if(hasTags) {
-            page = sharedGameRepository.pageByAllTagsOnly(lastId, tagIds, tagIds.size(), pr);
-        }
-        else {
-            page = sharedGameRepository.pageAll(lastId, pr);
-        }
 
-        var items = page.getContent().stream().map(g -> {
-            var dto = new PublicSharedGameResponse();
-            dto.setSharedGameId(g.getId());
+        // 3) 페이지 사이즈/페이징
+        Pageable pageable = PageRequest.of(0, Math.max(1, size));
+
+        // 4) 정렬 스위치별 슬라이스 조회 (qLike/qBlank 사용)
+        List<SharedGame> rows = switch (effectiveSort) {
+            case LATEST -> sharedGameRepository.sliceLatest(
+                    tagEmpty ? List.of(-1L) : tagIds, tagEmpty,
+                    qLike, qBlank,
+                    useCursor, lastSharedAt, lastId,
+                    pageable
+            );
+            case POPULAR -> sharedGameRepository.slicePopular(
+                    tagEmpty ? List.of(-1L) : tagIds, tagEmpty,
+                    qLike, qBlank,
+                    useCursor, lastPlayCount, lastId,
+                    pageable
+            );
+            case TOP_SCORE -> sharedGameRepository.sliceTopScore(
+                    tagEmpty ? List.of(-1L) : tagIds, tagEmpty,
+                    qLike, qBlank,
+                    useCursor, lastTopScore, lastId,
+                    pageable
+            );
+        };
+
+        // 5) DTO 매핑 (집계 일원화)
+        List<PublicSharedGameResponse> items = rows.stream().map(g -> {
+            PublicSharedGameResponse dto = new PublicSharedGameResponse();
+            dto.setSharedGameId(g.getUuid());
             dto.setThumbnailUrl(g.getThumbnailUrl());
             dto.setTitle(g.getTitle());
-            dto.setTopScore(sharedGameScoreRepository.maxScoreBySharedGameId(g.getId()));
             dto.setSharedAt(g.getSharedAt());
 
+            // 집계
             dto.setTotalPlayCount(sharedGameScoreRepository.countBySharedGameId(g.getId()));
             dto.setLikeCount(sharedGameFavoriteRepository.countBySharedGameId(g.getId()));
 
-            if(userId != null) {
-                dto.setLiked(sharedGameFavoriteRepository.existsByUserIdAndSharedGameId(userId, g.getId()));
+            Long topScore = sharedGameScoreRepository.maxScoreBySharedGameId(g.getId());
+            dto.setTopScore(topScore == null ? 0L : topScore);
+
+            // 좋아요 여부
+            if (userId != null) {
+                boolean liked = sharedGameFavoriteRepository.existsByUserIdAndSharedGameId(userId, g.getId());
+                dto.setLiked(liked);
             }
 
-            List<TagDto> tags = gameTagRepository.findTagDtosBySharedGameId(g.getId());
-            dto.setTags(tags);
-
+            // 태그
+            dto.setTags(gameTagRepository.findTagDtosBySharedGameId(g.getId()));
             return dto;
         }).toList();
 
-        Long nextCursor = items.isEmpty() ? null : items.get(items.size() - 1).getSharedGameId();
-        return ResponseEntity.ok(new CursorPage<>(items, nextCursor, page.hasNext()));
+        // 6) 커서/hasNext
+        UUID nextCursor = items.isEmpty() ? null : items.get(items.size() - 1).getSharedGameId();
+        boolean hasNext = rows.size() == Math.max(1, size);
+
+        return ResponseEntity.ok(new CursorPage<>(items, nextCursor, hasNext));
     }
 }

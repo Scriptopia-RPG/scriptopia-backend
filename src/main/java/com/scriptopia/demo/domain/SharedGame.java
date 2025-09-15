@@ -26,8 +26,6 @@ public class SharedGame {
     private UUID uuid;
 
     private String thumbnailUrl;
-    private Long recommend = 0L;
-    private Long totalPlayed = 0L;
 
     @Column(columnDefinition = "TEXT")
     private String title;
