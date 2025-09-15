@@ -78,7 +78,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/my-page/history")
+    @GetMapping("/games/histories")
     public ResponseEntity<List<HistoryPageResponse>> getHistory(@RequestParam(required = false) UUID lastId,
                                                                 @RequestParam(defaultValue = "10") int size,
                                                                 Authentication authentication) {

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,43 +20,92 @@ public interface SharedGameRepository extends JpaRepository<SharedGame, Long> {
     @Query("select sg from SharedGame sg where sg.uuid = :uuid")
     Optional<SharedGame> findByUuid(@Param("uuid") UUID uuid);
 
-    // 기본(전체)
-    @Query("""
-        select g from SharedGame g
-        where (:lastId is null or g.id < :lastId)
-        order by g.id desc
-    """)
-    Page<SharedGame> pageAll(@Param("lastId") Long lastId, Pageable pageable);
+    @Query("select g.sharedAt from SharedGame g where g.id = :id")
+    LocalDateTime findSharedAtById(@Param("id") Long id);
 
-    // 🔎 검색 전용 (태그 무시)
+    // 최신순
     @Query("""
-        select g from SharedGame g
-        where (:lastId is null or g.id < :lastId)
-          and (
-            lower(g.title) like lower(concat('%', :q, '%'))
-            or lower(g.worldView) like lower(concat('%', :q, '%'))
-            or lower(g.backgroundStory) like lower(concat('%', :q, '%'))
-          )
-        order by g.id desc
+    select g
+    from SharedGame g
+    where (:tagEmpty = true
+           or exists (select 1 from GameTag gt where gt.sharedGame = g and gt.tagDef.id in :tagIds))
+      and (:qBlank = true
+           or lower(coalesce(g.title,''))           like :qLike
+           or lower(coalesce(g.worldView,''))       like :qLike
+           or lower(coalesce(g.backgroundStory,'')) like :qLike)
+      and (
+           :useCursor = false
+           or g.sharedAt < :lastKey
+           or (g.sharedAt = :lastKey and g.id < :lastId)
+      )
+    order by g.sharedAt desc, g.id desc
     """)
-    Page<SharedGame> pageSearchOnly(@Param("lastId") Long lastId,
-                                    @Param("q") String q,
-                                    Pageable pageable);
+    List<SharedGame> sliceLatest(
+            @Param("tagIds") List<Long> tagIds, @Param("tagEmpty") boolean tagEmpty,
+            @Param("qLike") String qLike, @Param("qBlank") boolean qBlank,
+            @Param("useCursor") boolean useCursor,
+            @Param("lastKey") LocalDateTime lastKey, @Param("lastId") Long lastId,
+            Pageable pageable
+    );
 
-
-    // 🏷 태그 ALL 전용 (검색 없음)
     @Query("""
-        select g from SharedGame g
-        join GameTag gt on gt.sharedGame = g
-        join TagDef td on td = gt.tagDef
-        where (:lastId is null or g.id < :lastId)
-          and td.id in :tagIds
-        group by g.id
-        having count(distinct td.id) = :tagCount
-        order by g.id desc
+    select g
+    from SharedGame g
+    where (:tagEmpty = true
+           or exists (select 1 from GameTag gt where gt.sharedGame = g and gt.tagDef.id in :tagIds))
+      and (:qBlank = true
+           or lower(coalesce(g.title,'')) like :qLike
+           or lower(coalesce(g.worldView,'')) like :qLike
+           or lower(coalesce(g.backgroundStory,'')) like :qLike)
+      and (
+           :useCursor = false
+           or (
+               (select count(s.id) from SharedGameScore s where s.sharedGame = g) < :lastKey
+               or (
+                   (select count(s2.id) from SharedGameScore s2 where s2.sharedGame = g) = :lastKey
+                   and g.id < :lastId
+               )
+           )
+      )
+    order by (select count(s3.id) from SharedGameScore s3 where s3.sharedGame = g) desc,
+             g.id desc
     """)
-    Page<SharedGame> pageByAllTagsOnly(@Param("lastId") Long lastId,
-                                       @Param("tagIds") List<Long> tagIds,
-                                       @Param("tagCount") long tagCount,
-                                       Pageable pageable);
+    List<SharedGame> slicePopular(
+            @Param("tagIds") List<Long> tagIds, @Param("tagEmpty") boolean tagEmpty,
+            @Param("qLike") String qLike, @Param("qBlank") boolean qBlank,
+            @Param("useCursor") boolean useCursor,
+            @Param("lastKey") Long lastKey, @Param("lastId") Long lastId,
+            Pageable pageable
+    );
+
+    @Query("""
+    select g
+    from SharedGame g
+    where (:tagEmpty = true
+           or exists (select 1 from GameTag gt where gt.sharedGame = g and gt.tagDef.id in :tagIds))
+      and (:qBlank = true
+           or lower(coalesce(g.title,'')) like :qLike
+           or lower(coalesce(g.worldView,'')) like :qLike
+           or lower(coalesce(g.backgroundStory,'')) like :qLike)
+      and (
+           :useCursor = false
+           or (
+               (select coalesce(max(s.score),0) from SharedGameScore s where s.sharedGame = g) < :lastKey
+               or (
+                   (select coalesce(max(s2.score),0) from SharedGameScore s2 where s2.sharedGame = g) = :lastKey
+                   and g.id < :lastId
+               )
+           )
+      )
+    order by (select coalesce(max(s3.score),0) from SharedGameScore s3 where s3.sharedGame = g) desc,
+             g.id desc
+    """)
+    List<SharedGame> sliceTopScore(
+            @Param("tagIds") List<Long> tagIds, @Param("tagEmpty") boolean tagEmpty,
+            @Param("qLike") String qLike, @Param("qBlank") boolean qBlank,
+            @Param("useCursor") boolean useCursor,
+            @Param("lastKey") Long lastKey, @Param("lastId") Long lastId,
+            Pageable pageable
+    );
+
 }

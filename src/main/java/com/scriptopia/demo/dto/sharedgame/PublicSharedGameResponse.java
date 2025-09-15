@@ -4,10 +4,11 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class PublicSharedGameResponse {
-    private Long sharedGameId;
+    private UUID sharedGameId;
     private String thumbnailUrl;
     private boolean isLiked;
     private Long likeCount;
