@@ -1,6 +1,7 @@
 package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.dto.history.HistoryPageResponse;
+import com.scriptopia.demo.dto.items.ItemDTO;
 import com.scriptopia.demo.dto.users.PiaItemDTO;
 import com.scriptopia.demo.dto.users.UserAssetsResponse;
 import com.scriptopia.demo.dto.users.UserSettingsDTO;
