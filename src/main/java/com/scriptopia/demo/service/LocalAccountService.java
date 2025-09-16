@@ -2,11 +2,12 @@ package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.config.JwtProperties;
 import com.scriptopia.demo.domain.*;
-import com.scriptopia.demo.dto.localaccount.*;
+import com.scriptopia.demo.dto.auth.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.LocalAccountRepository;
 import com.scriptopia.demo.repository.UserRepository;
+import com.scriptopia.demo.repository.UserSettingRepository;
 import com.scriptopia.demo.utils.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -40,23 +40,24 @@ public class LocalAccountService {
     private final JwtProvider jwt;
     private final RefreshTokenService refreshService;
     private final JwtProperties prop;
+    private final MailService mailService;
 
     private static final String RT_COOKIE = "RT";
     private static final boolean COOKIE_SECURE = true;
     private static final String COOKIE_SAMESITE = "None";
-    private final MailService mailService;
+
 
     private static final Pattern WS = Pattern.compile("[\\s\\p{Z}\\u200B\\u200C\\u200D\\uFEFF]");
 
     private static final long TOKEN_EXPIRATION = 30;
-
+    private final UserSettingRepository userSettingRepository;
 
 
     @Transactional
     public void resetPassword(String token,String newPassword) {
+
         String key = "reset:token:" + token;
         String email = redisTemplate.opsForValue().get(key);
-        System.out.println(key);
         if (email == null) {
             throw new CustomException(ErrorCode.E_401);
         }
@@ -81,6 +82,9 @@ public class LocalAccountService {
 
     @Transactional
     public void sendVerificationCode(String email) {
+        if (localAccountRepository.existsByEmail(email)){
+            throw new CustomException(ErrorCode.E_409_EMAIL_TAKEN);
+        }
         String code = String.format("%06d", (int)(Math.random() * 999999));
         mailService.saveCode(email, code);
         mailService.sendVerificationCode(email, code);
@@ -150,6 +154,7 @@ public class LocalAccountService {
         user.setLastLoginAt(null);
         user.setProfileImgUrl(null);
         user.setRole(Role.USER);
+        user.setLoginType(LoginType.LOCAL);
         userRepository.save(user);
 
         //localAccount 객체 생성
@@ -163,11 +168,14 @@ public class LocalAccountService {
 
         //환경 설정 초기 값
         UserSetting userSetting = new UserSetting();
+        userSetting.setUser(user);
         userSetting.setTheme(Theme.DARK);
         userSetting.setFontType(FontType.PretendardVariable);
         userSetting.setFontSize(16);
         userSetting.setLineHeight(1);
+        userSetting.setWordSpacing(1);
         userSetting.setUpdatedAt(LocalDateTime.now());
+        userSettingRepository.save(userSetting);
 
     }
 
@@ -186,7 +194,7 @@ public class LocalAccountService {
         User user = localAccount.getUser();
         user.setLastLoginAt(LocalDateTime.now());
 
-        List<String> roles = List.of(Role.USER.toString());
+        List<String> roles = List.of(user.getRole().toString());
         String access  = jwt.createAccessToken(user.getId(), roles);
         String refresh = jwt.createRefreshToken(user.getId(), req.getDeviceId());
 

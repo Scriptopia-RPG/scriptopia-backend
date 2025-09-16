@@ -1,58 +1,89 @@
 package com.scriptopia.demo.config;
 
-import com.scriptopia.demo.domain.EffectGradeDef;
-import com.scriptopia.demo.domain.Grade;
-import com.scriptopia.demo.domain.ItemGradeDef;
-import com.scriptopia.demo.repository.EffectGradeDefRepository;
-import com.scriptopia.demo.repository.ItemGradeDefRepository;
+import com.scriptopia.demo.domain.*;
+import com.scriptopia.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Map;
+
 @Configuration
 @RequiredArgsConstructor
 public class DataLoaderConfig {
 
-    private final ItemGradeDefRepository itemGradeDefRepository;
     private final EffectGradeDefRepository effectGradeDefRepository;
+    private final ItemGradeDefRepository itemGradeDefRepository;
 
     @Bean
     public ApplicationRunner dataLoader() {
         return args -> {
-            // ✅ ItemGradeDef 기본 데이터
-            saveItemGradeIfNotExists(Grade.COMMON, 1.0, 100L);
-            saveItemGradeIfNotExists(Grade.UNCOMMON, 1.0, 200L);
-            saveItemGradeIfNotExists(Grade.RARE, 1.0, 500L);
-            saveItemGradeIfNotExists(Grade.EPIC, 1.0, 1000L);
-            saveItemGradeIfNotExists(Grade.LEGENDARY, 1.0, 2000L);
+            // EffectGradeDef 초기화
+            Map<EffectProbability, Long> effectPriceMap = Map.of(
+                    EffectProbability.COMMON, 10L,
+                    EffectProbability.UNCOMMON, 30L,
+                    EffectProbability.RARE, 50L,
+                    EffectProbability.EPIC, 80L,
+                    EffectProbability.LEGENDARY, 100L
+            );
 
-            // ✅ EffectGradeDef 기본 데이터
-            saveEffectGradeIfNotExists(Grade.COMMON, 100L, 0.1);
-            saveEffectGradeIfNotExists(Grade.UNCOMMON, 200L, 0.15);
-            saveEffectGradeIfNotExists(Grade.RARE, 500L, 0.2);
-            saveEffectGradeIfNotExists(Grade.EPIC, 1000L, 0.25);
-            saveEffectGradeIfNotExists(Grade.LEGENDARY, 2000L, 0.3);
+            Map<EffectProbability, Double> effectAtkMultiplierMap = Map.of(
+                    EffectProbability.COMMON, 0.10,   // C
+                    EffectProbability.UNCOMMON, 0.15, // U
+                    EffectProbability.RARE, 0.20,     // R
+                    EffectProbability.EPIC, 0.25,     // E
+                    EffectProbability.LEGENDARY, 0.30 // L
+            );
+
+            for (EffectProbability prob : EffectProbability.values()) {
+                if (prob == null) continue;
+
+                effectGradeDefRepository.findByEffectProbability(prob).ifPresentOrElse(
+                        def -> {
+                            // 이미 있으면 업데이트
+                            def.setPrice(effectPriceMap.get(prob));
+                            def.setWeight(effectAtkMultiplierMap.get(prob));
+                            effectGradeDefRepository.save(def);
+                        },
+                        () -> {
+                            // 없으면 새로 생성
+                            EffectGradeDef def = new EffectGradeDef();
+                            def.setEffectProbability(prob);
+                            def.setPrice(effectPriceMap.get(prob));
+                            def.setWeight(effectAtkMultiplierMap.get(prob));
+                            effectGradeDefRepository.save(def);
+                        }
+                );
+            }
+
+            // ItemGradeDef 초기화
+            Map<Grade, Long> itemGradePriceMap = Map.of(
+                    Grade.COMMON, 10L,
+                    Grade.UNCOMMON, 30L,
+                    Grade.RARE, 50L,
+                    Grade.EPIC, 80L,
+                    Grade.LEGENDARY, 100L
+            );
+
+            for (Grade grade : Grade.values()) {
+                if (grade == null) continue;
+
+                itemGradeDefRepository.findByGrade(grade).ifPresentOrElse(
+                        def -> {
+                            def.setPrice(itemGradePriceMap.get(grade));
+                            def.setWeight(1.0);
+                            itemGradeDefRepository.save(def);
+                        },
+                        () -> {
+                            ItemGradeDef def = new ItemGradeDef();
+                            def.setGrade(grade);
+                            def.setPrice(itemGradePriceMap.get(grade));
+                            def.setWeight(1.0);
+                            itemGradeDefRepository.save(def);
+                        }
+                );
+            }
         };
-    }
-
-    private void saveItemGradeIfNotExists(Grade grade, double weight, long price) {
-        itemGradeDefRepository.findByGrade(grade).orElseGet(() -> {
-            ItemGradeDef def = new ItemGradeDef();
-            def.setGrade(grade);
-            def.setWeight(weight);
-            def.setPrice(price);
-            return itemGradeDefRepository.save(def);
-        });
-    }
-
-    private void saveEffectGradeIfNotExists(Grade grade, long price, double weight) {
-        effectGradeDefRepository.findByGrade(grade).orElseGet(() -> {
-            EffectGradeDef def = new EffectGradeDef();
-            def.setGrade(grade);
-            def.setPrice(price);
-            def.setWeight(weight);
-            return effectGradeDefRepository.save(def);
-        });
     }
 }

@@ -1,6 +1,7 @@
 package com.scriptopia.demo.config;
 
-import com.scriptopia.demo.exception.CustomException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scriptopia.demo.dto.exception.ErrorResponse;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.utils.JwtProvider;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -11,36 +12,62 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.io.IOException;
-import java.security.SignatureException;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwt;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        String method = request.getMethod();
+
+        boolean authMatch = Arrays.stream(SecurityWhitelist.AUTH_WHITELIST)
+                .anyMatch(pattern -> pathMatcher.match(pattern, path));
+
+        boolean publicGetMatch = "GET".equalsIgnoreCase(method) &&
+                Arrays.stream(SecurityWhitelist.PUBLIC_GETS)
+                        .anyMatch(pattern -> pathMatcher.match(pattern, path));
+
+        boolean skip = authMatch || publicGetMatch;
+
+        if (skip) {
+            log.debug("➡️ Skipping JwtAuthFilter for whitelisted request: {} {}", method, path);
+        }
+
+        return skip;
+    }
+
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
 
-        String uri = req.getRequestURI();
-        if (uri.startsWith("/api/v1/public")) {
-            chain.doFilter(req, res);
-            return;
-        }
-
         String authHeader = req.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new CustomException(ErrorCode.E_400_MISSING_JWT);
+            setErrorResponse(res, ErrorCode.E_400_MISSING_JWT);
+            return;
         }
 
             String token = authHeader.substring(7);
@@ -56,18 +83,32 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            } catch (ExpiredJwtException e) {
-                throw new CustomException(ErrorCode.E_401_EXPIRED_JWT);
-            } catch (MalformedJwtException e) {
-                throw new CustomException(ErrorCode.E_401_MALFORMED);
-            } catch (UnsupportedJwtException e) {
-                throw new CustomException(ErrorCode.E_401_UNSUPPORTED_JWT);
+
             } catch (IllegalArgumentException e) {
-                throw new CustomException(ErrorCode.E_400_MISSING_JWT);
+                setErrorResponse(res,ErrorCode.E_400_MISSING_JWT);
+                return;
+            } catch (ExpiredJwtException e) {
+                setErrorResponse(res,ErrorCode.E_401_EXPIRED_JWT);
+                return;
+            } catch (MalformedJwtException e) {
+                setErrorResponse(res,ErrorCode.E_401_MALFORMED);
+                return;
+            } catch (UnsupportedJwtException e) {
+                setErrorResponse(res,ErrorCode.E_401_UNSUPPORTED_JWT);
+                return;
             } catch (JwtException e) {
-                throw new CustomException(ErrorCode.E_401_INVALID_SIGNATURE);
+                setErrorResponse(res,ErrorCode.E_401_INVALID_SIGNATURE);
+                return;
             }
 
             chain.doFilter(req, res);
+    }
+
+
+    private void setErrorResponse(HttpServletResponse res, ErrorCode code) throws IOException {
+        res.setStatus(code.getStatus().value());
+        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        res.setCharacterEncoding("UTF-8");
+        new ObjectMapper().writeValue(res.getOutputStream(), new ErrorResponse(code));
     }
 }

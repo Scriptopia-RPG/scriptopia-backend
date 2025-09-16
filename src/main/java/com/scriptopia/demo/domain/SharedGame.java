@@ -1,12 +1,12 @@
 package com.scriptopia.demo.domain;
 
-import com.scriptopia.demo.dto.sharedgame.SharedGameRequest;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @Entity
@@ -22,9 +22,10 @@ public class SharedGame {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
+    @Column(nullable = false, unique = true)
+    private UUID uuid;
+
     private String thumbnailUrl;
-    private Long recommend = 0L;
-    private Long totalPlayed = 0L;
 
     @Column(columnDefinition = "TEXT")
     private String title;
@@ -35,6 +36,17 @@ public class SharedGame {
     @Column(columnDefinition = "TEXT")
     private String backgroundStory;
     private LocalDateTime sharedAt;
+
+    @PrePersist
+    public void generateUuid() {
+        if(uuid == null) {
+            uuid = UUID.randomUUID();
+        }
+
+        if(sharedAt == null) {
+            sharedAt = LocalDateTime.now();
+        }
+    }
 
     public static SharedGame from(User user, History h) {
         SharedGame game = new SharedGame();

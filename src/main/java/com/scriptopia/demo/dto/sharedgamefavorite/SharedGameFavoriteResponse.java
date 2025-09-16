@@ -11,5 +11,5 @@ public class SharedGameFavoriteResponse {
     private Long totalPlayCount;
     private String title;
     private String[] tags;
-    private Float topScore;
+    private Long topScore;
 }

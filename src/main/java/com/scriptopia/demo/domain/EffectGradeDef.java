@@ -18,5 +18,6 @@ public class EffectGradeDef {
     private Double weight;
 
     @Enumerated(EnumType.STRING)
-    private Grade grade;
+    private EffectProbability effectProbability;
+
 }

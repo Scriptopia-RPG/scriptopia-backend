@@ -4,18 +4,18 @@ import com.scriptopia.demo.domain.PiaItem;
 import com.scriptopia.demo.domain.PiaItemPurchaseLog;
 import com.scriptopia.demo.domain.User;
 import com.scriptopia.demo.domain.UserPiaItem;
+import com.scriptopia.demo.dto.items.ItemDTO;
+import com.scriptopia.demo.dto.items.ItemDefRequest;
 import com.scriptopia.demo.dto.piashop.PiaItemRequest;
 import com.scriptopia.demo.dto.piashop.PiaItemResponse;
 import com.scriptopia.demo.dto.piashop.PiaItemUpdateRequest;
 import com.scriptopia.demo.dto.piashop.PurchasePiaItemRequest;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
-import com.scriptopia.demo.repository.PiaItemRepository;
-import com.scriptopia.demo.repository.PurchaseLogRepository;
-import com.scriptopia.demo.repository.UserPiaItemRepository;
-import com.scriptopia.demo.repository.UserRepository;
+import com.scriptopia.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +31,8 @@ public class PiaShopService {
     private final UserRepository userRepository;
     private final UserPiaItemRepository userPiaItemRepository;
     private final PurchaseLogRepository purchaseLogRepository;
+    private final ItemService itemService;
+    private final UserItemRepository userItemRepository;
 
     @Transactional
     public String createPiaItem(PiaItemRequest request) {
@@ -147,6 +149,41 @@ public class PiaShopService {
         log.setPiaItem(piaItem);
         log.setPrice(totalPrice);
         purchaseLogRepository.save(log);
+    }
+
+    @Transactional
+    public ItemDTO useItemAnvil(String userId, ItemDefRequest request){
+
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(
+                () -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND)
+        );
+        String ItemName = "아이템 모루";
+        PiaItem piaItem = piaItemRepository.findByName(ItemName).orElseThrow(
+                () -> new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND)
+        );
+
+        UserPiaItem userPiaItem = userPiaItemRepository.findByUserAndPiaItem(user, piaItem).orElseThrow(
+                () -> new CustomException(ErrorCode.E_400_ITEM_NOT_OWNED)
+        );
+
+        Long quantity = userPiaItem.getQuantity();
+        if (quantity < 1){
+            throw new CustomException(ErrorCode.E_400_ITEM_NOT_OWNED);
+        }
+
+        ItemDTO itemInWeb = itemService.createItemInWeb(userId, request);
+        quantity-=1;
+        if (quantity == 0){
+            userPiaItemRepository.delete(userPiaItem);
+        }
+        else {
+            userPiaItem.setQuantity(quantity);
+        }
+        return itemInWeb;
+
+
+
+
     }
 
 

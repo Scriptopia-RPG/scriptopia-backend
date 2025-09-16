@@ -2,6 +2,7 @@ package com.scriptopia.demo.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -31,8 +32,16 @@ public enum ErrorCode {
     E_400_MISSING_JWT("E400018", "토큰 값이 비어있습니다.", HttpStatus.BAD_REQUEST),
     E_400_PIA_ITEM_DUPLICATE("E400019", "이미 존재하는 PIA 아이템 이름입니다.", HttpStatus.BAD_REQUEST),
     E_400_INVALID_REQUEST("E400020", "이름이나, 금액이 비어있습니다.", HttpStatus.BAD_REQUEST),
-
-
+    E_400_GAME_ALREADY_IN_PROGRESS("E400021", "진행 중인 게임이 이미 존재합니다.", HttpStatus.BAD_REQUEST),
+    E_400_INVALID_SOCIAL_LOGIN_CODE("E400022", "유효하지 않거나 만료된 인증 코드입니다.", HttpStatus.BAD_REQUEST),
+    E_400_NO_EMAIL("E400023", "소셜 계정에서 이메일 정보를 제공하지 않았습니다.", HttpStatus.BAD_REQUEST),
+    E_400_UNSUPPORTED_PROVIDER("E400024", "지원하지 않는 소셜 로그인 공급자입니다.", HttpStatus.BAD_REQUEST),
+    E_400_ITEM_NO_USES_LEFT("E400025", "아이템 사용 가능 횟수가 남아있지 않습니다.", HttpStatus.BAD_REQUEST),
+    E_400_EMPTY_FILE("E400026", "파일이 비어있습니다.", HttpStatus.BAD_REQUEST),
+    E_400_INVALID_NPC_RANK("E400027", "잘못된 NPC 랭크입니다.", HttpStatus.BAD_REQUEST),
+    E_400_INVALID_ENUM_TYPE("E400028","요청 값이 잘못되었습니다. (Enum 타입 확인 필요)",HttpStatus.BAD_REQUEST),
+    E_400_TAG_DUPLICATED("E400029", "중복된 태그입니다.", HttpStatus.BAD_REQUEST),
+    E_400_IMAGE_URL_ERROR("E40030", "요청값이 잘못되었습니다.", HttpStatus.BAD_REQUEST),
 
     //401 Unauthorized
     E_401("401000", "인증되지 않은 요청입니다. (토큰 없음, 만료, 잘못됨)",HttpStatus.UNAUTHORIZED),
@@ -44,6 +53,7 @@ public enum ErrorCode {
     E_401_MALFORMED("E401006", "JWT 형식이 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
     E_401_EXPIRED_JWT("E401007", "JWT 토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
     E_401_UNSUPPORTED_JWT("E401008", "지원하지 않는 JWT 형식입니다.", HttpStatus.UNAUTHORIZED),
+    E_401_NOT_EQUAL_SHARED_GAME("E401009", "사용자가 공유한 게임이 아닙니다.", HttpStatus.UNAUTHORIZED),
 
     //403 Forbidden
     E_403("E403000", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
@@ -52,12 +62,20 @@ public enum ErrorCode {
 
 
     //404 Not Found
+    E_404("E404000","요청하신 리소스를 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
     E_404_REFRESH_NOT_FOUND("E404001", "유효한 리프레시 세션을 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
     E_404_USER_NOT_FOUND("E404002","사용자를 찾을 수 없습니다.",HttpStatus.NOT_FOUND),
     E_404_AUCTION_NOT_FOUND("E404003", "해당 아이템이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     E_404_SETTLEMENT_NOT_FOUND("E404004","정산 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     E_404_SHARED_GAME_NOT_FOUND("E404005", "공유된 게임을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     E_404_GAME_SESSION_NOT_FOUND("E404006", "게임을 불러올 수 없습니다.", HttpStatus.NOT_FOUND),
+    E_404_STORED_GAME_NOT_FOUND("E404007", "저장된 게임이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    E_404_Duplicated_Game_Session("E404008", "이미 저장된 게임이 존재합니다.", HttpStatus.NOT_FOUND),
+    E_404_ITEM_NOT_FOUND("E404009", "아이템이 없습니다.", HttpStatus.NOT_FOUND),
+    E_404_PAGE_NOT_FOUND("E404010", "페이지가 없습니다.", HttpStatus.NOT_FOUND),
+    E_404_SETTING_NOT_FOUND("E404011", "유저 설정을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    E_404_Tag_NOT_FOUND("E404012", "태그를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
 
 
     //409 Conflict
@@ -73,7 +91,16 @@ public enum ErrorCode {
 
     //500 Internal Server Error
     E_500("E_500000", "예상치 못한 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-    E_500_TOKEN_HASHING_FAILED("E_500001","리프레쉬 토큰 해싱에 실패했습니다.",HttpStatus.INTERNAL_SERVER_ERROR);
+    E_500_TOKEN_HASHING_FAILED("E_500001","리프레쉬 토큰 해싱에 실패했습니다.",HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_EXTERNAL_API_ERROR("E500002", "외부 게임 API 호출에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_DATABASE_ERROR("E500003", "데이터베이스 처리 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_TOKEN_CREATION_FAILED("E500004", "인증 토큰 생성에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_TOKEN_STORAGE_FAILED("E500005", "리프레시 토큰 저장에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    E_500_File_SAVED_FAILED("E500006", "파일 저장에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    //502 BAD_GATEWAY
+    E_502_OAUTH_SERVER_ERROR("E502001", "소셜 로그인 서버와의 통신에 실패했습니다.", HttpStatus.BAD_GATEWAY);
+
 
     private final String code;
     private final String message;

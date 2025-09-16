@@ -25,5 +25,7 @@ public class UserSetting {
 
     private int lineHeight;
 
+    private int wordSpacing;
+
     private LocalDateTime updatedAt;
 }

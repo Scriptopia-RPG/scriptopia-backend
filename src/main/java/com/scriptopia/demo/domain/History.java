@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -17,6 +18,9 @@ public class History {
 
     @Id @GeneratedValue
     private Long id;
+
+    @Column(nullable = false, unique = true)
+    private UUID uuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
@@ -56,6 +60,12 @@ public class History {
     private Long score;
     private LocalDateTime createdAt;
     private Boolean isShared;
+
+    @PrePersist
+    public void prePersist() {
+        if(uuid == null) uuid = UUID.randomUUID();
+        if(createdAt == null) createdAt = LocalDateTime.now();
+    }
 
     public History(User id, HistoryRequest req) {
         this.user = id;
