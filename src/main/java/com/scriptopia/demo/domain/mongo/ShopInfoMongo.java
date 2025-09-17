@@ -9,5 +9,5 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShopInfoMongo {
-    private List<Long> itemDefId;
+    private List<String> itemDefId;
 }

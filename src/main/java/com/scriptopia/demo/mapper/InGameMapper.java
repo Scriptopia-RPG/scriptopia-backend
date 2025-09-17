@@ -2,10 +2,7 @@ package com.scriptopia.demo.mapper;
 
 
 import com.scriptopia.demo.domain.mongo.*;
-import com.scriptopia.demo.dto.gamesession.ingame.InGameChoiceResponse;
-import com.scriptopia.demo.dto.gamesession.ingame.InGameInventoryResponse;
-import com.scriptopia.demo.dto.gamesession.ingame.InGameNpcResponse;
-import com.scriptopia.demo.dto.gamesession.ingame.InGamePlayerResponse;
+import com.scriptopia.demo.dto.gamesession.ingame.*;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.mongo.ItemDefMongoRepository;
@@ -106,6 +103,38 @@ public class InGameMapper {
                 .toList();
     }
 
+    public List<InGameShopTable> mapShopTable(List<String> createShopItems) {
+        return createShopItems.stream()
+                .map(shopItem -> {
+                    ItemDefMongo itemDef = itemDefMongoRepository.findById(shopItem)
+                            .orElseThrow(() -> new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND));
 
+                    return InGameShopTable.builder()
+
+                            // 아이템 정의 정보
+                            .shopItemId(itemDef.getId())
+                            .name(itemDef.getName())
+                            .description(itemDef.getDescription())
+                            .itemPicSrc(itemDef.getItemPicSrc())
+                            .category(itemDef.getCategory().name())
+                            .baseStat(itemDef.getBaseStat())
+                            .itemEffects(itemDef.getItemEffect().stream()
+                                    .map(e -> InGameShopTable.ItemEffect.builder()
+                                            .itemEffectName(e.getItemEffectName())
+                                            .itemEffectDescription(e.getItemEffectDescription())
+                                            .grade(e.getEffectProbability().name())
+                                            .build())
+                                    .toList())
+                            .strength(itemDef.getStrength())
+                            .agility(itemDef.getAgility())
+                            .intelligence(itemDef.getIntelligence())
+                            .luck(itemDef.getLuck())
+                            .mainStat(itemDef.getMainStat().name())
+                            .grade(itemDef.getGrade().name())
+                            .price(itemDef.getPrice().intValue())
+                            .build();
+                })
+                .toList();
+    }
 
 }
