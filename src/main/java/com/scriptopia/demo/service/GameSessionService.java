@@ -961,6 +961,49 @@ public class GameSessionService {
     }
 
 
+    @Transactional
+    public GameSessionMongo gameBuyItem(Long userId, String itemId) {
+        GameSession gameSession = gameSessionRepository.findByMongoId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+        GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameSession.getMongoId())
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+        PlayerInfoMongo playerInfo = gameSessionMongo.getPlayerInfo();
+        List<InventoryMongo> inventory = gameSessionMongo.getInventory();
+        ShopInfoMongo shopInfoMongo = gameSessionMongo.getShopInfo();
+        List<String> shopItems = shopInfoMongo.getItemDefId();
+
+        long playerGold = playerInfo.getGold();
+
+
+        ItemDefMongo targetDef = itemDefMongoRepository.findById(itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND));
+
+        long shopItemGold = targetDef.getPrice();
+
+        if(playerGold < shopItemGold){
+            throw new CustomException(ErrorCode.E_409_NOT_ENOUGH_MONEY);
+        }
+
+
+        InventoryMongo buyItem = InventoryMongo.builder()
+                .itemDefId(itemId)
+                .acquiredAt(LocalDateTime.now())
+                .equipped(false)
+                .source("item shop")
+                .build();
+
+        inventory.add(buyItem);
+        shopItems.remove(itemId);
+        shopInfoMongo.setItemDefId(shopItems);
+
+        gameSessionMongo.setInventory(inventory);
+        gameSessionMongo.setShopInfo(shopInfoMongo);
+
+        return gameSessionMongoRepository.save(gameSessionMongo);
+    }
+
 
     private void addStats(PlayerInfoMongo player, ItemDefMongo item) {
         player.setStrength(player.getStrength() + safeStat(item.getStrength()));

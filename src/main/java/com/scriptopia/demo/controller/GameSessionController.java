@@ -125,6 +125,20 @@ public class GameSessionController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
+    @DeleteMapping("/buyItem/{gameId}/{itemId}")
+    public ResponseEntity<GameSessionMongo> buyItem(
+            @PathVariable("gameId") String gameId,
+            @PathVariable("itemId") String itemId,
+            Authentication authentication) throws JsonProcessingException {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        GameSessionMongo response = gameSessionService.gameBuyItem(userId, itemId);
+
+        return ResponseEntity.ok(response);
+    }
+
 
     /*
      * 게임 -> 기존 게임 조회
