@@ -86,6 +86,8 @@ public enum ErrorCode {
     E_409_ALREADY_CONFIRMED("E409005","이미 정산이 완료된 항목입니다.", HttpStatus.CONFLICT),
     E_409_NOT_ENOUGH_MONEY("E409006", "보유 금액이 부족합니다.", HttpStatus.CONFLICT),
     E_409_NOT_THIS_SCENE("E409007", "적합하지 않은 곳입니다.", HttpStatus.CONFLICT),
+    E_409_DONT_SELL_EQUIPPED_ITEM("E409008", "착용중인 아이템은 팔 수 없습니다.", HttpStatus.CONFLICT),
+    E_404_ITEM_NOT_IN_SHOP("E409009", "아이템이 이미 팔렸습니다.", HttpStatus.CONFLICT),
 
 
     //412 Precondition Failed
