@@ -7,10 +7,10 @@ import java.security.SecureRandom;
 
 @Getter
 public enum ChoiceResultType {
-    BATTLE(20),
-    CHOICE(40),
-    DONE(45),
-    SHOP(5);
+    BATTLE(2),       // 20, 40, 45, 5
+    CHOICE(3),
+    DONE(5),
+    SHOP(90);
 
     private final int nextEventType;
 
