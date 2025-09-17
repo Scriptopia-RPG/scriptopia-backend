@@ -126,7 +126,7 @@ public class GameSessionController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    @DeleteMapping("/buyItem/{gameId}/{itemId}")
+    @PostMapping("/{gameId}/items/purchase/{itemId}")
     public ResponseEntity<GameSessionMongo> buyItem(
             @PathVariable("gameId") String gameId,
             @PathVariable("itemId") String itemId,
@@ -140,7 +140,7 @@ public class GameSessionController {
     }
 
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
-    @DeleteMapping("/sellItem/{gameId}/{itemId}")
+    @PostMapping("/{gameId}/items/sell/{itemId}")
     public ResponseEntity<GameSessionMongo> sellItem(
             @PathVariable("gameId") String gameId,
             @PathVariable("itemId") String itemId,
