@@ -112,6 +112,7 @@ public class InGameMapper {
                     return InGameShopTable.builder()
 
                             // 아이템 정의 정보
+                            .shopItemId(itemDef.getId())
                             .name(itemDef.getName())
                             .description(itemDef.getDescription())
                             .itemPicSrc(itemDef.getItemPicSrc())

@@ -15,6 +15,7 @@ import java.util.List;
 public class InGameShopTable {
 
     // 아이템 정의 정보
+    private String shopItemId;
     private String name;
     private String description;
     private String itemPicSrc;
