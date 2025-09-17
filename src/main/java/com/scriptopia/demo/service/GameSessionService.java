@@ -3,6 +3,7 @@ package com.scriptopia.demo.service;
 import com.scriptopia.demo.dto.gamesession.ingame.InGameBattleResponse;
 import com.scriptopia.demo.dto.gamesession.ingame.InGameChoiceResponse;
 import com.scriptopia.demo.dto.gamesession.ingame.InGameDoneResponse;
+import com.scriptopia.demo.dto.gamesession.ingame.InGameShopResponse;
 import com.scriptopia.demo.dto.items.ItemDefRequest;
 import com.scriptopia.demo.dto.items.ItemFastApiResponse;
 import com.scriptopia.demo.mapper.InGameMapper;
@@ -339,6 +340,20 @@ public class GameSessionService {
 
         } else if (currentSceneType == SceneType.SHOP) {
 
+            return InGameShopResponse.builder()
+                    .sceneType("SHOP")
+                    .startedAt(gameSessionMongo.getStartedAt())
+                    .updatedAt(LocalDateTime.now())
+                    .background(gameSessionMongo.getBackground())
+                    .location(gameSessionMongo.getLocation())
+                    .stageSize(gameSessionMongo.getStage() != null ? gameSessionMongo.getStage().size() : 0)
+                    .playerInfo(inGameMapper.mapPlayer(gameSessionMongo.getPlayerInfo()))
+                    .npcInfo(inGameMapper.mapNpc(gameSessionMongo.getNpcInfo()))
+                    .inventory(inGameMapper.mapInventory(gameSessionMongo.getInventory()))
+                    .shopTable(inGameMapper.mapShopTable(gameSessionMongo.getShopInfo().getItemDefId()))
+                    .build();
+
+
         } else if (currentSceneType == SceneType.BATTLE) {
             BattleInfoMongo battleInfo = gameSessionMongo.getBattleInfo();
 
@@ -406,6 +421,9 @@ public class GameSessionService {
                 gameToDone(userId);
             }
             case SceneType.DONE -> {
+                gameToChoice(userId);
+            }
+            case SceneType.SHOP -> {
                 gameToChoice(userId);
             }
             default -> throw new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND);
@@ -807,7 +825,7 @@ public class GameSessionService {
         ChoiceResultType nextScene = choiceMongo.getResultType();
         boolean isPass = GameBalanceUtil.isPass(probability);
 
-        RewardInfoMongo rewardInfo;
+        RewardInfoMongo rewardInfo = null;
 
         switch (nextScene) {
             case CHOICE -> {
@@ -826,6 +844,33 @@ public class GameSessionService {
 
                 gameSessionMongo = gameSessionMongoRepository.findById(gameId).get();
                 rewardInfo = handleReward(gameSessionMongo, rewardType, isPass);
+            }
+            case SHOP -> {
+                gameSessionMongo = gameSessionMongoRepository.findById(gameId).get();
+                List<String> createdItems = gameSessionMongo.getCreatedItems();
+                List<String> createShopItems = new ArrayList<>();
+
+                ItemDefRequest itemDefRequest = ItemDefRequest.builder()
+                        .worldView(gameSessionMongo.getHistoryInfo().getWorldView())
+                        .location(gameSessionMongo.getLocation())
+                        .playerTrait(null)
+                        .previousStory(gameSessionMongo.getBackground())
+                        .build();
+
+                for (int i=0; i<3; i+=1){
+                    String itemMongoId = itemService.createItemInGame(itemDefRequest);
+                    createdItems.add(itemMongoId);
+                    createShopItems.add(itemMongoId);
+                }
+
+                ShopInfoMongo shopInfoMongo = ShopInfoMongo.builder()
+                        .itemDefId(createShopItems)
+                        .build();
+
+                gameSessionMongo.setCreatedItems(createdItems);
+                gameSessionMongo.setShopInfo(shopInfoMongo);
+                gameSessionMongo.setSceneType(SceneType.SHOP);
+
             }
             default -> throw new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND);
         }
