@@ -84,7 +84,8 @@ public enum ErrorCode {
     E_409_REFRESH_REUSE_DETECTED("E409003", "리프레시 토큰 재사용이 감지되었습니다.", HttpStatus.CONFLICT),
     E_409_PASSWORD_SAME_AS_OLD("E409004","기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다.",HttpStatus.CONFLICT),
     E_409_ALREADY_CONFIRMED("E409005","이미 정산이 완료된 항목입니다.", HttpStatus.CONFLICT),
-    E_409_NOT_ENOUGH_MONEY("E4090056", "보유 금액이 부족합니다.", HttpStatus.CONFLICT),
+    E_409_NOT_ENOUGH_MONEY("E409006", "보유 금액이 부족합니다.", HttpStatus.CONFLICT),
+    E_409_NOT_THIS_SCENE("E409007", "적합하지 않은 곳입니다.", HttpStatus.CONFLICT),
 
 
     //412 Precondition Failed

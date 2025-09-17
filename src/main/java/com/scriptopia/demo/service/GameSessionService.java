@@ -969,6 +969,10 @@ public class GameSessionService {
         GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameSession.getMongoId())
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
 
+        if (gameSessionMongo.getSceneType() != SceneType.SHOP) {
+            throw new CustomException(ErrorCode.E_409_NOT_THIS_SCENE);
+        }
+
         PlayerInfoMongo playerInfo = gameSessionMongo.getPlayerInfo();
         List<InventoryMongo> inventory = gameSessionMongo.getInventory();
         ShopInfoMongo shopInfoMongo = gameSessionMongo.getShopInfo();
