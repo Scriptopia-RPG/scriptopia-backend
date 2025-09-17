@@ -42,6 +42,7 @@ public class GameSessionService {
     private final FastApiService fastApiService;
     private final ItemService itemService;
     private final InGameMapper inGameMapper;
+    private final ItemDefRepository itemDefRepository;
 
 
     public ResponseEntity<?> getGameSession(Long userid) {
@@ -1003,5 +1004,44 @@ public class GameSessionService {
             rewardInfo.setGainedItemDefId(gainItemList);
         }
         return rewardInfo;
+    }
+
+    @Transactional
+    public void usePotion(Long userId, String ItemId) {
+        GameSession gameSession = gameSessionRepository.findByMongoId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+        GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameSession.getMongoId())
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+        PlayerInfoMongo playerInfo = gameSessionMongo.getPlayerInfo();
+
+        List<InventoryMongo> items = gameSessionMongo.getInventory();
+
+        InventoryMongo targetItem = null;
+        for(InventoryMongo item : items) {
+            if(item.getItemDefId().equals(ItemId)) {
+                targetItem = item;
+                break;
+            }
+        }
+
+        if(targetItem == null) {
+            throw new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND);
+        }
+
+        com.scriptopia.demo.domain.ItemDef item = itemDefRepository.findById(Long.valueOf(ItemId))
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND));
+
+        if(item.getItemType() == ItemType.POTION) {
+            Integer life = playerInfo.getLife();
+            Integer tmpLife = life + 1;
+            playerInfo.setLife(tmpLife);
+
+            gameSessionMongoRepository.save(gameSessionMongo);
+        }
+        else {
+            throw new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND);
+        }
     }
 }
