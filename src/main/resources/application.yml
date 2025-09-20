@@ -57,8 +57,6 @@ oauth:
     redirect-uri: ${NAVER_REDIRECT_URI}
     scope: name email profile_image
 
-
-
 auth:
   jwt:
     issuer: scriptopia
