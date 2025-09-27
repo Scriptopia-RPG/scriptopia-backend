@@ -75,8 +75,6 @@ public class GameBalanceUtil {
     }};
 
 
-
-
     /**
      * @param grade
      * @return (0: STR, 1: AGI, 2: INT, 3: LUCK)
@@ -357,8 +355,8 @@ public class GameBalanceUtil {
     public static RewardInfoMongo getReward(RewardType rewardType, boolean isPass) {
         RewardInfoMongo.RewardInfoMongoBuilder builder = RewardInfoMongo.builder();
 
-        // 기본값: 성공이면 생명 +1, 실패면 생명 -1
-        builder.rewardLife(isPass ? 1 : -1);
+        // 기본값: 성공이면 생명 0, 실패면 생명 -1
+        builder.rewardLife(isPass ? 0 : -1);
 
         switch (rewardType) {
             case GOLD:
@@ -404,7 +402,12 @@ public class GameBalanceUtil {
                 playerInfo.setLife(playerInfo.getLife() + rewardInfo.getRewardLife());
 
             if (rewardInfo.getRewardGold() != null)
-                playerInfo.setGold(playerInfo.getGold() + rewardInfo.getRewardGold());
+                if (playerInfo.getGold() + rewardInfo.getRewardGold() < 0){
+                    playerInfo.setGold(0L);
+                }else{
+                    playerInfo.setGold(playerInfo.getGold() + rewardInfo.getRewardGold());
+                }
+
 
             if (rewardInfo.getRewardTrait() != null)
                 playerInfo.setTrait(rewardInfo.getRewardTrait());

@@ -295,7 +295,7 @@ public class GameSessionService {
                     .stageSize(gameSessionMongo.getStage() != null ? gameSessionMongo.getStage().size() : 0)
                     .playerInfo(inGameMapper.mapPlayer(gameSessionMongo.getPlayerInfo()))
                     .npcInfo(inGameMapper.mapNpc(gameSessionMongo.getNpcInfo()))
-                    .inventory(inGameMapper.mapInventory(gameSessionMongo.getInventory())  )
+                    .inventory(inGameMapper.mapInventory(gameSessionMongo.getInventory()))
                     .choiceInfo(inGameMapper.mapChoice(gameSessionMongo.getChoiceInfo()))
                     .build();
 
@@ -726,7 +726,7 @@ public class GameSessionService {
                 .selectedChoice(gameSessionMongo.getPreChoice())
                 .resultContent(RewardType.getRewardSummary(gameSessionMongo.getRewardInfo()))
                 .playerName(gameSessionMongo.getPlayerInfo().getName())
-                .playerVictory( (gameSessionMongo.getSceneType() == SceneType.BATTLE))
+                .playerVictory( gameSessionMongo.getRewardInfo().getRewardLife() >= 0 )
                 .build();
 
 
