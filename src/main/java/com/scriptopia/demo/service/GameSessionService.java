@@ -345,6 +345,7 @@ public class GameSessionService {
                     .startedAt(gameSessionMongo.getStartedAt())
                     .updatedAt(LocalDateTime.now())
                     .background(gameSessionMongo.getBackground())
+                    .progress(gameSessionMongo.getProgress())
                     .location(gameSessionMongo.getLocation())
                     .stageSize(gameSessionMongo.getStage() != null ? gameSessionMongo.getStage().size() : 0)
                     .playerInfo(inGameMapper.mapPlayer(gameSessionMongo.getPlayerInfo()))
@@ -421,9 +422,13 @@ public class GameSessionService {
                 gameToDone(userId);
             }
             case SceneType.DONE -> {
+                gameSessionMongo.setProgress(gameSessionMongo.getProgress() + 1);
+                gameSessionMongoRepository.save(gameSessionMongo);
                 gameToChoice(userId);
             }
             case SceneType.SHOP -> {
+                gameSessionMongo.setProgress(gameSessionMongo.getProgress() + 1);
+                gameSessionMongoRepository.save(gameSessionMongo);
                 gameToChoice(userId);
             }
             default -> throw new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND);
@@ -718,6 +723,11 @@ public class GameSessionService {
         GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
 
+        SceneType preSceneType = gameSessionMongo.getSceneType();
+        boolean isVictory = false;
+        if (preSceneType == SceneType.BATTLE) {
+            isVictory = gameSessionMongo.getBattleInfo().getPlayerWin();
+        }
 
         CreateGameDoneRequest fastApiRequest = CreateGameDoneRequest.builder()
                 .worldView(gameSessionMongo.getHistoryInfo().getWorldView())
@@ -726,7 +736,7 @@ public class GameSessionService {
                 .selectedChoice(gameSessionMongo.getPreChoice())
                 .resultContent(RewardType.getRewardSummary(gameSessionMongo.getRewardInfo()))
                 .playerName(gameSessionMongo.getPlayerInfo().getName())
-                .playerVictory( gameSessionMongo.getRewardInfo().getRewardLife() >= 0 )
+                .playerVictory( isVictory )
                 .build();
 
 
@@ -742,7 +752,6 @@ public class GameSessionService {
         gameSessionMongo.setUpdatedAt(LocalDateTime.now());
         gameSessionMongo.setLocation(fastApiResponse.getDoneInfo().getNewLocation());
         gameSessionMongo.setBackground(fastApiResponse.getDoneInfo().getReCap());
-        gameSessionMongo.setProgress(gameSessionMongo.getProgress() + 1);
 
 
         int currentProgress = gameSessionMongo.getProgress();
