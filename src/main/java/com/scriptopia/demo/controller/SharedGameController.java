@@ -48,7 +48,7 @@ public class SharedGameController {
                                                                                      @RequestParam(defaultValue = "20") int size,
                                                                                      @RequestParam(required = false) List<Long> tagIds,
                                                                                      @RequestParam(required = false) String query,
-                                                                                     @RequestParam(defaultValue = "LATEST")SharedGameSort sort) {
+                                                                                     @RequestParam(defaultValue = "POPULAR")SharedGameSort sort) {
         Long viewerId = (authentication == null) ? null : Long.valueOf(authentication.getName());
         return sharedGameService.getPublicSharedGames(viewerId, lastUUID, size, tagIds, query, sort);
     }
