@@ -159,7 +159,7 @@ public class SharedGameService {
 
         // 2) 태그/커서/정렬 전처리
         boolean tagEmpty = (tagIds == null || tagIds.isEmpty());
-        SharedGameSort effectiveSort = qBlank ? sort : SharedGameSort.LATEST;
+        SharedGameSort effectiveSort = qBlank ? sort : SharedGameSort.POPULAR;
 
         boolean useCursor = (lastUuid != null);
         Long lastId = null;
