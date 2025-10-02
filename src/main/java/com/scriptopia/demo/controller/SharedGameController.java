@@ -61,8 +61,8 @@ public class SharedGameController {
     게임공유 : 공유된 게임 상세 조회
      */
     @Operation(summary = "공유 게임 상세 조회")
-    @GetMapping("/{sharedGameId}")
-    public ResponseEntity<?> getSharedGameDetail(@PathVariable("sharedGameId") UUID sharedGameId) {
+    @GetMapping("/{sharedGameUuId}")
+    public ResponseEntity<?> getSharedGameDetail(@PathVariable("sharedGameUuId") UUID sharedGameId) {
         return sharedGameService.getDetailedSharedGame(sharedGameId);
     }
 
