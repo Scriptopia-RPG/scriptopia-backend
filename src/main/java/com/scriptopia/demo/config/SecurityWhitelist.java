@@ -15,7 +15,12 @@ public class SecurityWhitelist {
 
             "/oauth/**",
 
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+
             "/shops/pia/items"
+
+
 
 
     };

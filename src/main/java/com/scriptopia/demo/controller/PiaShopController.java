@@ -8,6 +8,8 @@ import com.scriptopia.demo.dto.piashop.PiaItemUpdateRequest;
 import com.scriptopia.demo.dto.piashop.PurchasePiaItemRequest;
 import com.scriptopia.demo.service.ItemService;
 import com.scriptopia.demo.service.PiaShopService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,11 +20,13 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "피아 상점 관련 API", description = "피아 상점 관련 API 입니다.")
 @RequestMapping("/shops")
 public class PiaShopController {
     private final PiaShopService piaShopService;
     private final ItemService itemService;
 
+    @Operation(summary = "PIA 상품 등록")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/items/pia")
     public ResponseEntity<String> createPiaItem(@RequestBody PiaItemRequest request) {
@@ -30,7 +34,7 @@ public class PiaShopController {
         return ResponseEntity.ok("PIA 아이템이 등록되었습니다.");
     }
 
-
+    @Operation(summary = "PIA 상품 수정")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PutMapping("/items/pia/{itemId}")
     public ResponseEntity<String> updatePiaItem(
@@ -42,11 +46,13 @@ public class PiaShopController {
         return ResponseEntity.ok(result);
     }
 
+    @Operation(summary = "PIA 판매 상품 목록 조회")
     @GetMapping("/pia/items")
     public ResponseEntity<List<PiaItemResponse>> getPiaItems() {
         return ResponseEntity.ok(piaShopService.getPiaItems());
     }
 
+    @Operation(summary = "PIA 상품 구매")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PostMapping("/pia/purchase")
     public ResponseEntity<String> purchasePiaItem(
@@ -58,6 +64,7 @@ public class PiaShopController {
         return ResponseEntity.ok("PIA 아이템을 구매했습니다.");
     }
 
+    @Operation(summary = "아이템 모루 사용")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PostMapping("/pia/items/anvil")
     public ResponseEntity<ItemDTO> useItemAnvil(
