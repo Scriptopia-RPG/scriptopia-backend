@@ -1,6 +1,8 @@
 package com.scriptopia.demo.service;
 
 import com.scriptopia.demo.dto.gamesession.ingame.*;
+import com.scriptopia.demo.dto.history.HistoryRequest;
+import com.scriptopia.demo.dto.history.HistoryResponse;
 import com.scriptopia.demo.dto.items.ItemDefRequest;
 import com.scriptopia.demo.dto.items.ItemFastApiResponse;
 import com.scriptopia.demo.mapper.InGameMapper;
@@ -41,6 +43,7 @@ public class GameSessionService {
     private final ItemService itemService;
     private final InGameMapper inGameMapper;
     private final ItemDefRepository itemDefRepository;
+    private final HistoryRepository historyRepository;
 
 
     public ResponseEntity<?> getGameSession(Long userid) {
@@ -590,8 +593,9 @@ public class GameSessionService {
                     .luck(npcStat[3])
                     .build();
 
-            gameSessionMongo.setNpcInfo(npcInfoMongo);
         }
+        gameSessionMongo.setNpcInfo(npcInfoMongo);
+
 
 
         List<ChoiceMongo> choiceList = new ArrayList<>();
@@ -635,6 +639,7 @@ public class GameSessionService {
     }
 
     /**
+     * 배틍
      * @param userId
      * @return win?
      */
@@ -1109,6 +1114,9 @@ public class GameSessionService {
         player.setAgility(player.getAgility() + safeStat(item.getAgility()));
         player.setIntelligence(player.getIntelligence() + safeStat(item.getIntelligence()));
         player.setLuck(player.getLuck() + safeStat(item.getLuck()));
+        if (item.getCategory() == ItemType.ARMOR){
+            player.setLife( item.getBaseStat() );
+        }
     }
 
     private void removeStats(PlayerInfoMongo player, ItemDefMongo item) {
@@ -1116,6 +1124,9 @@ public class GameSessionService {
         player.setAgility(player.getAgility() - safeStat(item.getAgility()));
         player.setIntelligence(player.getIntelligence() - safeStat(item.getIntelligence()));
         player.setLuck(player.getLuck() - safeStat(item.getLuck()));
+        if (item.getCategory() == ItemType.ARMOR){
+            player.setLife(80); // 추후 스탯에 따른 체력을 한다면
+        }
     }
 
     private int safeStat(Integer stat) {
@@ -1257,5 +1268,65 @@ public class GameSessionService {
 
         return gameSessionMongo;
     }
+
+
+    @Transactional
+    public ResponseEntity<HistoryResponse> gameToEnd(Long userId) {
+        GameSession gameSession = gameSessionRepository.findByMongoId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+        GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameSession.getMongoId())
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+
+
+        HistoryInfoMongo historyInfoMongo = gameSessionMongo.getHistoryInfo();
+
+
+        HistoryRequest historyRequest = HistoryRequest.builder()
+                .thumbnailUrl(null) // 필요 시
+                .title(historyInfoMongo.getTitle())
+                .worldView(historyInfoMongo.getWorldView())
+                .backgroundStory(historyInfoMongo.getBackgroundStory())
+                .worldPrompt(historyInfoMongo.getWorldPrompt())
+                .epilogue1Title(historyInfoMongo.getEpilogue1Title())
+                .epilogue1Content(historyInfoMongo.getEpilogue1Content())
+                .epilogue2Title(historyInfoMongo.getEpilogue2Title())
+                .epilogue2Content(historyInfoMongo.getEpilogue2Content())
+                .epilogue3Title(historyInfoMongo.getEpilogue3Title())
+                .epilogue3Content(historyInfoMongo.getEpilogue3Content())
+                .score(historyInfoMongo.getScore())
+                .build();
+
+
+        History history = new History(user, historyRequest);
+        historyRepository.save(history);
+
+
+        HistoryResponse historyResponse = HistoryResponse.builder()
+                .id(history.getId())
+                .userId(user.getId())
+                .thumbnailUrl(history.getThumbnailUrl())
+                .title(history.getTitle())
+                .worldView(history.getWorldView())
+                .backgroundStory(history.getBackgroundStory())
+                .worldPrompt(history.getWorldPrompt())
+                .epilogue1Title(history.getEpilogue1Title())
+                .epilogue1Content(history.getEpilogue1Content())
+                .epilogue2Title(history.getEpilogue2Title())
+                .epilogue2Content(history.getEpilogue2Content())
+                .epilogue3Title(history.getEpilogue3Title())
+                .epilogue3Content(history.getEpilogue3Content())
+                .score(history.getScore())
+                .createdAt(history.getCreatedAt())
+                .isShared(history.getIsShared())
+                .build();
+
+
+        return ResponseEntity.ok(historyResponse);
+    }
+
 
 }
