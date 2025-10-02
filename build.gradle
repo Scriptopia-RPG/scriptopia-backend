@@ -60,6 +60,9 @@ dependencies {
 
 	// 소셜 로그인 oauth2
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	// swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 }
 
 tasks.named('test') {
