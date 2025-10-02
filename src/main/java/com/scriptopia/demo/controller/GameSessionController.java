@@ -1,9 +1,9 @@
 package com.scriptopia.demo.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.scriptopia.demo.domain.GameSession;
 import com.scriptopia.demo.domain.mongo.GameSessionMongo;
 import com.scriptopia.demo.dto.gamesession.*;
+import com.scriptopia.demo.dto.history.HistoryResponse;
 import com.scriptopia.demo.service.GameSessionService;
 import com.scriptopia.demo.service.HistoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -195,4 +195,19 @@ public class GameSessionController {
         Long userId = Long.valueOf(authentication.getName());
         return historyService.seedDummySession(userId);
     }
+
+
+    /*
+     * 게임 종료 후 -> 히스토리 생성
+     */
+    @Operation(summary = "게임 종료 후 히스토리 저장")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PostMapping("/{gameId}/history")
+    public ResponseEntity<HistoryResponse> addHistory(
+            Authentication authentication,
+            @PathVariable("gameId") String gameId) {
+        Long userId = Long.valueOf(authentication.getName());
+        return gameSessionService.gameToEnd(userId);
+    }
+
 }
