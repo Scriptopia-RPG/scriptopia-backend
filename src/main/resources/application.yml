@@ -57,6 +57,8 @@ oauth:
     redirect-uri: ${NAVER_REDIRECT_URI}
     scope: name email profile_image
 
+
+
 auth:
   jwt:
     issuer: scriptopia
@@ -68,6 +70,15 @@ app:
   admin:
     username: ${ADMIN_NAME}
     password: ${ADMIN_PASSWORD}
+
+server:
+  servlet:
+    context-path: /api/v1
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
 
 image-dir: ./uploads/
 image-url-prefix: /images

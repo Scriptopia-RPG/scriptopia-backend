@@ -57,11 +57,9 @@ public class LocalDataSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        log.info("=== LocalDataSeeder: start ===");
 
         // 0) 이미 데이터가 있으면 중복 시드 방지
         if (userRepository.count() > 1) {
-            log.info("Users already exist. Skip seeding.");
             return;
         }
 

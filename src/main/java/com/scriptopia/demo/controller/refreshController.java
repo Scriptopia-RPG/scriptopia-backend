@@ -7,6 +7,8 @@ import com.scriptopia.demo.dto.token.RefreshRequest;
 import com.scriptopia.demo.service.LocalAccountService;
 import com.scriptopia.demo.service.RefreshTokenService;
 import com.scriptopia.demo.utils.JwtProvider;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -19,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/token")
+@Tag(name = "리프레쉬 토큰 관련 API", description = "리프레쉬 토큰 관련 API 입니다.")
 @RequiredArgsConstructor
 public class refreshController {
 
@@ -31,6 +34,7 @@ public class refreshController {
     private static final boolean COOKIE_SECURE = true;
     private static final String COOKIE_SAMESITE = "None";
 
+    @Operation(summary = "리프레시 토큰 재발급")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PostMapping("/refresh")
     public ResponseEntity<RefreshResponse> refresh(
