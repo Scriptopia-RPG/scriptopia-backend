@@ -49,13 +49,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 Arrays.stream(SecurityWhitelist.PUBLIC_GETS)
                         .anyMatch(pattern -> pathMatcher.match(pattern, path));
 
-        boolean skip = authMatch || publicGetMatch;
-
-        if (skip) {
-            log.debug("➡️ Skipping JwtAuthFilter for whitelisted request: {} {}", method, path);
-        }
-
-        return skip;
+        return authMatch || publicGetMatch;
     }
 
 

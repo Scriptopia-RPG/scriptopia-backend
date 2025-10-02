@@ -11,6 +11,8 @@ import com.scriptopia.demo.dto.sharedgame.SharedGameRequest;
 import com.scriptopia.demo.service.SharedGameFavoriteService;
 import com.scriptopia.demo.service.SharedGameService;
 import com.scriptopia.demo.service.TagDefService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +24,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/shared-games")
+@Tag(name = "게임 공유 관련 API", description = "게임 공유 관련 API 입니다.")
 @RequiredArgsConstructor
 public class SharedGameController {
     private final SharedGameService sharedGameService;
@@ -31,6 +34,8 @@ public class SharedGameController {
     /*
     게임 공유 -> 게임 공유하기
      */
+
+    @Operation(summary = "게임 공유하기")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<?> share(Authentication authentication, @RequestBody SharedGameRequest req) {
@@ -42,6 +47,7 @@ public class SharedGameController {
     /*
     게임 공유 -> 공유 게임 목록 조회
      */
+    @Operation(summary = "공유 게임 목록 조회")
     @GetMapping
     public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(Authentication authentication,
                                                                                      @RequestParam(required = false) UUID lastUUID,
@@ -56,6 +62,7 @@ public class SharedGameController {
     /*
     게임공유 : 공유된 게임 상세 조회
      */
+    @Operation(summary = "공유 게임 상세 조회")
     @GetMapping("/{sharedGameId}")
     public ResponseEntity<?> getSharedGameDetail(@PathVariable("sharedGameId") UUID sharedGameId) {
         return sharedGameService.getDetailedSharedGame(sharedGameId);
@@ -64,6 +71,7 @@ public class SharedGameController {
     /*
     게임공유 : 공유 게임 Like 요청
      */
+    @Operation(summary = "공유 게임 Like 요청")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("{sharedGameId}/like")
     public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameId") UUID sharedGameId, Authentication authentication) {
@@ -75,6 +83,7 @@ public class SharedGameController {
     /*
     게임공유 : 공유된 게임 태그 조회
      */
+    @Operation(summary = "게임 태그 조회")
     @GetMapping("/tags")
     public ResponseEntity<?> getSharedGameTags() {
         return sharedGameService.getTag();
@@ -83,6 +92,7 @@ public class SharedGameController {
     /*
     게임 공유 -> 공유한 게임 삭제
      */
+    @Operation(summary = "공유한 게임 삭제")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @DeleteMapping("/shared-games")
     public ResponseEntity<?> delete(Authentication authentication, @RequestBody SharedGameRequest req) {
@@ -96,6 +106,7 @@ public class SharedGameController {
     /*
     게임 공유 -> 공유한 게임 조회(내가 공유한 게임 조회)
      */
+    @Operation(summary = "(내가)공유한 게임 조회")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/me")
     public ResponseEntity<?> getMySharedGames(Authentication authentication) {
@@ -104,6 +115,7 @@ public class SharedGameController {
         return sharedGameService.getMySharedGames(userId);
     }
 
+    @Operation(summary = "게임 태그 생성")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/tags")
     public ResponseEntity<?> addTag(@RequestBody TagDefCreateRequest req) {
@@ -111,6 +123,7 @@ public class SharedGameController {
         return tagDefService.addTagName(req);
     }
 
+    @Operation(summary = "게임 태그 삭제 ")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @DeleteMapping("/tags")
     public ResponseEntity<?> removeTag(@RequestBody TagDefDeleteRequest req) {

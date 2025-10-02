@@ -8,6 +8,8 @@ import com.scriptopia.demo.dto.users.UserSettingsDTO;
 import com.scriptopia.demo.service.HistoryService;
 import com.scriptopia.demo.service.UserCharacterImgService;
 import com.scriptopia.demo.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/users/me")
+@Tag(name = "유저 관련 API", description = "유저 관련 API 입니다.")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -28,6 +31,7 @@ public class UserController {
     private final HistoryService historyService;
     private final UserCharacterImgService userCharacterImgService;
 
+    @Operation(summary = "보유 장비 아이템 조회")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @GetMapping("/items/game")
     public ResponseEntity<List<ItemDTO>> getGameItems(
@@ -38,6 +42,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "보유 피아 아이템 조회")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @GetMapping("/items/pia")
     public ResponseEntity<List<PiaItemDTO>> getPiaItems(
@@ -48,6 +53,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "사용자 옵션 조회")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @GetMapping("/settings")
     public ResponseEntity<UserSettingsDTO> getUserSettings(
@@ -58,6 +64,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "사용자 옵션 변경")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PutMapping("/settings")
     public ResponseEntity<String> updateUserSettings(
@@ -69,6 +76,7 @@ public class UserController {
         return ResponseEntity.ok("사용자 설정이 변경되었습니다.");
     }
 
+    @Operation(summary = "사용자 재화 조회")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @GetMapping("/assets")
     public ResponseEntity<UserAssetsResponse> getUserAssets(
@@ -79,6 +87,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "사용자 게임 기록 조회")
     @GetMapping("/games/histories")
     public ResponseEntity<List<HistoryPageResponse>> getHistory(@RequestParam(required = false) UUID lastId,
                                                                 @RequestParam(defaultValue = "10") int size,
@@ -88,6 +97,7 @@ public class UserController {
         return historyService.fetchMyHistory(userId, lastId, size);
     }
 
+    @Operation(summary = "프로필 이미지 변경")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/profile-images/url")
     public ResponseEntity<?> saveUserCharacterImg(Authentication authentication, @RequestParam("url") String url) {
@@ -96,6 +106,7 @@ public class UserController {
         return userCharacterImgService.saveUserCharacterImg(userId, url);
     }
 
+    @Operation(summary = "프로필 등록할 수 있는 이미지 조회")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @GetMapping("/images")
     public ResponseEntity<?> getUserCharacterImgs(Authentication authentication) {
@@ -107,6 +118,7 @@ public class UserController {
     /*
     등록할 수 있는 이미지 저장
     */
+    @Operation(summary = "등록할 수 있는 이미지 저장")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/save/img")
     public ResponseEntity<?> saveCharacterImg(Authentication authentication, @RequestParam("file") MultipartFile file) {
