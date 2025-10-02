@@ -200,6 +200,7 @@ public class GameSessionController {
     /*
      * 게임 종료 후 -> 히스토리 생성
      */
+    @Operation(summary = "게임 종료 후 히스토리 저장")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/{gameId}/history")
     public ResponseEntity<HistoryResponse> addHistory(
