@@ -99,25 +99,26 @@ public class SharedGameService {
         SharedGame game = sharedGameRepository.findByUuid(uuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_SHARED_GAME_NOT_FOUND));
 
-        List<String> tagName = gameTagRepository.findTagNamesBySharedGameId(game.getId());
+        List<com.scriptopia.demo.dto.sharedgame.TagDto> tagDtos = gameTagRepository.findTagDtosBySharedGameId(game.getId());
 
         List<SharedGameScore> score = sharedGameScoreRepository.findAllBySharedGameIdOrderByScoreDescCreatedAtDesc(game.getId());
 
         PublicSharedGameDetailResponse dto = new PublicSharedGameDetailResponse();
         dto.setSharedGameUUID(game.getUuid());
-        dto.setNickname(game.getUser().getNickname());
-        dto.setThumbnailUrl(game.getThumbnailUrl());
-        dto.setTotalPlayed(sharedGameScoreRepository.countBySharedGameId(game.getId()));
+        dto.setPosterUrl(game.getThumbnailUrl());
         dto.setTitle(game.getTitle());
         dto.setWorldView(game.getWorldView());
         dto.setBackgroundStory(game.getBackgroundStory());
+        dto.setCreator(game.getUser().getNickname());
+        dto.setPlayCount(sharedGameScoreRepository.countBySharedGameId(game.getId()));
+        dto.setLikeCount(sharedGameFavoriteRepository.countBySharedGameId(game.getId()));
         dto.setSharedAt(game.getSharedAt());
 
         List<PublicSharedGameDetailResponse.TagDto> tagarray = new ArrayList<>();
         List<PublicSharedGameDetailResponse.TopScoreDto> topscorearray = new ArrayList<>();
 
-        for(var tagNames : tagName) {
-            tagarray.add(new PublicSharedGameDetailResponse.TagDto(tagNames));
+        for(var tagDto : tagDtos) {
+            tagarray.add(new PublicSharedGameDetailResponse.TagDto(tagDto.getTagId(), tagDto.getTagName()));
         }
 
         dto.setTags(tagarray);
@@ -146,7 +147,7 @@ public class SharedGameService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(Long userId,
+    public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(
                                                                                UUID lastUuid,
                                                                                int size,
                                                                                List<Long> tagIds,
@@ -221,12 +222,6 @@ public class SharedGameService {
 
             Long topScore = sharedGameScoreRepository.maxScoreBySharedGameId(g.getId());
             dto.setTopScore(topScore == null ? 0L : topScore);
-
-            // 좋아요 여부
-            if (userId != null) {
-                boolean liked = sharedGameFavoriteRepository.existsByUserIdAndSharedGameId(userId, g.getId());
-                dto.setLiked(liked);
-            }
 
             // 태그
             dto.setTags(gameTagRepository.findTagDtosBySharedGameId(g.getId()));
