@@ -554,6 +554,49 @@
                     }
                     break;
 
+            case 'GAMEOVER':
+                choiceContainer.innerHTML = '';
+                const gameOverBtn = document.createElement('button');
+                gameOverBtn.className = 'btn';
+                gameOverBtn.textContent = '게임 패배 - 결과 보기';
+                gameOverBtn.addEventListener('click', () => {
+                    if (data.rewardInfo) {
+                        const r = data.rewardInfo;
+                        choiceContainer.innerHTML = `
+                <div>게임 패배 결과</div>
+                <div>획득 아이템: ${r.gainedItemNames?.join(', ') || '없음'}</div>
+                <div>보상: STR ${r.rewardStrength}, AGI ${r.rewardAgility},
+                      INT ${r.rewardIntelligence}, LUCK ${r.rewardLuck},
+                      Life ${r.rewardLife}, Gold ${r.rewardGold}</div>`;
+                    } else {
+                        choiceContainer.innerHTML = '<div>결과 없음</div>';
+                    }
+                });
+                choiceContainer.appendChild(gameOverBtn);
+                break;
+
+
+                case 'GAMECLEAR':
+                    choiceContainer.innerHTML = '';
+                    const gameClearBtn = document.createElement('button');
+                    gameClearBtn.className = 'btn';
+                    gameClearBtn.textContent = '게임 승리 - 결과 보기';
+                    gameClearBtn.addEventListener('click', () => {
+                        if (data.rewardInfo) {
+                            const r = data.rewardInfo;
+                            choiceContainer.innerHTML = `
+                    <div>게임 승리 결과</div>
+                    <div>획득 아이템: ${r.gainedItemNames?.join(', ') || '없음'}</div>
+                    <div>보상: STR ${r.rewardStrength}, AGI ${r.rewardAgility},
+                          INT ${r.rewardIntelligence}, LUCK ${r.rewardLuck},
+                          Life ${r.rewardLife}, Gold ${r.rewardGold}</div>`;
+                        } else {
+                            choiceContainer.innerHTML = '<div>결과 없음</div>';
+                        }
+                    });
+                    choiceContainer.appendChild(gameClearBtn);
+                    break;
+
                 default:
                     choiceContainer.innerHTML = '<div>알 수 없는 장면</div>';
             }

@@ -1,9 +1,6 @@
 package com.scriptopia.demo.service;
 
-import com.scriptopia.demo.dto.gamesession.ingame.InGameBattleResponse;
-import com.scriptopia.demo.dto.gamesession.ingame.InGameChoiceResponse;
-import com.scriptopia.demo.dto.gamesession.ingame.InGameDoneResponse;
-import com.scriptopia.demo.dto.gamesession.ingame.InGameShopResponse;
+import com.scriptopia.demo.dto.gamesession.ingame.*;
 import com.scriptopia.demo.dto.items.ItemDefRequest;
 import com.scriptopia.demo.dto.items.ItemFastApiResponse;
 import com.scriptopia.demo.mapper.InGameMapper;
@@ -386,6 +383,34 @@ public class GameSessionService {
                     .curTurnId(battleInfo != null ? battleInfo.getCurTurnId() : null)
                     .build();
 
+        } else if (currentSceneType == SceneType.GAMEOVER) {
+
+            return InGameOverResponse.builder()
+                    .sceneType("GAMEOVER")
+                    .startedAt(gameSessionMongo.getStartedAt())
+                    .updatedAt(gameSessionMongo.getUpdatedAt())
+                    .background(gameSessionMongo.getBackground())
+                    .location(gameSessionMongo.getLocation())
+                    .progress(gameSessionMongo.getProgress())
+                    .stageSize(gameSessionMongo.getStage() != null ? gameSessionMongo.getStage().size() : 0)
+                    .playerInfo(inGameMapper.mapPlayer(gameSessionMongo.getPlayerInfo()))
+                    .npcInfo(inGameMapper.mapNpc(gameSessionMongo.getNpcInfo()))
+                    .inventory(inGameMapper.mapInventory(gameSessionMongo.getInventory()))
+                    .build();
+        } else if (currentSceneType == SceneType.GAMECLEAR) {
+
+            return InGameClearResponse.builder()
+                    .sceneType("GAMECLEAR")
+                    .startedAt(gameSessionMongo.getStartedAt())
+                    .updatedAt(gameSessionMongo.getUpdatedAt())
+                    .background(gameSessionMongo.getBackground())
+                    .location(gameSessionMongo.getLocation())
+                    .progress(gameSessionMongo.getProgress())
+                    .stageSize(gameSessionMongo.getStage() != null ? gameSessionMongo.getStage().size() : 0)
+                    .playerInfo(inGameMapper.mapPlayer(gameSessionMongo.getPlayerInfo()))
+                    .npcInfo(inGameMapper.mapNpc(gameSessionMongo.getNpcInfo()))
+                    .inventory(inGameMapper.mapInventory(gameSessionMongo.getInventory()))
+                    .build();
         }
 
         return null;
@@ -411,6 +436,19 @@ public class GameSessionService {
         String gameId = gameSession.getMongoId();
         GameSessionMongo gameSessionMongo = gameSessionMongoRepository.findById(gameId)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_GAME_SESSION_NOT_FOUND));
+
+
+        if( gameSessionMongo.getPlayerInfo().getLife() <= 0 ){
+            // gameOver 메소드 구현 필요
+            return gameToEnd(gameSessionMongo, 0);
+        }
+
+        if ( gameSessionMongo.getProgress() > gameSessionMongo.getStage().size()){
+            // gmaeClear 즉
+            return gameToEnd(gameSessionMongo, 1);
+
+        }
+
 
 
         SceneType currentSceneType = gameSessionMongo.getSceneType();
@@ -1193,4 +1231,31 @@ public class GameSessionService {
             throw new CustomException(ErrorCode.E_404_ITEM_NOT_FOUND);
         }
     }
+
+
+    /**
+     * 게임 종료 처리 (0 이면 gameover 1이면 gameclear
+     */
+    private GameSessionMongo gameToEnd(GameSessionMongo gameSessionMongo, int gameOver) {
+        GameEndRequest fastApiRequest = GameEndRequest.builder()
+                .worldView(gameSessionMongo.getHistoryInfo().getWorldView())
+                .location(gameSessionMongo.getLocation())
+                .previousStory(gameSessionMongo.getBackground())
+                .playerName(gameSessionMongo.getPlayerInfo().getName())
+                .gameEnd(gameOver)
+                .build();
+
+        SceneType isGameClear = SceneType.GAMEOVER;
+        if ( gameOver == 1){
+            isGameClear =  SceneType.GAMECLEAR;
+        }
+        GameEndResponse fastApiResponse = fastApiService.end(fastApiRequest);
+
+        gameSessionMongo.setBackground(fastApiResponse.getEndStory());
+        gameSessionMongo.setSceneType(isGameClear);
+        gameSessionMongoRepository.save(gameSessionMongo);
+
+        return gameSessionMongo;
+    }
+
 }
