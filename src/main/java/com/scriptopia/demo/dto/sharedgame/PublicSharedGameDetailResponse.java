@@ -10,12 +10,13 @@ import java.util.UUID;
 @Data
 public class PublicSharedGameDetailResponse {
     private UUID sharedGameUUID;
-    private String nickname;
-    private String thumbnailUrl;
-    private Long totalPlayed;
+    private String posterUrl;
     private String title;
     private String worldView;
     private String backgroundStory;
+    private String creator;
+    private Long playCount;
+    private Long likeCount;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime sharedAt;
@@ -24,9 +25,11 @@ public class PublicSharedGameDetailResponse {
 
     @Data
     public static class TagDto {
+        private Long tagId;
         private String tagName;
 
-        public TagDto(String tagName) {
+        public TagDto(Long tagId, String tagName) {
+            this.tagId = tagId;
             this.tagName = tagName;
         }
     }

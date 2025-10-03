@@ -65,5 +65,14 @@ public class FastApiService {
                 .block();
     }
 
+    // 게임 종료 생성 (확장용)
+    public GameEndResponse end(GameEndRequest request) {
+        return fastApiWebClient.post()
+                .uri(FastApiEndpoint.END.getPath())
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(GameEndResponse.class)
+                .block();
+    }
 
 }

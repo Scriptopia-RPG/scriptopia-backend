@@ -17,5 +17,5 @@ public class HistoryInfoMongo {
     private String epilogue2Content;
     private String epilogue3Title;
     private String epilogue3Content;
-    private Integer score;
+    private Long score;
 }

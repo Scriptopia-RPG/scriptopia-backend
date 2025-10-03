@@ -3,6 +3,8 @@ package com.scriptopia.demo.controller;
 import com.scriptopia.demo.dto.auth.*;
 import com.scriptopia.demo.service.LocalAccountService;
 import com.scriptopia.demo.service.RefreshTokenService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -15,17 +17,17 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "로컬 인증 API", description = "로컬 인증 관련 API 입니다.")
 @RequiredArgsConstructor
 public class AuthController {
     private final LocalAccountService localAccountService;
     private final RefreshTokenService refreshTokenService;
-
     private static final String RT_COOKIE = "RT";
     private static final boolean COOKIE_SECURE = true;
     private static final String COOKIE_SAMESITE = "None";
 
 
-
+    @Operation(summary = "로그아웃")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
             @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
@@ -38,7 +40,7 @@ public class AuthController {
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
-
+    @Operation(summary = "로컬 로그인")
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @RequestBody @Valid LoginRequest req,
@@ -49,6 +51,7 @@ public class AuthController {
         return ResponseEntity.ok(localAccountService.login(req, request, response));
     }
 
+    @Operation(summary = "로컬 계정 회원가입")
     @PostMapping("/register")
     public ResponseEntity<?> register(
             @RequestBody @Valid RegisterRequest request
@@ -57,6 +60,7 @@ public class AuthController {
         return ResponseEntity.ok("회원가입에 성공했습니다.");
     }
 
+    @Operation(summary = "이메일 중복 검증")
     @PostMapping("/email/verify")
     public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
 
@@ -65,21 +69,21 @@ public class AuthController {
         return ResponseEntity.ok("사용 가능한 이메일입니다.");
     }
 
-
+    @Operation(summary = "이메일 인증 코드 전송")
     @PostMapping("/email/code/send")
     public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest request) {
         localAccountService.sendVerificationCode(request.getEmail());
         return ResponseEntity.ok("인증 코드가 이메일로 발송되었습니다.");
     }
 
+    @Operation(summary = "이메일 인증 코드 확인")
     @PostMapping("/email/code/verify")
     public ResponseEntity<String> verifyCode(@RequestBody @Valid VerifyCodeRequest request) {
         localAccountService.verifyCode(request.getEmail(), request.getCode());
         return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
-
     }
 
-
+    @Operation(summary = "비밀번호 초기화 링크 발송")
     @PostMapping("/password/reset/send")
     public ResponseEntity<?> sendResetMail(@Valid @RequestBody SendCodeRequest request){
 
@@ -88,7 +92,7 @@ public class AuthController {
         return ResponseEntity.ok("비밀번호 초기화 링크를 전송했습니다.");
     }
 
-
+    @Operation(summary = "비밀번호 초기화")
     @PatchMapping("/password/reset")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         localAccountService.resetPassword(request.getToken(), request.getNewPassword());
@@ -96,7 +100,7 @@ public class AuthController {
         return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
 
-
+    @Operation(summary = "비밀번호 재설정")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PatchMapping("/password/change")
     public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest request,

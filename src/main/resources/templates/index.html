@@ -46,6 +46,10 @@
         </div>
     </div>
 
+    <div id="progressContainer" style="margin-top:10px; text-align:center; display:none;">
+        진행도: <span id="progressValue">0/0</span>
+    </div>
+
     <!-- 중단: 좌측, 중앙, 우측 영역 -->
     <div class="middle">
         <!-- 좌측: Player 정보 + 인벤토리 -->
@@ -54,9 +58,14 @@
                 <h3>Player Info</h3>
                 <div id="playerStats">HP: 100<br>MP: 50<br>Level: 1</div>
             </div>
-            <div class="item-info" id="itemInfo">
-                <h3>Inventory</h3>
-                <div id="playerItems">아이템 없음</div>
+            <div class="item-info" id="equippedItems">
+                <h3>장착 중 장비</h3>
+                <div id="equippedList">없음</div>
+            </div>
+
+            <div class="item-info" id="inventoryItems">
+                <h3>소유 아이템</h3>
+                <div id="inventoryList">없음</div>
             </div>
         </div>
 
@@ -75,9 +84,23 @@
 </div>
 
 <script th:inline="javascript">
+    let gameId = "sss"; // 초기값 고정
+    let data = {};
+
+    // 진행도 표시
+    const progressContainer = document.getElementById('progressContainer');
+    const progressValue = document.getElementById('progressValue');
+
+    if (data.progress !== undefined && data.stageSize !== undefined) {
+        progressContainer.style.display = 'block';
+        progressValue.textContent = `${data.progress} / ${data.stageSize}`;
+    } else {
+        progressContainer.style.display = 'none';
+    }
+
+
     document.addEventListener('DOMContentLoaded', () => {
         let accessToken = localStorage.getItem('accessToken');
-        let gameId = "sss"; // 고정
 
         const loginContainer = document.getElementById('loginContainer');
         const tokenDisplay = document.getElementById('tokenDisplay');
@@ -92,17 +115,83 @@
         const getInGameDataBtn = document.getElementById('getInGameDataBtn');
         const keepGameBtn = document.getElementById('keepGameBtn');
 
+
+        const historyModal = document.getElementById('historyModal');
+        const closeHistoryModal = document.getElementById('closeHistoryModal');
+
+        closeHistoryModal.onclick = () => historyModal.style.display = 'none';
+        window.onclick = (event) => { if(event.target === historyModal) historyModal.style.display = 'none'; };
+
+        const showHistoryModal = (history) => {
+            if(!history) return;
+            document.getElementById('historyModalTitle').textContent = history.title || '제목 없음';
+            document.getElementById('historyModalWorldView').textContent = history.worldView || '';
+            document.getElementById('historyModalBackground').textContent = history.backgroundStory || '';
+            document.getElementById('historyModalScore').textContent = `점수: ${history.score || 0}`;
+
+            const epiloguesDiv = document.getElementById('historyModalEpilogues');
+            epiloguesDiv.innerHTML = '';
+            for(let i=1;i<=3;i++){
+                const title = history[`epilogue${i}Title`];
+                const content = history[`epilogue${i}Content`];
+                if(title || content){
+                    const div = document.createElement('div');
+                    div.innerHTML = `<h4>${title || ''}</h4><p>${content || ''}</p>`;
+                    epiloguesDiv.appendChild(div);
+                }
+            }
+
+            historyModal.style.display = 'block';
+        };
+
+
+
+
+
+
+
+
+
+
+        // 초기 로그인 상태 반영
+        if (accessToken) {
+            loginContainer.style.display = 'none';
+            tokenDisplay.style.display = 'block';
+            tokenValue.textContent = accessToken;
+        }
+
+        // 요청 유틸 (버튼 비활성화 + 에러 핸들링)
+        const safeFetch = async (btn, url, options = {}) => {
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch(url, options);
+                if (!res.ok) {
+                    let msg;
+                    try { msg = (await res.json()).message; } catch { msg = await res.text(); }
+                    throw new Error(msg || '알 수 없는 오류');
+                }
+                return await res.json();
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };
+
         // 로그아웃
         logoutBtn.addEventListener('click', async () => {
             try {
-                const res = await fetch('/api/v1/auth/logout', {
+                await safeFetch(logoutBtn, '/api/v1/auth/logout', {
                     method: 'POST',
                     headers: {'Authorization': 'Bearer ' + accessToken}
                 });
-                if(!res.ok){ alert('로그아웃 실패'); return; }
-
+            } catch(err) {
+                console.error(err);
+                alert('로그아웃 오류(서버 응답 실패): ' + err.message);
+            } finally {
+                // 서버 응답 성공/실패와 상관없이 클라이언트 상태는 초기화
                 localStorage.removeItem('accessToken');
+                localStorage.removeItem('gameId');
                 accessToken = null;
+                gameId = null;
 
                 loginContainer.style.display = 'block';
                 tokenDisplay.style.display = 'none';
@@ -110,9 +199,7 @@
                 choiceContainer.innerHTML = '';
                 playerStats.innerHTML = 'HP: 100<br>MP: 50<br>Level: 1';
                 playerItems.textContent = '아이템 없음';
-
-                alert('로그아웃 완료');
-            } catch(err){ console.error(err); alert('로그아웃 오류'); }
+            }
         });
 
         // 로그인
@@ -122,94 +209,454 @@
             const deviceId = document.getElementById('deviceId').value;
 
             try {
-                const res = await fetch('/api/v1/auth/login',{
+                const data = await safeFetch(loginBtn, '/api/v1/auth/login', {
                     method:'POST',
                     headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({email,password,deviceId})
                 });
-                if(!res.ok){ alert('로그인 실패'); return; }
-                const data = await res.json();
+
                 accessToken = data.accessToken;
                 localStorage.setItem('accessToken', accessToken);
 
                 loginContainer.style.display = 'none';
                 tokenDisplay.style.display = 'block';
                 tokenValue.textContent = accessToken;
-            } catch(err){ console.error(err); alert('로그인 오류'); }
+            } catch(err){ console.error(err); alert('로그인 오류: ' + err.message); }
         });
 
-        // 게임 불러오기
-        getInGameDataBtn.addEventListener('click', async () => {
+        // 게임 불러오기 기능을 함수로 분리
+        const loadGameData = async () => {
             if(!accessToken){ alert('로그인 필요'); return; }
+            if(!gameId){ alert('게임 ID 없음'); return; }
             try {
-                const res = await fetch(`/api/v1/games/${gameId}`,{
+                const data = await safeFetch(getInGameDataBtn, `/api/v1/games/${gameId}`, {
                     headers:{'Authorization':'Bearer ' + accessToken}
                 });
-                if(!res.ok){ alert('조회 실패'); return; }
-                const data = await res.json();
                 updateGameUI(data);
-            } catch(err){ console.error(err); alert('조회 오류'); }
-        });
+            } catch(err){ console.error(err); alert('조회 오류: ' + err.message); }
+        };
+
+
+        // 게임 불러오기
+        getInGameDataBtn.addEventListener('click', loadGameData);
 
         // 게임 진행
         keepGameBtn.addEventListener('click', async () => {
             if(!accessToken){ alert('로그인 필요'); return; }
             try{
-                const res = await fetch(`/api/v1/games/progress`,{
+                const data = await safeFetch(keepGameBtn, `/api/v1/games/${gameId}/progress`, {
                     method:'POST',
                     headers:{'Authorization':'Bearer ' + accessToken}
                 });
-                if(!res.ok){ alert('게임 진행 실패'); return; }
-                const data = await res.json();
-                updateGameUI(data);
-            } catch(err){ console.error(err); alert('진행 오류'); }
+                // 진행 후 바로 게임 데이터 갱신
+                await loadGameData();
+            } catch(err){ console.error(err); alert('진행 오류: ' + err.message); }
         });
 
         // 선택 전송
         const sendChoice = async (index) => {
+            if(!accessToken){ alert('로그인 필요'); return; }
             try{
-                const res = await fetch(`/api/v1/games/${gameId}/choice`,{
+                const data = await safeFetch(null, `/api/v1/games/${gameId}/select`, {
                     method:'POST',
                     headers:{'Content-Type':'application/json','Authorization':'Bearer '+accessToken},
                     body: JSON.stringify({choiceIndex:index})
                 });
-                if(!res.ok){ alert('선택 실패'); return; }
-                const data = await res.json();
-                updateGameUI(data);
-            } catch(err){ console.error(err); alert('선택 오류'); }
+                // 진행 후 바로 게임 데이터 갱신
+                await loadGameData();
+            } catch(err){ console.error(err); alert('선택 오류: ' + err.message); }
+        };
+
+
+        // 상점 아이템 구매
+        const buyItem = async (item) => {
+            if(!accessToken){ alert('로그인 필요'); return; }
+
+            try {
+                // 아이템 구매 API 호출
+                const data = await safeFetch(null, `/api/v1/games/${gameId}/items/purchase/${item.shopItemId}`, {
+                    method: 'POST',
+                    headers: {'Authorization':'Bearer ' + accessToken}
+                });
+
+                // 진행 후 바로 게임 데이터 갱신
+                await loadGameData();
+                alert(`✅ "${item.name}" 구매 완료!`);
+            } catch(err) {
+                console.error(err);
+                alert('구매 오류: ' + err.message);
+            }
+        };
+
+        // 판매 API 호출
+        const sellItem = async (item) => {
+            if (!accessToken) {
+                alert('로그인 필요');
+                return;
+            }
+
+            try {
+                await safeFetch(null, `/api/v1/games/${gameId}/items/sell/${item.itemDefId}`, {
+                    method: 'POST',
+                    headers: {'Authorization': 'Bearer ' + accessToken}
+                });
+
+                // 판매 후 게임 데이터 갱신
+                await loadGameData();
+                alert(`💰 "${item.name}" 판매 완료!`);
+            } catch (err) {
+                console.error(err);
+                alert('판매 오류: ' + err.message);
+            }
+        };
+
+
+        // 장착 API 호출
+        const equipItem = async (item) => {
+            if(!accessToken){ alert('로그인 필요'); return; }
+
+            try {
+                await safeFetch(null, `/api/v1/games/equipItem/${gameId}/${item.itemDefId}`, {
+                    method: 'POST',
+                    headers: {'Authorization':'Bearer ' + accessToken}
+                });
+
+                // 장착 후 게임 데이터 갱신
+                await loadGameData();
+                alert(`✅ "${item.name}" 장착 완료!`);
+            } catch(err) {
+                console.error(err);
+                alert('장착 오류: ' + err.message);
+            }
+        };
+
+        // 버리기 API 호출
+        const dropItem = async (item) => {
+            if(!accessToken){ alert('로그인 필요'); return; }
+
+            try {
+                await safeFetch(null, `/api/v1/games/dropItem/${gameId}/${item.itemDefId}`, {
+                    method: 'DELETE',
+                    headers: {'Authorization':'Bearer ' + accessToken}
+                });
+
+                // 버린 후 게임 데이터 갱신
+                await loadGameData();
+                alert(`🗑️ "${item.name}" 버림 완료!`);
+            } catch(err) {
+                console.error(err);
+                alert('버리기 오류: ' + err.message);
+            }
+        };
+
+        // 게임 히스토리 API 호출
+        const loadGameHistory = async (gameId) => {
+            if (!accessToken) {
+                alert('로그인 필요');
+                return;
+            }
+
+            try {
+                const history = await safeFetch(null, `/api/v1/games/${gameId}/history`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+
+                console.log('게임 히스토리:', history);
+                return history;
+            } catch (err) {
+                console.error(err);
+                alert('게임 히스토리 불러오기 오류: ' + err.message);
+            }
         };
 
         const updateGameUI = (data) => {
-            // 스토리
+
+            // updateGameUI(data) 안쪽 맨 위쪽
+            if (data.progress !== undefined && data.stageSize !== undefined) {
+                progressContainer.style.display = 'block';
+                progressValue.textContent = `${data.progress} / ${data.stageSize}`;
+            } else {
+                progressContainer.style.display = 'none';
+            }
+
+            // 공통: 스토리
             storyText.textContent = data.background || '스토리 없음';
 
-            // 플레이어 정보
-            if(data.playerInfo){
+            // 공통: 플레이어 정보
+            if (data.playerInfo) {
                 const p = data.playerInfo;
-                playerStats.innerHTML = `HP: ${p.healthPoint}<br>MP: ???<br>Level: ${p.level}<br>Life: ${p.life}<br>STR: ${p.strength}, AGI: ${p.agility}, INT: ${p.intelligence}, LUCK: ${p.luck}, GOLD: ${p.gold}`;
+                playerStats.innerHTML = `HP: ${p.healthPoint}<br>
+                                 Level: ${p.level}<br>
+                                 Life: ${p.life}<br>
+                                 STR: ${p.strength}, AGI: ${p.agility}, INT: ${p.intelligence},
+                                 LUCK: ${p.luck}, GOLD: ${p.gold}`;
             }
 
-            // 인벤토리
-            if(data.inventory && data.inventory.length > 0){
-                // 아이템 이름만 표시
-                playerItems.textContent = data.inventory.map(item => item.name).join(', ');
-            } else {
-                playerItems.textContent = '아이템 없음';
+
+            // NPC 정보 표시
+            const npcContainerId = 'npcInfoContainer';
+            let npcContainer = document.getElementById(npcContainerId);
+            if (!npcContainer) {
+                // 존재하지 않으면 새로 생성
+                npcContainer = document.createElement('div');
+                npcContainer.id = npcContainerId;
+                npcContainer.className = 'item-info'; // 스타일 재사용
+                npcContainer.innerHTML = '<h3>NPC Info</h3><div id="npcStats">없음</div>';
+                const leftDiv = document.querySelector('.left');
+                leftDiv.appendChild(npcContainer);
             }
 
-            // 선택지
-            choiceContainer.innerHTML = '';
-            if(data.sceneType === 'CHOICE' && Array.isArray(data.choiceInfo)){
-                data.choiceInfo.forEach((choice, idx) => {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn';
-                    btn.textContent = `${idx+1}. ${choice.detail}`;
-                    btn.addEventListener('click', () => sendChoice(idx));
-                    choiceContainer.appendChild(btn);
+            const npcStats = document.getElementById('npcStats');
+            if (data.npcInfo) {
+                const n = data.npcInfo;
+                npcStats.innerHTML = `
+            이름: ${n.name} (${n.rank})<br>
+            특성: ${n.trait}<br>
+            STR: ${n.strength}, AGI: ${n.agility}, INT: ${n.intelligence}, LUCK: ${n.luck}<br>
+            무기: ${n.npcWeaponName} - ${n.npcWeaponDescription}
+                `;
+                } else {
+                    npcStats.textContent = '없음';
+                }
+
+
+            const equippedList = document.getElementById('equippedList');
+            const inventoryList = document.getElementById('inventoryList');
+
+            if (equippedList && inventoryList) {
+                const equippedItems = data.inventory?.filter(i => i.equipped) || [];
+                const inventoryItems = data.inventory?.filter(i => !i.equipped) || [];
+
+                // 슬롯별 장착 초기화
+                const slots = {
+                    WEAPON: null,
+                    ARMOR: null,
+                    ARTIFACT: null
+                };
+
+                equippedItems.forEach(item => {
+                    if (slots[item.category.toUpperCase()]) {
+                        console.warn(`이미 ${item.category} 슬롯이 채워져 있음: ${item.name}`);
+                    }
+                    slots[item.category.toUpperCase()] = item;
                 });
+
+                // 장착 UI 업데이트
+                equippedList.innerHTML = '';
+                for (const [slot, item] of Object.entries(slots)) {
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.style = 'border:1px solid #555; border-radius:10px; padding:5px; margin:5px; background:#333;';
+                    if (item) {
+                        card.innerHTML = `<strong>${slot}: ${item.name} (${item.grade})</strong><br>
+                              STR:${item.strength}, AGI:${item.agility}, INT:${item.intelligence}, LUCK:${item.luck}`;
+
+                        // ✅ 여기서 해제 버튼 추가
+                        const toggleBtn = document.createElement('button');
+                        toggleBtn.textContent = '해제';
+                        toggleBtn.className = 'btn';
+                        toggleBtn.addEventListener('click', () => equipItem(item)); // toggleEquipItem: 장착/해제 API 호출
+                        card.appendChild(toggleBtn);
+
+                    } else {
+                        card.textContent = `${slot}: 없음`;
+                    }
+
+
+
+                    equippedList.appendChild(card);
+                }
+
+                // 미장착 인벤토리 UI
+                inventoryList.innerHTML = '';
+                if (inventoryItems.length > 0) {
+                    inventoryItems.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'item-card';
+                        card.style = 'border:1px solid #555; border-radius:10px; padding:5px; margin:5px; background:#222;';
+                        card.innerHTML = `
+                        <strong>${item.name} (${item.grade})</strong><br>
+                        카테고리: ${item.category}<br>
+                        STR:${item.strength}, AGI:${item.agility}, INT:${item.intelligence}, LUCK:${item.luck}<br>
+                        `;
+
+                        // 버튼 컨테이너
+                        const btnContainer = document.createElement('div');
+                        btnContainer.style = 'margin-top:5px; display:flex; gap:5px;';
+
+                        // 장착 버튼
+                        const equipBtn = document.createElement('button');
+                        equipBtn.textContent = '장착';
+                        equipBtn.className = 'btn';
+                        equipBtn.addEventListener('click', () => equipItem(item));
+
+                        // 버리기 버튼
+                        const dropBtn = document.createElement('button');
+                        dropBtn.textContent = '버리기';
+                        dropBtn.className = 'btn';
+                        dropBtn.addEventListener('click', () => {
+                            if(confirm(`정말 "${item.name}"을(를) 버리시겠습니까?`)) {
+                                dropItem(item);
+                            }
+                        });
+
+                        btnContainer.appendChild(equipBtn);
+                        btnContainer.appendChild(dropBtn);
+
+
+                        // ✅ SHOP일 경우 판매 버튼 추가
+                        if (data.sceneType === 'SHOP') {
+                            const sellBtn = document.createElement('button');
+                            sellBtn.textContent = '판매';
+                            sellBtn.className = 'btn';
+                            sellBtn.addEventListener('click', () => {
+                                if(confirm(`정말 "${item.name}"을(를) 판매하시겠습니까?`)) sellItem(item);
+                            });
+                            btnContainer.appendChild(sellBtn);
+                        }
+
+
+                        card.appendChild(btnContainer);
+
+                        inventoryList.appendChild(card);
+                    });
+                } else {
+                    inventoryList.textContent = '없음';
+                }
+
+                // 장면 타입별 처리
+            choiceContainer.innerHTML = '';
+
+            switch (data.sceneType) {
+                case 'CHOICE':
+                    console.log(data)
+                    if (Array.isArray(data.choiceInfo)) {
+                        data.choiceInfo.forEach((choice, idx) => {
+                            const btn = document.createElement('button');
+                            btn.className = 'btn';
+                            btn.textContent = `${idx+1}. ${choice.detail}. ${choice.stats}. ${choice.probability}.`;
+                            btn.addEventListener('click', () => sendChoice(idx));
+                            choiceContainer.appendChild(btn);
+                        });
+                    }
+                    break;
+
+                case 'DONE':
+                    if (data.rewardInfo) {
+                        const r = data.rewardInfo;
+                        choiceContainer.innerHTML = `
+                    <div>획득 아이템: ${r.gainedItemNames?.join(', ') || '없음'}</div>
+                    <div>보상: STR ${r.rewardStrength}, AGI ${r.rewardAgility},
+                          INT ${r.rewardIntelligence}, LUCK ${r.rewardLuck},
+                          Life ${r.rewardLife}, Gold ${r.rewardGold}</div>
+                `;
+                    }
+                    break;
+
+                case 'SHOP':
+                    if (data.shopTable) {
+                        choiceContainer.innerHTML = `<h3>상점</h3>`;
+                        data.shopTable.forEach((item) => {
+                            const card = document.createElement('div');
+                            card.className = 'shop-item-card';
+                            card.style = 'border:1px solid #555; border-radius:10px; padding:10px; margin:5px; background:#333; cursor:pointer;';
+
+                            card.innerHTML = `
+                                <strong>${item.name} (${item.grade})</strong><br>
+                                카테고리: ${item.category} <br>
+                                가격: ${item.price} Gold<br>
+                                STR: ${item.strength}, AGI: ${item.agility}, INT: ${item.intelligence}, LUCK: ${item.luck}<br>
+                                기본 스탯: ${item.baseStat} (${item.mainStat})<br>
+                                설명: ${item.description}<br>
+                                효과: ${item.itemEffects?.map(e => e.itemEffectName + ' (' + e.grade + ')').join(', ') || '없음'}
+                            `;
+                            card.addEventListener('click', () => buyItem(item));
+                            choiceContainer.appendChild(card);
+                        });
+                    }
+                    break;
+
+                case 'BATTLE':
+                    // 기존 스토리 출력
+                    storyText.textContent = data.background || '스토리 없음';
+
+                    // 구분선 추가
+                    const battleLogHeader = document.createElement('div');
+                    battleLogHeader.style.fontWeight = 'bold';
+                    battleLogHeader.style.marginTop = '10px';
+                    battleLogHeader.textContent = '=================== 전투 로그 =====================';
+                    storyText.appendChild(battleLogHeader);
+
+                    // 턴별 로그 출력
+                    if (data.battleStory && data.battleStory.length > 0) {
+                        data.battleStory.forEach((bs, idx) => {
+                            const turnDiv = document.createElement('div');
+                            turnDiv.className = 'battle-turn';
+                            turnDiv.style.marginBottom = '5px';
+                            turnDiv.textContent = `턴 ${idx + 1}: ${bs.turnInfo}`;
+                            storyText.appendChild(turnDiv);
+                        });
+                    }
+
+                    // 전투 결과
+                    if (data.playerWin !== null) {
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'battle-result';
+                        resultDiv.style.fontWeight = 'bold';
+                        resultDiv.style.marginTop = '10px';
+                        resultDiv.innerHTML = data.playerWin
+                            ? "🎉 전투 승리!"
+                            : "💀 전투 패배...";
+                        choiceContainer.innerHTML = '';
+                        choiceContainer.appendChild(resultDiv);
+                    }
+                    break;
+
+            case 'GAMEOVER':
+                choiceContainer.innerHTML = '';
+                const gameOverBtn = document.createElement('button');
+                gameOverBtn.className = 'btn';
+                gameOverBtn.textContent = '게임 패배 - 결과 보기';
+                gameOverBtn.addEventListener('click', async () => {
+                    const history = await loadGameHistory(gameId);
+                    showHistoryModal(history); // ✅ 모달로 표시
+                });
+                choiceContainer.appendChild(gameOverBtn);
+                break;
+
+
+                case 'GAMECLEAR':
+                    choiceContainer.innerHTML = '';
+                    const gameClearBtn = document.createElement('button');
+                    gameClearBtn.className = 'btn';
+                    gameClearBtn.textContent = '게임 승리 - 결과 보기';
+                    gameClearBtn.addEventListener('click', async () => {
+                        const history = await loadGameHistory(gameId);
+                        showHistoryModal(history); // ✅ 모달로 표시
+                    });
+                    choiceContainer.appendChild(gameClearBtn);
+                    break;
+
+                default:
+                    choiceContainer.innerHTML = '<div>알 수 없는 장면</div>';
             }
         };
+    }
     });
+
 </script>
+
+<!-- 히스토리 모달 -->
+<div id="historyModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.7);">
+    <div style="background:#1e1e2f; color:white; margin:10% auto; padding:20px; border-radius:10px; width:60%; max-width:600px; position:relative;">
+        <span id="closeHistoryModal" style="position:absolute; top:10px; right:20px; font-size:24px; cursor:pointer;">&times;</span>
+        <h2 id="historyModalTitle"></h2>
+        <p id="historyModalWorldView"></p>
+        <p id="historyModalBackground"></p>
+        <p id="historyModalScore"></p>
+        <div id="historyModalEpilogues"></div>
+    </div>
+</div>
 </body>
 </html>
