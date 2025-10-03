@@ -1,8 +1,10 @@
 package com.scriptopia.demo.service;
 
+import com.scriptopia.demo.domain.History;
 import com.scriptopia.demo.domain.User;
 import com.scriptopia.demo.domain.UserPiaItem;
 import com.scriptopia.demo.domain.UserSetting;
+import com.scriptopia.demo.dto.history.HistoryPageResponse;
 import com.scriptopia.demo.dto.items.ItemDTO;
 import com.scriptopia.demo.dto.users.PiaItemDTO;
 import com.scriptopia.demo.dto.users.UserAssetsResponse;
@@ -10,22 +12,28 @@ import com.scriptopia.demo.dto.users.UserSettingsDTO;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.mapper.ItemMapper;
+import com.scriptopia.demo.repository.HistoryRepository;
 import com.scriptopia.demo.repository.UserPiaItemRepository;
 import com.scriptopia.demo.repository.UserRepository;
 import com.scriptopia.demo.repository.UserSettingRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
 
+    private final HistoryRepository historyRepository;
     private final UserSettingRepository userSettingRepository;
     private final UserRepository userRepository;
     private final UserPiaItemRepository userPiaItemRepository;
@@ -103,6 +111,25 @@ public class UserService {
         }
 
         return piaItems;
+    }
+
+    @Transactional(readOnly = true)
+    public List<HistoryPageResponse> fetchMyHistory(Long userId, UUID lastId, int size) {
+        PageRequest pr = PageRequest.of(0, size);
+        Page<History> page;
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+
+        if(lastId == null) page = historyRepository.findByUserIdOrderByIdDesc(user.getId(), pr);
+        else {
+            Long lastIds = historyRepository.findByUserIdAndUuid(user.getId(), lastId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.E_404_PAGE_NOT_FOUND));
+
+            page = historyRepository.findByUserIdAndIdLessThanOrderByIdDesc(user.getId(), lastIds, pr);
+        }
+
+        return page.getContent().stream().map(HistoryPageResponse::from).toList();
     }
 
 

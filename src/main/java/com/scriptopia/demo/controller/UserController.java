@@ -5,7 +5,6 @@ import com.scriptopia.demo.dto.items.ItemDTO;
 import com.scriptopia.demo.dto.users.PiaItemDTO;
 import com.scriptopia.demo.dto.users.UserAssetsResponse;
 import com.scriptopia.demo.dto.users.UserSettingsDTO;
-import com.scriptopia.demo.service.HistoryService;
 import com.scriptopia.demo.service.UserCharacterImgService;
 import com.scriptopia.demo.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +26,6 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
-    private final HistoryService historyService;
     private final UserCharacterImgService userCharacterImgService;
 
     @Operation(summary = "보유 장비 아이템 조회")
@@ -94,36 +91,25 @@ public class UserController {
                                                                 Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
-        return historyService.fetchMyHistory(userId, lastId, size);
+        return ResponseEntity.ok(userService.fetchMyHistory(userId, lastId, size));
     }
 
     @Operation(summary = "프로필 이미지 변경")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping("/profile-images/url")
+    @PostMapping("/profile-images")
     public ResponseEntity<?> saveUserCharacterImg(Authentication authentication, @RequestParam("url") String url) {
         Long userId = Long.valueOf(authentication.getName());
 
         return userCharacterImgService.saveUserCharacterImg(userId, url);
     }
 
-    @Operation(summary = "프로필 등록할 수 있는 이미지 조회")
+    @Operation(summary = "프로필 이미지 조회")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @GetMapping("/images")
+    @GetMapping("/profile-images")
     public ResponseEntity<?> getUserCharacterImgs(Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
         return userCharacterImgService.getUserCharacterImg(userId);
     }
 
-    /*
-    등록할 수 있는 이미지 저장
-    */
-    @Operation(summary = "등록할 수 있는 이미지 저장")
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping("/save/img")
-    public ResponseEntity<?> saveCharacterImg(Authentication authentication, @RequestParam("file") MultipartFile file) {
-        Long userId = Long.valueOf(authentication.getName());
-
-        return userCharacterImgService.saveCharacterImg(userId, file);
-    }
 }

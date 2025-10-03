@@ -5,7 +5,6 @@ import com.scriptopia.demo.domain.mongo.GameSessionMongo;
 import com.scriptopia.demo.dto.gamesession.*;
 import com.scriptopia.demo.dto.history.HistoryResponse;
 import com.scriptopia.demo.service.GameSessionService;
-import com.scriptopia.demo.service.HistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 public class GameSessionController {
 
     private final GameSessionService gameSessionService;
-    private final HistoryService historyService;
 
     /*
      * 게임 -> 게임 도중 종료
@@ -171,29 +169,6 @@ public class GameSessionController {
         GameSessionMongo response = gameSessionService.gameSellItem(userId, itemId);
 
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 현재는 userId, sessionId를 통해 저장하는데
-     * 인증 관리 부분 끝나면 header에 token 꺼내오고 requestparameter session_id로 저장하게 수정
-     */
-    /*
-     * 게임 -> 히스토리 생성
-     */
-    @Operation(summary = "")
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping("/history")
-    public ResponseEntity<?> addHistory(Authentication authentication, @RequestBody GameSessionRequest request) {
-        Long userId = Long.valueOf(authentication.getName());
-        return historyService.createHistory(userId, request.getGameId());
-    }
-
-    /** 개발용: 로컬 MongoDB에 더미 세션 한 건 심어서 테스트용 ObjectId 반환 */
-    @Operation(summary = "")
-    @PostMapping("/history/seed")
-    public ResponseEntity<?> seed(Authentication authentication) {
-        Long userId = Long.valueOf(authentication.getName());
-        return historyService.seedDummySession(userId);
     }
 
 
