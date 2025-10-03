@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @Builder
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HistoryResponse {
-    private Long id;
+    private UUID uuid;
     private Long userId;
     private String thumbnailUrl;
     private String title;
