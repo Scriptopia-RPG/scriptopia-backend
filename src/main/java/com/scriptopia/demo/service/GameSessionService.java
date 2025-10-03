@@ -1306,7 +1306,7 @@ public class GameSessionService {
 
 
         HistoryResponse historyResponse = HistoryResponse.builder()
-                .id(history.getId())
+                .uuid(history.getUuid())
                 .userId(user.getId())
                 .thumbnailUrl(history.getThumbnailUrl())
                 .title(history.getTitle())
