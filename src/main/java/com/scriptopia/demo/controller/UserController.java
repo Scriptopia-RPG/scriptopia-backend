@@ -4,6 +4,7 @@ import com.scriptopia.demo.dto.history.HistoryPageResponse;
 import com.scriptopia.demo.dto.items.ItemDTO;
 import com.scriptopia.demo.dto.users.PiaItemDTO;
 import com.scriptopia.demo.dto.users.UserAssetsResponse;
+import com.scriptopia.demo.dto.users.UserImageRequest;
 import com.scriptopia.demo.dto.users.UserSettingsDTO;
 import com.scriptopia.demo.service.UserCharacterImgService;
 import com.scriptopia.demo.service.UserService;
@@ -97,10 +98,10 @@ public class UserController {
     @Operation(summary = "프로필 이미지 변경")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
     @PostMapping("/profile-images")
-    public ResponseEntity<?> saveUserCharacterImg(Authentication authentication, @RequestParam("url") String url) {
+    public ResponseEntity<?> saveUserCharacterImg(Authentication authentication, @RequestBody UserImageRequest req) {
         Long userId = Long.valueOf(authentication.getName());
 
-        return userCharacterImgService.saveUserCharacterImg(userId, url);
+        return userCharacterImgService.saveUserCharacterImg(userId, req.getUrl());
     }
 
     @Operation(summary = "프로필 이미지 조회")
