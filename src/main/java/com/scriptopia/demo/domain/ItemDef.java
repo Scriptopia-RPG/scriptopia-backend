@@ -20,6 +20,9 @@ public class ItemDef {
     @ManyToOne(fetch = FetchType.LAZY)
     private ItemGradeDef itemGradeDef;
 
+    @OneToMany(mappedBy = "itemDef", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemEffect> itemEffects = new ArrayList<>();
+
     private String name;
 
     @Column(columnDefinition = "TEXT")
@@ -43,7 +46,6 @@ public class ItemDef {
 
     private Long price;
 
-    @OneToMany(mappedBy = "itemDef", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemEffect> itemEffects = new ArrayList<>();
+
 
 }
