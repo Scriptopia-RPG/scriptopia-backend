@@ -5,6 +5,8 @@ import com.scriptopia.demo.domain.User;
 import com.scriptopia.demo.domain.UserPiaItem;
 import com.scriptopia.demo.domain.UserSetting;
 import com.scriptopia.demo.dto.history.HistoryPageResponse;
+import com.scriptopia.demo.dto.history.HistoryPageResponseDto;
+import com.scriptopia.demo.dto.history.HistoryResponse;
 import com.scriptopia.demo.dto.items.ItemDTO;
 import com.scriptopia.demo.dto.users.PiaItemDTO;
 import com.scriptopia.demo.dto.users.UserAssetsResponse;
@@ -27,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -114,24 +117,22 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<HistoryPageResponse> fetchMyHistory(Long userId, UUID lastId, int size) {
-        PageRequest pr = PageRequest.of(0, size);
-        Page<History> page;
+    public HistoryPageResponseDto fetchMyHistory(Long userId, UUID lastId, int size) {
+        List<History> histories = historyRepository.findHistoriesByUserWithCursor(
+                userId,
+                lastId,
+                PageRequest.of(0, size + 1)
+        );
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+        boolean hasNext = histories.size() > size;
 
-        if(lastId == null) page = historyRepository.findByUserIdOrderByIdDesc(user.getId(), pr);
-        else {
-            Long lastIds = historyRepository.findByUserIdAndUuid(user.getId(), lastId)
-                    .orElseThrow(() -> new CustomException(ErrorCode.E_404_PAGE_NOT_FOUND));
+        List<HistoryPageResponse> result = histories.stream()
+                .limit(size)
+                .map(HistoryPageResponse::from)
+                .collect(Collectors.toList());
 
-            page = historyRepository.findByUserIdAndIdLessThanOrderByIdDesc(user.getId(), lastIds, pr);
-        }
+        UUID nextCursor = hasNext ? result.get(result.size() - 1).getUuid() : null;
 
-        return page.getContent().stream().map(HistoryPageResponse::from).toList();
+        return new HistoryPageResponseDto(result, nextCursor, hasNext);
     }
-
-
-
 }

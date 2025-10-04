@@ -1,6 +1,7 @@
 package com.scriptopia.demo.controller;
 
 import com.scriptopia.demo.dto.history.HistoryPageResponse;
+import com.scriptopia.demo.dto.history.HistoryPageResponseDto;
 import com.scriptopia.demo.dto.items.ItemDTO;
 import com.scriptopia.demo.dto.users.PiaItemDTO;
 import com.scriptopia.demo.dto.users.UserAssetsResponse;
@@ -87,9 +88,9 @@ public class UserController {
 
     @Operation(summary = "사용자 게임 기록 조회")
     @GetMapping("/games/histories")
-    public ResponseEntity<List<HistoryPageResponse>> getHistory(@RequestParam(required = false) UUID lastId,
-                                                                @RequestParam(defaultValue = "10") int size,
-                                                                Authentication authentication) {
+    public ResponseEntity<HistoryPageResponseDto> getHistory(@RequestParam(required = false) UUID lastId,
+                                                                   @RequestParam(defaultValue = "10") int size,
+                                                                   Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
         return ResponseEntity.ok(userService.fetchMyHistory(userId, lastId, size));

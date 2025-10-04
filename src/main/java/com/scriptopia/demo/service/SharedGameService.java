@@ -41,6 +41,8 @@ public class SharedGameService {
             throw new CustomException(ErrorCode.E_401_NOT_EQUAL_SHARED_GAME);
         }
 
+        history.setIsShared(true);
+
         SharedGame sharedGame = SharedGame.from(user, history);
         return ResponseEntity.ok(sharedGameRepository.save(sharedGame));
     }
