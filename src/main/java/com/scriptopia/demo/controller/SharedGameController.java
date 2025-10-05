@@ -48,10 +48,10 @@ public class SharedGameController {
     @GetMapping
     public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(@RequestParam(value = "lastUUID", required = false) UUID lastUUID,
                                                                                      @RequestParam(value = "size", defaultValue = "20") int size,
-                                                                                     @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
+                                                                                     @RequestParam(value = "tags", required = false) List<Long> tags,
                                                                                      @RequestParam(value = "query", required = false) String query,
                                                                                      @RequestParam(value = "sort", defaultValue = "POPULAR") SharedGameSort sort) {
-        return sharedGameService.getPublicSharedGames(lastUUID, size, tagIds, query, sort);
+        return sharedGameService.getPublicSharedGames(lastUUID, size, tags, query, sort);
     }
 
     /*
@@ -77,8 +77,8 @@ public class SharedGameController {
      */
     @Operation(summary = "공유 게임 Like 요청")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping("{sharedGameUuId}/like")
-    public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameUuId") UUID sharedGameId, Authentication authentication) {
+    @PostMapping("{sharedGameUuid}/like")
+    public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameUuid") UUID sharedGameId, Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
         return sharedGameFavoriteService.saveFavorite(userId, sharedGameId);
