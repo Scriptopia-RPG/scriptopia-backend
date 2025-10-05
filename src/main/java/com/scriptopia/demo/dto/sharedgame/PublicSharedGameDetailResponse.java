@@ -1,6 +1,7 @@
 package com.scriptopia.demo.dto.sharedgame;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,8 @@ public class PublicSharedGameDetailResponse {
     private String creator;
     private Long playCount;
     private Long likeCount;
+
+    @JsonProperty("isLiked")
     private boolean isLiked;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)

@@ -58,41 +58,6 @@ public class SharedGameService {
         return ResponseEntity.ok(dto);
     }
 
-    public ResponseEntity<?> getMySharedGames(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
-
-        List<SharedGame> games = sharedGameRepository.findAllByUserid(user.getId());
-
-        List<MySharedGameResponse> dtos = new ArrayList<>();
-
-        for(SharedGame game : games) {
-            MySharedGameResponse dto = new MySharedGameResponse();
-            dto.setShared_game_uuid(game.getUuid());
-            dto.setThumbnailUrl(game.getThumbnailUrl());
-            dto.setTotalPlayed(sharedGameScoreRepository.countBySharedGameId(game.getId()));
-            dto.setTitle(game.getTitle());
-            dto.setWorldView(game.getWorldView());
-            dto.setSharedAt(game.getSharedAt());
-            dto.setBackgroundStory(game.getBackgroundStory());
-
-            boolean liked = sharedGameFavoriteRepository.existsLikeSharedGame(user.getId(), game.getId());
-            dto.setRecommand(liked);
-
-            List<String> tagdto = gameTagRepository.findTagNamesBySharedGameId(game.getId());
-            List<MySharedGameResponse.TagDto> tags = new ArrayList<>();
-
-            for(String tagName : tagdto) {
-                tags.add(new MySharedGameResponse.TagDto(tagName));
-            }
-
-            dto.setTags(tags);
-            dtos.add(dto);
-        }
-
-        return ResponseEntity.ok(dtos);
-    }
-
     @Transactional
     public void deleteSharedGame(Long id, UUID uuid) {
         User user = userRepository.findById(id)
@@ -230,14 +195,9 @@ public class SharedGameService {
             dto.setSharedGameUuid(g.getUuid());
             dto.setThumbnailUrl(g.getThumbnailUrl());
             dto.setTitle(g.getTitle());
-            dto.setSharedAt(g.getSharedAt());
 
             // 집계
-            dto.setTotalPlayCount(sharedGameScoreRepository.countBySharedGameId(g.getId()));
-            dto.setLikeCount(sharedGameFavoriteRepository.countBySharedGameId(g.getId()));
-
-            Long topScore = sharedGameScoreRepository.maxScoreBySharedGameId(g.getId());
-            dto.setTopScore(topScore == null ? 0L : topScore);
+            dto.setPlayCount(sharedGameScoreRepository.countBySharedGameId(g.getId()));
 
             // 태그
             dto.setTags(gameTagRepository.findTagDtosBySharedGameId(g.getId()));

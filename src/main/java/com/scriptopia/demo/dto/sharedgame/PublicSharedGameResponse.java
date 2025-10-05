@@ -10,12 +10,8 @@ import java.util.UUID;
 public class PublicSharedGameResponse {
     private UUID sharedGameUuid;
     private String thumbnailUrl;
-    private boolean isLiked;
-    private Long likeCount;
-    private Long totalPlayCount;
     private String title;
-    private Long topScore;
-    private LocalDateTime sharedAt;
+    private Long playCount;
 
     private List<TagDto> tags;
 

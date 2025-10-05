@@ -77,8 +77,8 @@ public class SharedGameController {
      */
     @Operation(summary = "공유 게임 Like 요청")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping("{sharedGameUuId}/like")
-    public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameUuId") UUID sharedGameId, Authentication authentication) {
+    @PostMapping("{sharedGameUuid}/like")
+    public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameUuid") UUID sharedGameId, Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
         return sharedGameFavoriteService.saveFavorite(userId, sharedGameId);
