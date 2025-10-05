@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 public class PublicSharedGameDetailResponse {
-    private UUID sharedGameUUID;
+    private UUID sharedGameUuID;
     private String posterUrl;
     private String title;
     private String worldView;
@@ -17,6 +17,7 @@ public class PublicSharedGameDetailResponse {
     private String creator;
     private Long playCount;
     private Long likeCount;
+    private boolean isLiked;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime sharedAt;
@@ -37,6 +38,7 @@ public class PublicSharedGameDetailResponse {
     @Data
     public static class TopScoreDto {
         private String nickname;
+        private String profileUrl;
         private Long score;
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         private LocalDateTime createdAt;

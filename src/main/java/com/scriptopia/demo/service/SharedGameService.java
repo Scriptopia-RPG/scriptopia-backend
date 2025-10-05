@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +45,19 @@ public class SharedGameService {
         history.setIsShared(true);
 
         SharedGame sharedGame = SharedGame.from(user, history);
-        return ResponseEntity.ok(sharedGameRepository.save(sharedGame));
+        sharedGameRepository.save(sharedGame);
+
+        SharedGameSaveDto dto = new SharedGameSaveDto();
+        dto.setSharedGameUuid(sharedGame.getUuid().toString());
+        dto.setThumbnailUrl(sharedGame.getThumbnailUrl());
+        dto.setRecommand(sharedGameFavoriteRepository.countBySharedGameId(sharedGame.getId()));
+        dto.setPlayCount(sharedGameScoreRepository.countBySharedGameId(sharedGame.getId()));
+        dto.setTitle(sharedGame.getTitle());
+        dto.setWorldView(sharedGame.getWorldView());
+        dto.setBackgroundStory(sharedGame.getBackgroundStory());
+        dto.setSharedAt(sharedGame.getSharedAt());
+
+        return ResponseEntity.ok(dto);
     }
 
     public ResponseEntity<?> getMySharedGames(Long userId) {
@@ -97,16 +110,17 @@ public class SharedGameService {
         sharedGameRepository.delete(game);
     }
 
-    public ResponseEntity<?> getDetailedSharedGame(UUID uuid) {
+    public ResponseEntity<?> getDetailedSharedGame(Long userId, UUID uuid) {
         SharedGame game = sharedGameRepository.findByUuid(uuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_SHARED_GAME_NOT_FOUND));
 
         List<com.scriptopia.demo.dto.sharedgame.TagDto> tagDtos = gameTagRepository.findTagDtosBySharedGameId(game.getId());
 
         List<SharedGameScore> score = sharedGameScoreRepository.findAllBySharedGameIdOrderByScoreDescCreatedAtDesc(game.getId());
+        boolean isLiked = (userId != null) && sharedGameFavoriteRepository.existsByUserIdAndSharedGameId(userId, game.getId());
 
         PublicSharedGameDetailResponse dto = new PublicSharedGameDetailResponse();
-        dto.setSharedGameUUID(game.getUuid());
+        dto.setSharedGameUuID(game.getUuid());
         dto.setPosterUrl(game.getThumbnailUrl());
         dto.setTitle(game.getTitle());
         dto.setWorldView(game.getWorldView());
@@ -115,6 +129,7 @@ public class SharedGameService {
         dto.setPlayCount(sharedGameScoreRepository.countBySharedGameId(game.getId()));
         dto.setLikeCount(sharedGameFavoriteRepository.countBySharedGameId(game.getId()));
         dto.setSharedAt(game.getSharedAt());
+        dto.setLiked(isLiked);
 
         List<PublicSharedGameDetailResponse.TagDto> tagarray = new ArrayList<>();
         List<PublicSharedGameDetailResponse.TopScoreDto> topscorearray = new ArrayList<>();
@@ -129,6 +144,7 @@ public class SharedGameService {
             PublicSharedGameDetailResponse.TopScoreDto topscore = new PublicSharedGameDetailResponse.TopScoreDto();
             topscore.setNickname(topScoreInfo.getUser().getNickname());
             topscore.setScore(topScoreInfo.getScore());
+            topscore.setProfileUrl(topScoreInfo.getUser().getProfileImgUrl());
             topscore.setCreatedAt(topScoreInfo.getCreatedAt());
             topscorearray.add(topscore);
         }
