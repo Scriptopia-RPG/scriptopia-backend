@@ -83,7 +83,7 @@ public class SharedGameService {
         boolean isLiked = (userId != null) && sharedGameFavoriteRepository.existsByUserIdAndSharedGameId(userId, game.getId());
 
         PublicSharedGameDetailResponse dto = new PublicSharedGameDetailResponse();
-        dto.setSharedGameUuID(game.getUuid());
+        dto.setSharedGameUuid(game.getUuid());
         dto.setPosterUrl(game.getThumbnailUrl());
         dto.setTitle(game.getTitle());
         dto.setWorldView(game.getWorldView());

@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Data
 public class PublicSharedGameDetailResponse {
-    private UUID sharedGameUuID;
+    private UUID sharedGameUuid;
     private String posterUrl;
     private String title;
     private String worldView;
