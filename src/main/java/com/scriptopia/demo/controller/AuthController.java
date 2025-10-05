@@ -1,5 +1,6 @@
 package com.scriptopia.demo.controller;
 
+import com.scriptopia.demo.dto.CommonResponse;
 import com.scriptopia.demo.dto.auth.*;
 import com.scriptopia.demo.service.LocalAccountService;
 import com.scriptopia.demo.service.RefreshTokenService;
@@ -29,7 +30,7 @@ public class AuthController {
 
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(
+    public ResponseEntity<CommonResponse> logout(
             @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
             HttpServletResponse response
     ) {
@@ -37,7 +38,7 @@ public class AuthController {
             refreshTokenService.logout(refreshToken);
         }
         response.addHeader(HttpHeaders.SET_COOKIE, localAccountService.removeRefreshCookie().toString());
-        return ResponseEntity.ok("로그아웃 되었습니다.");
+        return ResponseEntity.ok(new CommonResponse("로그아웃 되었습니다."));
     }
 
     @Operation(summary = "로컬 로그인")
@@ -53,64 +54,64 @@ public class AuthController {
 
     @Operation(summary = "로컬 계정 회원가입")
     @PostMapping("/register")
-    public ResponseEntity<?> register(
+    public ResponseEntity<CommonResponse> register(
             @RequestBody @Valid RegisterRequest request
     ) {
         localAccountService.register(request);
-        return ResponseEntity.ok("회원가입에 성공했습니다.");
+        return ResponseEntity.ok(new CommonResponse("회원가입에 성공했습니다."));
     }
 
     @Operation(summary = "이메일 중복 검증")
     @PostMapping("/email/verify")
-    public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+    public ResponseEntity<CommonResponse> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
 
         localAccountService.verifyEmail(request);
 
-        return ResponseEntity.ok("사용 가능한 이메일입니다.");
+        return ResponseEntity.ok(new CommonResponse("사용 가능한 이메일입니다."));
     }
 
     @Operation(summary = "이메일 인증 코드 전송")
     @PostMapping("/email/code/send")
-    public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest request) {
+    public ResponseEntity<CommonResponse> sendCode(@RequestBody @Valid SendCodeRequest request) {
         localAccountService.sendVerificationCode(request.getEmail());
-        return ResponseEntity.ok("인증 코드가 이메일로 발송되었습니다.");
+        return ResponseEntity.ok(new CommonResponse("인증 코드가 이메일로 발송되었습니다."));
     }
 
     @Operation(summary = "이메일 인증 코드 확인")
     @PostMapping("/email/code/verify")
-    public ResponseEntity<String> verifyCode(@RequestBody @Valid VerifyCodeRequest request) {
+    public ResponseEntity<CommonResponse> verifyCode(@RequestBody @Valid VerifyCodeRequest request) {
         localAccountService.verifyCode(request.getEmail(), request.getCode());
-        return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
+        return ResponseEntity.ok(new CommonResponse("이메일 인증이 완료되었습니다."));
     }
 
     @Operation(summary = "비밀번호 초기화 링크 발송")
     @PostMapping("/password/reset/send")
-    public ResponseEntity<?> sendResetMail(@Valid @RequestBody SendCodeRequest request){
+    public ResponseEntity<CommonResponse> sendResetMail(@Valid @RequestBody SendCodeRequest request){
 
         localAccountService.sendResetPasswordMail(request.getEmail());
 
-        return ResponseEntity.ok("비밀번호 초기화 링크를 전송했습니다.");
+        return ResponseEntity.ok(new CommonResponse("비밀번호 초기화 링크를 전송했습니다."));
     }
 
     @Operation(summary = "비밀번호 초기화")
     @PatchMapping("/password/reset")
-    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<CommonResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         localAccountService.resetPassword(request.getToken(), request.getNewPassword());
 
-        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        return ResponseEntity.ok(new CommonResponse("비밀번호가 성공적으로 변경되었습니다."));
     }
 
     @Operation(summary = "비밀번호 재설정")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PatchMapping("/password/change")
-    public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordRequest request,
+    public ResponseEntity<CommonResponse> changePassword(@RequestBody @Valid ChangePasswordRequest request,
                                                  Authentication authentication) {
 
         Long userId = Long.valueOf(authentication.getName());
 
         localAccountService.changePassword(userId,request);
 
-        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        return ResponseEntity.ok(new CommonResponse("비밀번호가 성공적으로 변경되었습니다."));
     }
 
 
