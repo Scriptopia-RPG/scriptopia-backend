@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TagDefDeleteRequest {
-    private String name;
+    private String tagName;
 }

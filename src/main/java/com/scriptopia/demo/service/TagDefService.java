@@ -35,7 +35,7 @@ public class TagDefService {
 
     @Transactional
     public ResponseEntity<?> removeTagName(TagDefDeleteRequest req) {
-        TagDef tag = tagDefRepository.findByTagName(req.getName())
+        TagDef tag = tagDefRepository.findByTagName(req.getTagName())
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_Tag_NOT_FOUND));
 
         tagDefRepository.delete(tag);

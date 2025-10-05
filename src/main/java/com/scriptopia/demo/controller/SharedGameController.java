@@ -16,7 +16,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authorization.AuthenticatedAuthorizationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,8 +64,16 @@ public class SharedGameController {
      */
     @Operation(summary = "공유 게임 상세 조회")
     @GetMapping("/{sharedGameUuId}")
-    public ResponseEntity<?> getSharedGameDetail(@PathVariable("sharedGameUuId") UUID sharedGameId) {
-        return sharedGameService.getDetailedSharedGame(sharedGameId);
+    public ResponseEntity<?> getSharedGameDetail(Authentication authentication, @PathVariable("sharedGameUuId") UUID sharedGameId) {
+        Long userId = null;
+        if (authentication != null && authentication.isAuthenticated() && authentication.getName() != null) {
+            try {
+                userId = Long.valueOf(authentication.getName());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        return sharedGameService.getDetailedSharedGame(userId, sharedGameId);
     }
 
     /*
@@ -71,8 +81,8 @@ public class SharedGameController {
      */
     @Operation(summary = "공유 게임 Like 요청")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping("{sharedGameId}/like")
-    public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameId") UUID sharedGameId, Authentication authentication) {
+    @PostMapping("{sharedGameUuId}/like")
+    public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameUuId") UUID sharedGameId, Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
         return sharedGameFavoriteService.saveFavorite(userId, sharedGameId);
@@ -92,7 +102,7 @@ public class SharedGameController {
      */
     @Operation(summary = "공유한 게임 삭제")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @DeleteMapping("/shared-games")
+    @DeleteMapping
     public ResponseEntity<?> delete(Authentication authentication, @RequestBody SharedGameRequest req) {
         Long userId = Long.valueOf(authentication.getName());
 
