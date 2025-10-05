@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 public class PublicSharedGameResponse {
-    private UUID sharedGameId;
+    private UUID sharedGameUuid;
     private String thumbnailUrl;
     private boolean isLiked;
     private Long likeCount;

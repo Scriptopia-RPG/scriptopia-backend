@@ -6,11 +6,9 @@ import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -229,7 +227,7 @@ public class SharedGameService {
         // 5) DTO 매핑 (집계 일원화)
         List<PublicSharedGameResponse> items = rows.stream().map(g -> {
             PublicSharedGameResponse dto = new PublicSharedGameResponse();
-            dto.setSharedGameId(g.getUuid());
+            dto.setSharedGameUuid(g.getUuid());
             dto.setThumbnailUrl(g.getThumbnailUrl());
             dto.setTitle(g.getTitle());
             dto.setSharedAt(g.getSharedAt());
@@ -247,7 +245,7 @@ public class SharedGameService {
         }).toList();
 
         // 6) 커서/hasNext
-        UUID nextCursor = items.isEmpty() ? null : items.get(items.size() - 1).getSharedGameId();
+        UUID nextCursor = items.isEmpty() ? null : items.get(items.size() - 1).getSharedGameUuid();
         boolean hasNext = rows.size() == Math.max(1, size);
 
         return ResponseEntity.ok(new CursorPage<>(items, nextCursor, hasNext));
