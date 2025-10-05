@@ -1,5 +1,6 @@
 package com.scriptopia.demo.dto.sharedgamefavorite;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.scriptopia.demo.dto.sharedgame.TagDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,10 @@ import java.util.List;
 public class SharedGameFavoriteResponse {
     private String sharedGameUuid;
     private String thumbnailUrl;
+
+    @JsonProperty("isLiked")
     private boolean isLiked;
+
     private Long likeCount;
     private Long totalPlayCount;
     private String title;

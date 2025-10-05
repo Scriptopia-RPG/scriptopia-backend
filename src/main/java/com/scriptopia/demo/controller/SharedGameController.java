@@ -39,11 +39,11 @@ public class SharedGameController {
 
     @Operation(summary = "게임 공유하기")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping
-    public ResponseEntity<?> share(Authentication authentication, @RequestBody SharedGameRequest req) {
+    @PostMapping("/{sharedGameUuid}")
+    public ResponseEntity<?> share(Authentication authentication, @PathVariable("sharedGameUuid") UUID sharedGameUuid) {
         Long userId = Long.valueOf(authentication.getName());
 
-        return sharedGameService.saveSharedGame(userId, req.getUuid());
+        return sharedGameService.saveSharedGame(userId, sharedGameUuid);
     }
 
     /*
@@ -102,11 +102,11 @@ public class SharedGameController {
      */
     @Operation(summary = "공유한 게임 삭제")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @DeleteMapping
-    public ResponseEntity<?> delete(Authentication authentication, @RequestBody SharedGameRequest req) {
+    @DeleteMapping("/{sharedGameUuid}")
+    public ResponseEntity<?> delete(Authentication authentication, @PathVariable("sharedGameUuid") UUID sharedGameUuid) {
         Long userId = Long.valueOf(authentication.getName());
 
-        sharedGameService.deleteSharedGame(userId, req.getUuid());
+        sharedGameService.deleteSharedGame(userId, sharedGameUuid);
 
         return ResponseEntity.ok("게임이 삭제되었습니다.");
     }
