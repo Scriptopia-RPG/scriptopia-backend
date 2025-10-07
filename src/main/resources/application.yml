@@ -57,8 +57,6 @@ oauth:
     redirect-uri: ${NAVER_REDIRECT_URI}
     scope: name email profile_image
 
-
-
 auth:
   jwt:
     issuer: scriptopia
@@ -82,3 +80,6 @@ springdoc:
 
 image-dir: ./uploads/
 image-url-prefix: /images
+logging:
+  level:
+    org.springframework.security: DEBUG

@@ -49,7 +49,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 Arrays.stream(SecurityWhitelist.PUBLIC_GETS)
                         .anyMatch(pattern -> pathMatcher.match(pattern, path));
 
-        return authMatch || publicGetMatch;
+        boolean publicSharedGameUuidGet = "GET".equalsIgnoreCase(method) &&
+                path.matches("^/shared-games/[0-9a-fA-F\\-]{36}$");
+
+        return authMatch || publicGetMatch || publicSharedGameUuidGet;
+
     }
 
 

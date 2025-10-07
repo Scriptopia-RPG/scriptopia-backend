@@ -20,8 +20,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import java.util.Arrays;
 
@@ -40,7 +42,11 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
+
+        MvcRequestMatcher publicSharedGameUuidGet =
+                new MvcRequestMatcher(introspector, "/shared-games/{uuid:[0-9a-fA-F\\-]{36}}");
+        publicSharedGameUuidGet.setMethod(HttpMethod.GET);
 
 
         http
@@ -52,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers(SecurityWhitelist.AUTH_WHITELIST).permitAll()
                         //public 권한(GET 요청)
                         .requestMatchers(HttpMethod.GET,SecurityWhitelist.PUBLIC_GETS).permitAll()
+                        .requestMatchers(publicSharedGameUuidGet).permitAll()
 
                         .anyRequest().authenticated()
                 )

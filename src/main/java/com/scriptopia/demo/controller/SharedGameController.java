@@ -1,13 +1,10 @@
 package com.scriptopia.demo.controller;
 
-import com.scriptopia.demo.domain.SharedGame;
-import com.scriptopia.demo.domain.SharedGameFavorite;
 import com.scriptopia.demo.domain.SharedGameSort;
 import com.scriptopia.demo.dto.TagDef.TagDefCreateRequest;
 import com.scriptopia.demo.dto.TagDef.TagDefDeleteRequest;
 import com.scriptopia.demo.dto.sharedgame.CursorPage;
 import com.scriptopia.demo.dto.sharedgame.PublicSharedGameResponse;
-import com.scriptopia.demo.dto.sharedgame.SharedGameRequest;
 import com.scriptopia.demo.service.SharedGameFavoriteService;
 import com.scriptopia.demo.service.SharedGameService;
 import com.scriptopia.demo.service.TagDefService;
@@ -37,11 +34,11 @@ public class SharedGameController {
 
     @Operation(summary = "게임 공유하기")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping
-    public ResponseEntity<?> share(Authentication authentication, @RequestBody SharedGameRequest req) {
+    @PostMapping("/{sharedGameUuid}")
+    public ResponseEntity<?> share(Authentication authentication, @PathVariable("sharedGameUuid") UUID sharedGameUuid) {
         Long userId = Long.valueOf(authentication.getName());
 
-        return sharedGameService.saveSharedGame(userId, req.getUuid());
+        return sharedGameService.saveSharedGame(userId, sharedGameUuid);
     }
 
     /*
@@ -49,21 +46,30 @@ public class SharedGameController {
      */
     @Operation(summary = "공유 게임 목록 조회")
     @GetMapping
-    public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(@RequestParam(value = "lastUUID", required = false) UUID lastUUID,
+    public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(@RequestParam(value = "lastUuID", required = false) UUID lastUuID,
                                                                                      @RequestParam(value = "size", defaultValue = "20") int size,
-                                                                                     @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
+                                                                                     @RequestParam(value = "tags", required = false) List<Long> tags,
                                                                                      @RequestParam(value = "query", required = false) String query,
                                                                                      @RequestParam(value = "sort", defaultValue = "POPULAR") SharedGameSort sort) {
-        return sharedGameService.getPublicSharedGames(lastUUID, size, tagIds, query, sort);
+        return sharedGameService.getPublicSharedGames(lastUuID, size, tags, query, sort);
     }
 
     /*
     게임공유 : 공유된 게임 상세 조회
      */
     @Operation(summary = "공유 게임 상세 조회")
-    @GetMapping("/{sharedGameUuId}")
-    public ResponseEntity<?> getSharedGameDetail(@PathVariable("sharedGameUuId") UUID sharedGameId) {
-        return sharedGameService.getDetailedSharedGame(sharedGameId);
+    @GetMapping("/{sharedGameUuid}")
+    public ResponseEntity<?> getSharedGameDetail(Authentication authentication, @PathVariable("sharedGameUuid") UUID sharedGameUuid) {
+        Long userId = null;
+        if (authentication != null && authentication.isAuthenticated() && authentication.getName() != null) {
+            try {
+                userId = Long.valueOf(authentication.getName());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        System.out.println(userId);
+
+        return sharedGameService.getDetailedSharedGame(userId, sharedGameUuid);
     }
 
     /*
@@ -71,8 +77,8 @@ public class SharedGameController {
      */
     @Operation(summary = "공유 게임 Like 요청")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @PostMapping("{sharedGameId}/like")
-    public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameId") UUID sharedGameId, Authentication authentication) {
+    @PostMapping("{sharedGameUuid}/like")
+    public ResponseEntity<?> likeSharedGame(@PathVariable("sharedGameUuid") UUID sharedGameId, Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
 
         return sharedGameFavoriteService.saveFavorite(userId, sharedGameId);
@@ -92,25 +98,13 @@ public class SharedGameController {
      */
     @Operation(summary = "공유한 게임 삭제")
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @DeleteMapping("/shared-games")
-    public ResponseEntity<?> delete(Authentication authentication, @RequestBody SharedGameRequest req) {
+    @DeleteMapping("/{sharedGameUuid}")
+    public ResponseEntity<?> delete(Authentication authentication, @PathVariable("sharedGameUuid") UUID sharedGameUuid) {
         Long userId = Long.valueOf(authentication.getName());
 
-        sharedGameService.deleteSharedGame(userId, req.getUuid());
+        sharedGameService.deleteSharedGame(userId, sharedGameUuid);
 
         return ResponseEntity.ok("게임이 삭제되었습니다.");
-    }
-
-    /*
-    게임 공유 -> 공유한 게임 조회(내가 공유한 게임 조회)
-     */
-    @Operation(summary = "(내가)공유한 게임 조회")
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
-    @GetMapping("/me")
-    public ResponseEntity<?> getMySharedGames(Authentication authentication) {
-        Long userId = Long.valueOf(authentication.getName());
-
-        return sharedGameService.getMySharedGames(userId);
     }
 
     @Operation(summary = "게임 태그 생성")

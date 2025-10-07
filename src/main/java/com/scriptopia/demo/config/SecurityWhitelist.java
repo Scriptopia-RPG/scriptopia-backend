@@ -18,15 +18,12 @@ public class SecurityWhitelist {
             "/v3/api-docs/**",
             "/swagger-ui/**",
 
-            "/shops/pia/items"
-
-
-
-
+            "/shops/pia/items",
     };
 
     public static final String[] PUBLIC_GETS = {
             "/trades",
-            "/shared-games/**"
+            "/shared-games",
+            "/shared-games/tags"
     };
 }

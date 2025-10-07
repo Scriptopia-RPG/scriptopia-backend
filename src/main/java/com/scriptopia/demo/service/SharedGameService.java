@@ -6,7 +6,6 @@ import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -41,43 +40,22 @@ public class SharedGameService {
             throw new CustomException(ErrorCode.E_401_NOT_EQUAL_SHARED_GAME);
         }
 
+        history.setIsShared(true);
+
         SharedGame sharedGame = SharedGame.from(user, history);
-        return ResponseEntity.ok(sharedGameRepository.save(sharedGame));
-    }
+        sharedGameRepository.save(sharedGame);
 
-    public ResponseEntity<?> getMySharedGames(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND));
+        SharedGameSaveDto dto = new SharedGameSaveDto();
+        dto.setSharedGameUuid(sharedGame.getUuid().toString());
+        dto.setThumbnailUrl(sharedGame.getThumbnailUrl());
+        dto.setRecommand(sharedGameFavoriteRepository.countBySharedGameId(sharedGame.getId()));
+        dto.setPlayCount(sharedGameScoreRepository.countBySharedGameId(sharedGame.getId()));
+        dto.setTitle(sharedGame.getTitle());
+        dto.setWorldView(sharedGame.getWorldView());
+        dto.setBackgroundStory(sharedGame.getBackgroundStory());
+        dto.setSharedAt(sharedGame.getSharedAt());
 
-        List<SharedGame> games = sharedGameRepository.findAllByUserid(user.getId());
-
-        List<MySharedGameResponse> dtos = new ArrayList<>();
-
-        for(SharedGame game : games) {
-            MySharedGameResponse dto = new MySharedGameResponse();
-            dto.setShared_game_uuid(game.getUuid());
-            dto.setThumbnailUrl(game.getThumbnailUrl());
-            dto.setTotalPlayed(sharedGameScoreRepository.countBySharedGameId(game.getId()));
-            dto.setTitle(game.getTitle());
-            dto.setWorldView(game.getWorldView());
-            dto.setSharedAt(game.getSharedAt());
-            dto.setBackgroundStory(game.getBackgroundStory());
-
-            boolean liked = sharedGameFavoriteRepository.existsLikeSharedGame(user.getId(), game.getId());
-            dto.setRecommand(liked);
-
-            List<String> tagdto = gameTagRepository.findTagNamesBySharedGameId(game.getId());
-            List<MySharedGameResponse.TagDto> tags = new ArrayList<>();
-
-            for(String tagName : tagdto) {
-                tags.add(new MySharedGameResponse.TagDto(tagName));
-            }
-
-            dto.setTags(tags);
-            dtos.add(dto);
-        }
-
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(dto);
     }
 
     @Transactional
@@ -95,16 +73,17 @@ public class SharedGameService {
         sharedGameRepository.delete(game);
     }
 
-    public ResponseEntity<?> getDetailedSharedGame(UUID uuid) {
+    public ResponseEntity<?> getDetailedSharedGame(Long userId, UUID uuid) {
         SharedGame game = sharedGameRepository.findByUuid(uuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.E_404_SHARED_GAME_NOT_FOUND));
 
         List<com.scriptopia.demo.dto.sharedgame.TagDto> tagDtos = gameTagRepository.findTagDtosBySharedGameId(game.getId());
 
         List<SharedGameScore> score = sharedGameScoreRepository.findAllBySharedGameIdOrderByScoreDescCreatedAtDesc(game.getId());
+        boolean isLiked = (userId != null) && sharedGameFavoriteRepository.existsByUserIdAndSharedGameId(userId, game.getId());
 
         PublicSharedGameDetailResponse dto = new PublicSharedGameDetailResponse();
-        dto.setSharedGameUUID(game.getUuid());
+        dto.setSharedGameUuid(game.getUuid());
         dto.setPosterUrl(game.getThumbnailUrl());
         dto.setTitle(game.getTitle());
         dto.setWorldView(game.getWorldView());
@@ -113,6 +92,7 @@ public class SharedGameService {
         dto.setPlayCount(sharedGameScoreRepository.countBySharedGameId(game.getId()));
         dto.setLikeCount(sharedGameFavoriteRepository.countBySharedGameId(game.getId()));
         dto.setSharedAt(game.getSharedAt());
+        dto.setLiked(isLiked);
 
         List<PublicSharedGameDetailResponse.TagDto> tagarray = new ArrayList<>();
         List<PublicSharedGameDetailResponse.TopScoreDto> topscorearray = new ArrayList<>();
@@ -127,6 +107,7 @@ public class SharedGameService {
             PublicSharedGameDetailResponse.TopScoreDto topscore = new PublicSharedGameDetailResponse.TopScoreDto();
             topscore.setNickname(topScoreInfo.getUser().getNickname());
             topscore.setScore(topScoreInfo.getScore());
+            topscore.setProfileUrl(topScoreInfo.getUser().getProfileImgUrl());
             topscore.setCreatedAt(topScoreInfo.getCreatedAt());
             topscorearray.add(topscore);
         }
@@ -211,17 +192,12 @@ public class SharedGameService {
         // 5) DTO 매핑 (집계 일원화)
         List<PublicSharedGameResponse> items = rows.stream().map(g -> {
             PublicSharedGameResponse dto = new PublicSharedGameResponse();
-            dto.setSharedGameId(g.getUuid());
+            dto.setSharedGameUuid(g.getUuid());
             dto.setThumbnailUrl(g.getThumbnailUrl());
             dto.setTitle(g.getTitle());
-            dto.setSharedAt(g.getSharedAt());
 
             // 집계
-            dto.setTotalPlayCount(sharedGameScoreRepository.countBySharedGameId(g.getId()));
-            dto.setLikeCount(sharedGameFavoriteRepository.countBySharedGameId(g.getId()));
-
-            Long topScore = sharedGameScoreRepository.maxScoreBySharedGameId(g.getId());
-            dto.setTopScore(topScore == null ? 0L : topScore);
+            dto.setPlayCount(sharedGameScoreRepository.countBySharedGameId(g.getId()));
 
             // 태그
             dto.setTags(gameTagRepository.findTagDtosBySharedGameId(g.getId()));
@@ -229,7 +205,7 @@ public class SharedGameService {
         }).toList();
 
         // 6) 커서/hasNext
-        UUID nextCursor = items.isEmpty() ? null : items.get(items.size() - 1).getSharedGameId();
+        UUID nextCursor = items.isEmpty() ? null : items.get(items.size() - 1).getSharedGameUuid();
         boolean hasNext = rows.size() == Math.max(1, size);
 
         return ResponseEntity.ok(new CursorPage<>(items, nextCursor, hasNext));

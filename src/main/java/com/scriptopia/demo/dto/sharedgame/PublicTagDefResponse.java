@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class PublicTagDefResponse {
-    private Long id;
+    private Long tagId;
     private String tagName;
 }

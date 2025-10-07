@@ -48,17 +48,18 @@ public class SharedGameFavoriteService {
         Long maxScore  = sharedGameScoreRepository.maxScoreBySharedGameId(game.getId());
 
         // 태그 이름들
-        var tagNames = gameTagRepository.findTagNamesBySharedGameId(game.getId());
+        var tags = gameTagRepository.findTagDtosBySharedGameId(game.getId());
 
-        var dto = new SharedGameFavoriteResponse();
-        dto.setSharedGameId(game.getId());
-        dto.setThumbnailUrl(game.getThumbnailUrl());
-        dto.setLiked(liked);
-        dto.setLikeCount(likeCount);
-        dto.setTotalPlayCount(playCount);
-        dto.setTitle(game.getTitle());
-        dto.setTags(tagNames.isEmpty() ? null : tagNames.toArray(new String[0]));
-        dto.setTopScore(maxScore);
+        var dto = SharedGameFavoriteResponse.builder()
+                .sharedGameUuid(game.getUuid().toString())
+                .thumbnailUrl(game.getThumbnailUrl())
+                .isLiked(liked)
+                .likeCount(likeCount)
+                .totalPlayCount(playCount)
+                .title(game.getTitle())
+                .tags(tags)
+                .topScore(maxScore)
+                .build();
 
         return ResponseEntity.ok(dto);
     }
