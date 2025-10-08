@@ -46,12 +46,12 @@ public class SharedGameController {
      */
     @Operation(summary = "공유 게임 목록 조회")
     @GetMapping
-    public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(@RequestParam(value = "lastUuID", required = false) UUID lastUuID,
+    public ResponseEntity<CursorPage<PublicSharedGameResponse>> getPublicSharedGames(@RequestParam(value = "lastUuId", required = false) UUID lastUuId,
                                                                                      @RequestParam(value = "size", defaultValue = "20") int size,
                                                                                      @RequestParam(value = "tags", required = false) List<Long> tags,
                                                                                      @RequestParam(value = "query", required = false) String query,
                                                                                      @RequestParam(value = "sort", defaultValue = "POPULAR") SharedGameSort sort) {
-        return sharedGameService.getPublicSharedGames(lastUuID, size, tags, query, sort);
+        return sharedGameService.getPublicSharedGames(lastUuId, size, tags, query, sort);
     }
 
     /*
