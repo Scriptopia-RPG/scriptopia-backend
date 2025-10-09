@@ -1287,6 +1287,29 @@ public class GameSessionService {
 
         HistoryInfoMongo historyInfoMongo = gameSessionMongo.getHistoryInfo();
 
+        GameTitleRequest fastApiRequest = new GameTitleRequest();
+        if(historyInfoMongo.getBackgroundStory() != null){
+            fastApiRequest.getContents().add(historyInfoMongo.getBackgroundStory());
+        }
+        if(historyInfoMongo.getEpilogue1Title() != null && historyInfoMongo.getEpilogue1Content() != null){
+            fastApiRequest.getContents().add(historyInfoMongo.getEpilogue1Content());
+        }
+        if(historyInfoMongo.getEpilogue2Title() != null && historyInfoMongo.getEpilogue2Content() != null){
+            fastApiRequest.getContents().add(historyInfoMongo.getEpilogue2Content());
+        }
+        if(historyInfoMongo.getEpilogue3Title() != null && historyInfoMongo.getEpilogue3Content() != null){
+            fastApiRequest.getContents().add(historyInfoMongo.getEpilogue3Content());
+        }
+
+        GameTitleResponse fastApiResponse = fastApiService.title(fastApiRequest);
+
+        List<String> titles = fastApiResponse.getTitles();
+        if (titles != null && !titles.isEmpty()) {
+            if (titles.size() > 0) historyInfoMongo.setTitle(titles.get(0));
+            if (titles.size() > 1) historyInfoMongo.setEpilogue1Title(titles.get(1));
+            if (titles.size() > 2) historyInfoMongo.setEpilogue2Title(titles.get(2));
+            if (titles.size() > 3) historyInfoMongo.setEpilogue3Title(titles.get(3));
+        }
 
         HistoryRequest historyRequest = HistoryRequest.builder()
                 .thumbnailUrl(null) // 필요 시

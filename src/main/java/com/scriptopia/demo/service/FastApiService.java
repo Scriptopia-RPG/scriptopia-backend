@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class FastApiService {
@@ -74,5 +76,16 @@ public class FastApiService {
                 .bodyToMono(GameEndResponse.class)
                 .block();
     }
+
+    // 게임 종료 시 빅 이벤트 타이틀 처리
+    public GameTitleResponse title(GameTitleRequest request) {
+        return fastApiWebClient.post()
+                .uri(FastApiEndpoint.TITLE.getPath())
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(GameTitleResponse.class)
+                .block();
+    }
+
 
 }
