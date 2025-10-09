@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -12,5 +14,5 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GameTitleRequest {
-    private List<String> contents;
+    private List<String> contents = new ArrayList<>();
 }

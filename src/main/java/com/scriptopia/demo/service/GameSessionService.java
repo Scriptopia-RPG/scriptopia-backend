@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -1118,7 +1119,7 @@ public class GameSessionService {
         player.setIntelligence(player.getIntelligence() + safeStat(item.getIntelligence()));
         player.setLuck(player.getLuck() + safeStat(item.getLuck()));
         if (item.getCategory() == ItemType.ARMOR){
-            player.setLife( item.getBaseStat() );
+            player.setHealthPoint( item.getBaseStat() );
         }
     }
 
@@ -1288,6 +1289,7 @@ public class GameSessionService {
         HistoryInfoMongo historyInfoMongo = gameSessionMongo.getHistoryInfo();
 
         GameTitleRequest fastApiRequest = new GameTitleRequest();
+
         if(historyInfoMongo.getBackgroundStory() != null){
             fastApiRequest.getContents().add(historyInfoMongo.getBackgroundStory());
         }
@@ -1301,15 +1303,15 @@ public class GameSessionService {
             fastApiRequest.getContents().add(historyInfoMongo.getEpilogue3Content());
         }
 
+
+
         GameTitleResponse fastApiResponse = fastApiService.title(fastApiRequest);
 
         List<String> titles = fastApiResponse.getTitles();
-        if (titles != null && !titles.isEmpty()) {
-            if (titles.size() > 0) historyInfoMongo.setTitle(titles.get(0));
-            if (titles.size() > 1) historyInfoMongo.setEpilogue1Title(titles.get(1));
-            if (titles.size() > 2) historyInfoMongo.setEpilogue2Title(titles.get(2));
-            if (titles.size() > 3) historyInfoMongo.setEpilogue3Title(titles.get(3));
-        }
+        if (titles.size() > 0) historyInfoMongo.setTitle(titles.get(0));
+        if (titles.size() > 1) historyInfoMongo.setEpilogue1Title(titles.get(1));
+        if (titles.size() > 2) historyInfoMongo.setEpilogue2Title(titles.get(2));
+        if (titles.size() > 3) historyInfoMongo.setEpilogue3Title(titles.get(3));
 
         HistoryRequest historyRequest = HistoryRequest.builder()
                 .thumbnailUrl(null) // 필요 시

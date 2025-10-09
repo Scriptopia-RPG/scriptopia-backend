@@ -350,14 +350,14 @@
         };
 
         // 게임 히스토리 API 호출
-        const loadGameHistory = async (gameId) => {
+        const loadGameHistory = async () => {
             if (!accessToken) {
                 alert('로그인 필요');
                 return;
             }
 
             try {
-                const history = await safeFetch(null, `/api/v1/games/${gameId}/history`, {
+                const history = await safeFetch(null, `/api/v1/games/sss/history`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + accessToken }
                 });
@@ -619,7 +619,7 @@
                 gameOverBtn.className = 'btn';
                 gameOverBtn.textContent = '게임 패배 - 결과 보기';
                 gameOverBtn.addEventListener('click', async () => {
-                    const history = await loadGameHistory(gameId);
+                    const history = await loadGameHistory();
                     showHistoryModal(history); // ✅ 모달로 표시
                 });
                 choiceContainer.appendChild(gameOverBtn);
@@ -632,7 +632,7 @@
                     gameClearBtn.className = 'btn';
                     gameClearBtn.textContent = '게임 승리 - 결과 보기';
                     gameClearBtn.addEventListener('click', async () => {
-                        const history = await loadGameHistory(gameId);
+                        const history = await loadGameHistory();
                         showHistoryModal(history); // ✅ 모달로 표시
                     });
                     choiceContainer.appendChild(gameClearBtn);
