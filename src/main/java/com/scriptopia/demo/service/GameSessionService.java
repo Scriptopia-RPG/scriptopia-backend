@@ -527,12 +527,15 @@ public class GameSessionService {
                 fastApiRequest.setCurrentChoice(null);
                 switch (currentEventStage) {
                     case 2:
+                        gameSessionMongo.getHistoryInfo().setEpilogue1Title("Come Stage");
                         fastApiRequest.setCurrentStory(gameSessionMongo.getHistoryInfo().getEpilogue1Content());
                         break;
                     case 4:
+                        gameSessionMongo.getHistoryInfo().setEpilogue2Title("Come Stage");
                         fastApiRequest.setCurrentStory(gameSessionMongo.getHistoryInfo().getEpilogue2Content());
                         break;
                     case 6:
+                        gameSessionMongo.getHistoryInfo().setEpilogue3Title("Come Stage");
                         fastApiRequest.setCurrentStory(gameSessionMongo.getHistoryInfo().getEpilogue3Content());
                         break;
                 }
