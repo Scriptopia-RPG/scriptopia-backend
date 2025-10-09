@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 
 @Data
@@ -11,5 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GameTitleRequest {
-    private String content;
+    private List<String> contents;
 }
