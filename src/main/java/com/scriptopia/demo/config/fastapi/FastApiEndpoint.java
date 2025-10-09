@@ -6,7 +6,8 @@ public enum FastApiEndpoint {
     BATTLE("/games/battle"),
     ITEM("/games/item"),
     DONE("/games/done"),
-    END("/games/end");
+    END("/games/end"),
+    TITLE("/games/title");
 
     private final String path;
 
