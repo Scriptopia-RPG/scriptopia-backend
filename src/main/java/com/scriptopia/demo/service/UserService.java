@@ -11,6 +11,7 @@ import com.scriptopia.demo.dto.items.ItemDTO;
 import com.scriptopia.demo.dto.users.PiaItemDTO;
 import com.scriptopia.demo.dto.users.UserAssetsResponse;
 import com.scriptopia.demo.dto.users.UserSettingsDTO;
+import com.scriptopia.demo.dto.users.UserStatusResponse;
 import com.scriptopia.demo.exception.CustomException;
 import com.scriptopia.demo.exception.ErrorCode;
 import com.scriptopia.demo.mapper.ItemMapper;
@@ -134,5 +135,18 @@ public class UserService {
         UUID nextCursor = hasNext ? result.get(result.size() - 1).getUuid() : null;
 
         return new HistoryPageResponseDto(result, nextCursor, hasNext);
+    }
+
+    @Transactional
+    public UserStatusResponse getUserStatus(Long userId){
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new CustomException(ErrorCode.E_404_USER_NOT_FOUND)
+        );
+
+        return UserStatusResponse.builder()
+                .nickname(user.getNickname())
+                .profileImage(user.getProfileImgUrl())
+                .ticket(0)
+                .build();
     }
 }
