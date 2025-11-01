@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -54,11 +55,14 @@ public class AuthController {
 
     @Operation(summary = "로컬 계정 회원가입")
     @PostMapping("/register")
-    public ResponseEntity<CommonResponse> register(
-            @RequestBody @Valid RegisterRequest request
+    public ResponseEntity<LoginResponse> register(
+
+            @RequestBody @Valid RegisterRequest req,
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
-        localAccountService.register(request);
-        return ResponseEntity.ok(new CommonResponse("회원가입에 성공했습니다."));
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(localAccountService.register(req, request, response));
     }
 
     @Operation(summary = "이메일 중복 검증")

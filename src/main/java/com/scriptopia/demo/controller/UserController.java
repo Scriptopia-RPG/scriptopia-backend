@@ -1,12 +1,10 @@
 package com.scriptopia.demo.controller;
 
+import com.scriptopia.demo.domain.UserStatus;
 import com.scriptopia.demo.dto.history.HistoryPageResponse;
 import com.scriptopia.demo.dto.history.HistoryPageResponseDto;
 import com.scriptopia.demo.dto.items.ItemDTO;
-import com.scriptopia.demo.dto.users.PiaItemDTO;
-import com.scriptopia.demo.dto.users.UserAssetsResponse;
-import com.scriptopia.demo.dto.users.UserImageRequest;
-import com.scriptopia.demo.dto.users.UserSettingsDTO;
+import com.scriptopia.demo.dto.users.*;
 import com.scriptopia.demo.service.UserCharacterImgService;
 import com.scriptopia.demo.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -112,6 +110,15 @@ public class UserController {
         Long userId = Long.valueOf(authentication.getName());
 
         return userCharacterImgService.getUserCharacterImg(userId);
+    }
+
+    @Operation(summary = "사용자 헤더 정보 조회")
+    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @GetMapping("/status")
+    public ResponseEntity<UserStatusResponse> getUserStatus(Authentication authentication) {
+        Long userId = Long.valueOf(authentication.getName());
+
+        return ResponseEntity.ok(userService.getUserStatus(userId));
     }
 
 }
