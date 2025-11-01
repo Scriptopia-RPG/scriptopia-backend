@@ -1,5 +1,6 @@
 package com.scriptopia.demo.dto.auth;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -26,4 +27,8 @@ public class RegisterRequest {
 
     @NotBlank(message = "E_400_MISSING_NICKNAME")
     private String nickname;
+
+    @NotBlank(message = "디바이스 식별값이 필요합니다.")
+    @Schema(description = "디바이스 아이디", example = "1234")
+    private String deviceId;
 }

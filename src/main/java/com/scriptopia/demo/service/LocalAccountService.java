@@ -12,6 +12,7 @@ import com.scriptopia.demo.utils.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -28,6 +29,7 @@ import java.util.regex.Pattern;
 
 import static org.thymeleaf.util.StringUtils.length;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -124,8 +126,8 @@ public class LocalAccountService {
 
 
     @Transactional
-    public void register(RegisterRequest request) {
-        String email = request.getEmail();
+    public LoginResponse register(RegisterRequest registerRequest, HttpServletRequest request, HttpServletResponse response) {
+        String email = registerRequest.getEmail();
 
         //중복 검증
         if (localAccountRepository.existsByEmail(email)){
@@ -140,28 +142,28 @@ public class LocalAccountService {
         }
 
         // 공백 검증
-        if (WS.matcher(request.getPassword()).find()) {
+        if (WS.matcher(registerRequest.getPassword()).find()) {
             throw new CustomException(ErrorCode.E_400_PASSWORD_WHITESPACE);
         }
 
-        isAvailable(email, request.getNickname());
+        isAvailable(email, registerRequest.getNickname());
 
         //user 객체 생성
         User user = new User();
-        user.setNickname(request.getNickname());
+        user.setNickname(registerRequest.getNickname());
         user.setPia(0L);
         user.setCreatedAt(LocalDateTime.now());
-        user.setLastLoginAt(null);
+        user.setLastLoginAt(LocalDateTime.now());
         user.setProfileImgUrl(null);
         user.setRole(Role.USER);
         user.setLoginType(LoginType.LOCAL);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         //localAccount 객체 생성
         LocalAccount localAccount = new LocalAccount();
         localAccount.setUser(user);
         localAccount.setEmail(email);
-        localAccount.setPassword(passwordEncoder.encode(request.getPassword()));
+        localAccount.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         localAccount.setUpdatedAt(LocalDateTime.now());
         localAccount.setStatus(UserStatus.UNVERIFIED);
         localAccountRepository.save(localAccount);
@@ -177,6 +179,10 @@ public class LocalAccountService {
         userSetting.setUpdatedAt(LocalDateTime.now());
         userSettingRepository.save(userSetting);
 
+        return initLoginResponse(savedUser, registerRequest.getDeviceId(), request, response);
+
+
+
     }
 
     @Transactional
@@ -185,27 +191,14 @@ public class LocalAccountService {
         LocalAccount localAccount = localAccountRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.E_401_INVALID_CREDENTIALS));
 
-
         if (!passwordEncoder.matches(req.getPassword(), localAccount.getPassword())) {
             throw new CustomException(ErrorCode.E_401_INVALID_CREDENTIALS);
         }
 
-
         User user = localAccount.getUser();
         user.setLastLoginAt(LocalDateTime.now());
 
-        List<String> roles = List.of(user.getRole().toString());
-        String access  = jwt.createAccessToken(user.getId(), roles);
-        String refresh = jwt.createRefreshToken(user.getId(), req.getDeviceId());
-
-        String ip = request.getRemoteAddr();
-        String ua = request.getHeader("User-Agent");
-        refreshService.saveLoginRefresh(user.getId(), refresh, req.getDeviceId(), ip, ua);
-
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie(refresh).toString());
-
-
-        return new LoginResponse(access, prop.accessExpSeconds(), user.getRole());
+        return initLoginResponse(user, req.getDeviceId(), request, response);
     }
 
     @Transactional
@@ -283,5 +276,19 @@ public class LocalAccountService {
                 .path("/")
                 .maxAge(0)
                 .build();
+    }
+
+    public LoginResponse initLoginResponse(User user, String deviceId, HttpServletRequest request, HttpServletResponse response){
+        List<String> roles = List.of(user.getRole().toString());
+        String access  = jwt.createAccessToken(user.getId(), roles);
+        String refresh = jwt.createRefreshToken(user.getId(), deviceId);
+
+        String ip = request.getRemoteAddr();
+        String ua = request.getHeader("User-Agent");
+        refreshService.saveLoginRefresh(user.getId(), refresh, deviceId, ip, ua);
+
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie(refresh).toString());
+
+        return new LoginResponse(access, prop.accessExpSeconds(), user.getRole());
     }
 }
