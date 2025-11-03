@@ -45,8 +45,8 @@ public class LocalAccountService {
     private final MailService mailService;
 
     private static final String RT_COOKIE = "RT";
-    private static final boolean COOKIE_SECURE = true;
-    private static final String COOKIE_SAMESITE = "None";
+    private static final boolean COOKIE_SECURE = false;
+    private static final String COOKIE_SAME_SITE = "None";
 
 
     private static final Pattern WS = Pattern.compile("[\\s\\p{Z}\\u200B\\u200C\\u200D\\uFEFF]");
@@ -262,7 +262,7 @@ public class LocalAccountService {
         return ResponseCookie.from(RT_COOKIE, value)
                 .httpOnly(true)
                 .secure(COOKIE_SECURE)
-                .sameSite(COOKIE_SAMESITE)
+                .sameSite(COOKIE_SAME_SITE)
                 .path("/")
                 .maxAge(Duration.ofDays(14))
                 .build();
@@ -272,7 +272,7 @@ public class LocalAccountService {
         return ResponseCookie.from(RT_COOKIE, "")
                 .httpOnly(true)
                 .secure(COOKIE_SECURE)
-                .sameSite(COOKIE_SAMESITE)
+                .sameSite(COOKIE_SAME_SITE)
                 .path("/")
                 .maxAge(0)
                 .build();
