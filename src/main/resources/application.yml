@@ -12,7 +12,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true
@@ -60,7 +60,7 @@ oauth:
 auth:
   jwt:
     issuer: scriptopia
-    access-exp-seconds: 1800
+    access-exp-seconds: 18000 # 로컬 테스트용 300분으로 변경
     refresh-exp-seconds: 1209600
     secret: ${JWT_SECRET}
 

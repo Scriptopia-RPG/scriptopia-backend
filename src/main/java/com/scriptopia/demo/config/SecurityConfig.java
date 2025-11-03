@@ -87,8 +87,16 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-//        config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        config.setAllowedOriginPatterns(Collections.singletonList("*"));
+        /*
+         * 로컬 테스트용
+         */
+        config.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:*",
+                "http://127.0.0.1:*",
+                "http://192.168.*:*",
+                "http://10.*:*"
+        ));
+//        config.setAllowedOriginPatterns(Collections.singletonList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*")); // Authorization, Content-Type 등 허용
         config.setExposedHeaders(Arrays.asList("Authorization")); // 필요시 노출할 헤더
