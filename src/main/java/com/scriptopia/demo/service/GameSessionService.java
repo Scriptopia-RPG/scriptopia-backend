@@ -444,11 +444,17 @@ public class GameSessionService {
 
         if( gameSessionMongo.getPlayerInfo().getLife() <= 0 ){
             // gameOver 메소드 구현 필요
+
+            gameToEnd(userId);
+            deleteGameSession(userId, gameId);
             return gameToEnd(gameSessionMongo, 0);
         }
 
         if ( gameSessionMongo.getProgress() > gameSessionMongo.getStage().size()){
             // gmaeClear 즉
+
+            gameToEnd(userId);
+            deleteGameSession(userId, gameId);
             return gameToEnd(gameSessionMongo, 1);
 
         }
