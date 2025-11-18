@@ -46,7 +46,7 @@ public class LocalAccountService {
 
     private static final String RT_COOKIE = "RT";
     private static final boolean COOKIE_SECURE = false;
-    private static final String COOKIE_SAME_SITE = "None";
+    private static final String COOKIE_SAME_SITE = "Lax";
 
 
     private static final Pattern WS = Pattern.compile("[\\s\\p{Z}\\u200B\\u200C\\u200D\\uFEFF]");
