@@ -35,7 +35,6 @@ public class refreshController {
     private static final String COOKIE_SAMESITE = "None";
 
     @Operation(summary = "리프레시 토큰 재발급")
-    @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
     @PostMapping("/refresh")
     public ResponseEntity<RefreshResponse> refresh(
             @CookieValue(name = RT_COOKIE, required = false) String refreshToken,
