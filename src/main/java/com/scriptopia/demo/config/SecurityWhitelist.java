@@ -19,6 +19,8 @@ public class SecurityWhitelist {
             "/swagger-ui/**",
 
             "/shops/pia/items",
+            "/token/refresh"
+
     };
 
     public static final String[] PUBLIC_GETS = {
