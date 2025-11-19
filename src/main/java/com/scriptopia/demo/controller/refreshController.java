@@ -31,8 +31,8 @@ public class refreshController {
     private final JwtProperties props;
 
     private static final String RT_COOKIE = "RT";
-    private static final boolean COOKIE_SECURE = true;
-    private static final String COOKIE_SAMESITE = "None";
+    private static final boolean COOKIE_SECURE = false;
+    private static final String COOKIE_SAMESITE = "Lax";
 
     @Operation(summary = "리프레시 토큰 재발급")
     @PreAuthorize("hasAnyAuthority('USER','ADMIN')")
